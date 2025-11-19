@@ -26,7 +26,7 @@
 
         .left-side, .right-side {
             position: absolute; top: 0; width: 50%; height: 100%;
-            transition: transform 1.5s ease-in-out; will-change: transform; z-index: 10000;
+            transition: transform 0.5s ease-in-out; will-change: transform; z-index: 10000;
         }
         .left-side { left: 0; background-color: #B02E2D; transform-origin: left; }
         .right-side { right: 0; background-color: #C13835; transform-origin: right; }
@@ -80,7 +80,9 @@
         
         @include('plantilla.navegacion')
 
-        @include('plantilla.pop-up')
+        @if(request()->routeIs('welcome'))
+            @include('plantilla.pop-up')
+        @endif
 
         <div class="contenido-dinamico">
             @yield('content')
@@ -99,9 +101,9 @@
                 loader.classList.add('active'); 
                 setTimeout(() => {
                     mainWrapper.classList.add('visible'); 
-                    setTimeout(() => { loader.style.display = 'none'; }, 1500);
-                }, 500);
-            }, 2000); 
+                    setTimeout(() => { loader.style.display = 'none'; }, 600);
+                }, 300);
+            }, 1000); 
         });
     </script>
     

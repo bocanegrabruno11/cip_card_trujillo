@@ -328,7 +328,7 @@
             <ul class="nav-menu" id="navMenu">
     
                 {{-- 1. INICIO (Enlace simple) --}}
-                <li><a href="#" onclick="handleMenuClick(event, this)">INICIO</a></li>    
+                <li><a href="{{ route('welcome') }}" onclick="handleMenuClick(event, this)">INICIO</a></li>    
                 
                 {{-- 2. EL CARD --}}
                 <li class="has-dropdown {{ request()->routeIs('card.*') ? 'current-menu-item' : '' }}" onclick="toggleMobileDropdown(this)">
@@ -336,7 +336,7 @@
                     <ul class="dropdown-menu">
                         <li><a href="#" onclick="handleMenuClick(event, this)">Presentación</a></li>
                         <li><a href="#" onclick="handleMenuClick(event, this)">Organización del CARD</a></li>
-                        <li><a href="#" onclick="handleMenuClick(event, this)">Visión y Misión</a></li>
+                        <li><a href="{{ route('mision-vision') }}" onclick="handleMenuClick(event, this)">Visión y Misión</a></li>
                         <li><a href="#" onclick="handleMenuClick(event, this)">Organigrama</a></li>
                         <li><a href="#" onclick="handleMenuClick(event, this)">Nuestro equipo</a></li>
                         <li><a href="#" onclick="handleMenuClick(event, this)">Certificaciones ISO</a></li>
