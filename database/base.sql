@@ -1,0 +1,1 @@
+create database cip_card_trujillo;
