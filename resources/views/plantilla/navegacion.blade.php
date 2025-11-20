@@ -334,7 +334,7 @@
                 <li class="has-dropdown {{ request()->routeIs('card.*') ? 'current-menu-item' : '' }}" onclick="toggleMobileDropdown(this)">
                     <a href="javascript:void(0)">CARD</a>
                     <ul class="dropdown-menu">
-                        <li><a href="#" onclick="handleMenuClick(event, this)">Presentación</a></li>
+                        <li><a href="{{ route('presentacion') }}" onclick="handleMenuClick(event, this)">Presentación</a></li>
                         <li><a href="#" onclick="handleMenuClick(event, this)">Organización del CARD</a></li>
                         <li><a href="{{ route('mision-vision') }}" onclick="handleMenuClick(event, this)">Visión y Misión</a></li>
                         <li><a href="#" onclick="handleMenuClick(event, this)">Organigrama</a></li>
@@ -373,7 +373,7 @@
                 
                 {{-- 7. CONTACTOS --}}
                 <li><a href="#" onclick="handleMenuClick(event, this)">CONTACTOS</a></li>
-                <li><a href="#" onclick="handleMenuClick(event, this)">MESA DE PARTES - VIRTUAL</a></li>
+                <li><a href="{{ route('login') }}" onclick="handleMenuClick(event, this)">MESA DE PARTES - VIRTUAL</a></li>
                 
             </ul>
         </div>

@@ -15,4 +15,9 @@ class PageController extends Controller
     {
         return view('welcome');
     }
+
+    public function presentacion()
+    {
+        return view('contenido.presentacion');
+    }
 }
