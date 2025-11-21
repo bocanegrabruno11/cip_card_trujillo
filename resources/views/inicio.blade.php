@@ -14,50 +14,77 @@
             padding: 0; 
             width: 100%; 
             height: 100%; 
-            /* Quitamos overflow-x: hidden global para evitar cortar contenidos sticky, 
-               lo manejaremos en el wrapper */
         }
 
-        /* === ANIMACIÓN DE CARGA (LOADER) === */
+        /* === ANIMACIÓN DE CARGA (LOADER DIAGONAL) === */
         .container-loader {
             position: fixed; top: 0; left: 0; width: 100%; height: 100vh;
             background-color: white; z-index: 9999; pointer-events: none;
         }
 
         .left-side, .right-side {
-            position: absolute; top: 0; width: 50%; height: 100%;
-            transition: transform 0.5s ease-in-out; will-change: transform; z-index: 10000;
+            position: absolute; 
+            top: 0; 
+            width: 100%; /* CAMBIO: Deben ocupar el ancho completo para la diagonal */
+            height: 100%;
+            transition: clip-path 1.0s ease-in-out; /* Animamos el recorte, no la posición */
+            will-change: clip-path; 
+            z-index: 10000;
         }
-        .left-side { left: 0; background-color: #B02E2D; transform-origin: left; }
-        .right-side { right: 0; background-color: #C13835; transform-origin: right; }
+
+        /* Triángulo Superior Izquierdo (Rojo Claro) */
+        .left-side { 
+            left: 0; 
+            background-color: #B02E2D; 
+            /* Coordenadas: Arriba-Izq, Arriba-Der, Abajo-Izq */
+            clip-path: polygon(0 0, 100% 0, 0 100%);
+        }
+
+        /* Triángulo Inferior Derecho (Rojo Oscuro) */
+        .right-side { 
+            right: 0; 
+            background-color: #C13835; 
+            /* Coordenadas: Arriba-Der, Abajo-Der, Abajo-Izq */
+            clip-path: polygon(100% 0, 100% 100%, 0 100%);
+        }
         
-        .container-loader.active .left-side { transform: translateX(-100%); }
-        .container-loader.active .right-side { transform: translateX(100%); }
+        /* === ESTADO ACTIVO (ABRIENDO) === */
         
+        /* El lado izquierdo se contrae hacia la esquina superior izquierda */
+        .container-loader.active .left-side { 
+            clip-path: polygon(0 0, 0 0, 0 0); 
+        }
+
+        /* El lado derecho se contrae hacia la esquina inferior derecha */
+        .container-loader.active .right-side { 
+            clip-path: polygon(100% 100%, 100% 100%, 100% 100%); 
+        }
+        
+        /* Logo Central */
         .image-container {
             position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
             z-index: 10001; text-align: center; transition: opacity 0.5s ease;
         }
         .image-container img { max-width: 200px; height: auto; }
         .image-container p { color: white; font-weight: bold; margin-top: 15px; font-family: Arial, sans-serif; }
+        
         .container-loader.active .image-container { opacity: 0; }
 
-        /* === ESTRUCTURA PRINCIPAL (Sticky Footer) === */
+        /* === ESTRUCTURA PRINCIPAL === */
         .main-wrapper {
             opacity: 0; 
-            transition: opacity 1s ease-in-out;
+            transition: opacity 0.8s ease-in-out;
             display: flex; 
             flex-direction: column; 
-            min-height: 100vh; /* Ocupa al menos toda la pantalla */
+            min-height: 100vh;
             position: relative;
         }
         .main-wrapper.visible { opacity: 1; }
 
-        /* Contenido dinámico */
         .contenido-dinamico {
-            flex: 1; /* Esto hace que empuje el footer hacia abajo si falta contenido */
+            flex: 1; 
             width: 100%;
-            margin-top: 110px; /* Espacio para el navbar fijo */
+            margin-top: 110px;
             position: relative;
             z-index: 1;
         }
@@ -81,7 +108,9 @@
         @include('plantilla.navegacion')
 
         @if(request()->routeIs('welcome'))
+        @if($popupData)
             @include('plantilla.pop-up')
+        @endif
         @endif
 
         <div class="contenido-dinamico">
@@ -97,13 +126,19 @@
             const loader = document.getElementById('loader');
             const mainWrapper = document.getElementById('mainWrapper');
             
+            // 1. Espera inicial breve
             setTimeout(() => {
+                // 2. Inicia animación diagonal
                 loader.classList.add('active'); 
+                
                 setTimeout(() => {
+                    // 3. Muestra el contenido
                     mainWrapper.classList.add('visible'); 
-                    setTimeout(() => { loader.style.display = 'none'; }, 600);
+                    
+                    // 4. Elimina el loader del DOM (Espera a que termine la transición CSS de 1.0s)
+                    setTimeout(() => { loader.style.display = 'none'; }, 1000);
                 }, 300);
-            }, 1000); 
+            }, 500); 
         });
     </script>
     

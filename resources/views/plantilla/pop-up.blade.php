@@ -89,6 +89,35 @@
     .popup-image.active {
       display: block;
     }
+
+   .popup-action-btn {
+        position: absolute; /* Flotante */
+        bottom: 30px;       /* Distancia del borde inferior */
+        left: 50%;
+        transform: translateX(-50%); /* Centrado exacto */
+        
+        background-color: #D4AF37; /* Dorado */
+        color: #000;
+        font-weight: bold;
+        text-transform: uppercase;
+        padding: 12px 35px;
+        border-radius: 30px;
+        text-decoration: none;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+        transition: all 0.2s;
+        z-index: 2002;
+        display: none; /* Oculto por defecto */
+        border: 2px solid #fff;
+        align-items: center; gap: 8px;
+        white-space: nowrap; /* Evita que el texto se parta */
+    }
+    .popup-action-btn:hover {
+        background-color: #f0c448;
+        transform: translateX(-50%) scale(1.05); /* Mantiene el centrado al escalar */
+        color: #000;
+        box-shadow: 0 6px 20px rgba(0,0,0,0.5);
+    }
+    .popup-action-btn i { margin-left: 5px; }
     
     /* Imagen ampliada */
     .popup-image.zoomed {
@@ -318,22 +347,36 @@
         
         <div class="popup-container">
             <div class="image-wrapper">
-                <!-- Botón de cerrar DENTRO del image-wrapper -->
                 <button class="close-btn" id="closeBtn" aria-label="Cerrar">×</button>
                 
-                <!-- IMÁGENES -->
-               <img src="{{asset('img/pop-up1.png')}}" alt="Imagen 1" class="popup-image active">
-               <img src="{{asset('img/pop-up2.png')}}" alt="Imagen 2" class="popup-image">
+                @if(isset($popupData) && $popupData->detalles->count() > 0)
+                    @foreach($popupData->detalles as $index => $img)
+                        <img src="{{ asset('storage/' . $img->ruta_imagen) }}" 
+                             alt="Imagen {{ $index }}" 
+                             class="popup-image {{ $index === 0 ? 'active' : '' }}"
+                             data-link="{{ $img->url_enlace ?? '' }}">
+                    @endforeach
+
+                @endif
             </div>
+            <a href="#" target="_blank" class="popup-action-btn" id="popupActionBtn">
+                Ver Más Información <i class="fas fa-external-link-alt"></i>
+            </a>
             
-            <!-- BOTONES DE NAVEGACIÓN (fuera del image-wrapper) -->
             <button class="nav-arrow nav-left" id="prevBtn" aria-label="Anterior">❮</button>
             <button class="nav-arrow nav-right" id="nextBtn" aria-label="Siguiente">❯</button>
             
-            <!-- INDICADORES (fuera del image-wrapper) -->
             <div class="indicators" id="indicators">
-                <button class="indicator active" data-index="0" aria-label="Ir a imagen 1"></button>
-                <button class="indicator" data-index="1" aria-label="Ir a imagen 2"></button>
+                @if(isset($popupData) && $popupData->detalles->count() > 0)
+                    @foreach($popupData->detalles as $index => $img)
+                        <button class="indicator {{ $index === 0 ? 'active' : '' }}" 
+                                data-index="{{ $index }}" 
+                                aria-label="Ir a imagen {{ $index + 1 }}"></button>
+                    @endforeach
+                @else
+                    <button class="indicator active" data-index="0" aria-label="Ir a imagen 1"></button>
+                    <button class="indicator" data-index="1" aria-label="Ir a imagen 2"></button>
+                @endif
             </div>
         </div>
     </div>
@@ -343,167 +386,133 @@
 <div class="zoom-container" id="zoomContainer">
     <img src="" alt="Imagen ampliada" id="zoomedImage">
 </div>
-
 <script>
-  let currentIndex = 0;
-  const images = document.querySelectorAll('.popup-image');
-  const indicators = document.querySelectorAll('.indicator');
-  let autoSlideTimer;
-  
-  // Referencias a los botones
-  const prevBtn = document.getElementById('prevBtn');
-  const nextBtn = document.getElementById('nextBtn');
-  const closeBtn = document.getElementById('closeBtn');
-  const popup = document.getElementById('popup');
-  const popupWrapper = document.querySelector('.popup-wrapper');
-  const zoomContainer = document.getElementById('zoomContainer');
-  const zoomedImage = document.getElementById('zoomedImage');
-  
-  let isZoomed = false;
-  
-  function showImage(index) {
-    // Remover clase active de la imagen e indicador actual
-    images[currentIndex].classList.remove('active');
-    indicators[currentIndex].classList.remove('active');
+document.addEventListener('DOMContentLoaded', function() {
     
-    // Actualizar el índice
-    currentIndex = index;
-    if (currentIndex >= images.length) currentIndex = 0;
-    if (currentIndex < 0) currentIndex = images.length - 1;
+    let currentIndex = 0;
+    const images = document.querySelectorAll('.popup-image');
+    const indicators = document.querySelectorAll('.indicator');
+    const actionBtn = document.getElementById('popupActionBtn');
     
-    // Agregar clase active a la nueva imagen e indicador
-    images[currentIndex].classList.add('active');
-    indicators[currentIndex].classList.add('active');
+    // Referencias DOM
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+    const closeBtn = document.getElementById('closeBtn');
+    const popup = document.getElementById('popup');
+    const zoomContainer = document.getElementById('zoomContainer');
+    const zoomedImage = document.getElementById('zoomedImage');
     
-    console.log('Mostrando imagen:', currentIndex);
-  }
-  
-  function nextImage() {
-    showImage(currentIndex + 1);
-    resetAutoSlide();
-  }
-  
-  function previousImage() {
-    showImage(currentIndex - 1);
-    resetAutoSlide();
-  }
-  
-  function autoSlide() {
-    showImage(currentIndex + 1);
-  }
-  
-  function startAutoSlide() {
-    autoSlideTimer = setInterval(autoSlide, 5000);
-  }
-  
-  function resetAutoSlide() {
-    clearInterval(autoSlideTimer);
-    startAutoSlide();
-  }
-  
-  function closePopup() {
-    popup.style.display = 'none';
-    clearInterval(autoSlideTimer);
-    closeZoom(); // Cerrar zoom si está abierto
-  }
-  
-  function openZoom(imageSrc) {
-    isZoomed = true;
-    zoomedImage.src = imageSrc;
-    zoomContainer.classList.add('active');
-    clearInterval(autoSlideTimer); // Pausar autoSlide mientras está en zoom
-  }
-  
-  function closeZoom() {
-    isZoomed = false;
-    zoomContainer.classList.remove('active');
-    zoomedImage.src = '';
-    if (popup.style.display !== 'none') {
-      startAutoSlide(); // Reanudar autoSlide al salir del zoom
+    let autoSlideTimer;
+
+    // === FUNCIÓN PRINCIPAL: ACTUALIZAR BOTÓN ===
+    function updateActionButton(index) {
+        if (!images[index] || !actionBtn) return;
+
+        const link = images[index].getAttribute('data-link');
+        
+        // Verificamos si hay link y si no está vacío
+        if (link && link.trim() !== '') {
+            actionBtn.href = link;
+            actionBtn.style.display = 'inline-flex'; // Flex para alinear el icono
+        } else {
+            actionBtn.style.display = 'none';
+        }
     }
-  }
-  
-  // Event Listeners con addEventListener
-  prevBtn.addEventListener('click', function(e) {
-    e.stopPropagation();
-    previousImage();
-  });
-  
-  nextBtn.addEventListener('click', function(e) {
-    e.stopPropagation();
-    nextImage();
-  });
-  
-  closeBtn.addEventListener('click', function(e) {
-    e.stopPropagation();
-    closePopup();
-  });
-  
-  // Click en las imágenes - ABRIR ZOOM
-  images.forEach(img => {
-    img.addEventListener('click', function(e) {
-      e.stopPropagation();
-      // Usar la misma imagen src en lugar de data-full-src
-      const imageSrc = this.src;
-      openZoom(imageSrc);
-    });
-  });
-  
-  // Click en la imagen ampliada - CERRAR ZOOM
-  zoomedImage.addEventListener('click', function(e) {
-    e.stopPropagation();
-    closeZoom();
-  });
-  
-  // Click en el contenedor de zoom - CERRAR ZOOM
-  zoomContainer.addEventListener('click', function(e) {
-    if (e.target === zoomContainer) {
-      closeZoom();
+
+    function showImage(index) {
+        if(images.length > 0) {
+            // Ocultar actual
+            images[currentIndex].classList.remove('active');
+            if(indicators[currentIndex]) indicators[currentIndex].classList.remove('active');
+            
+            // Calcular nuevo índice
+            currentIndex = (index + images.length) % images.length;
+            
+            // Mostrar nueva
+            images[currentIndex].classList.add('active');
+            if(indicators[currentIndex]) indicators[currentIndex].classList.add('active');
+
+            // Actualizar botón
+            updateActionButton(currentIndex);
+        }
     }
-  });
-  
-  // Click en indicadores
-  indicators.forEach(indicator => {
-    indicator.addEventListener('click', function(e) {
-      e.stopPropagation();
-      const index = parseInt(this.getAttribute('data-index'));
-      showImage(index);
-      resetAutoSlide();
-    });
-  });
-  
-  // Click en el overlay (cerrar)
-  popup.addEventListener('click', function(e) {
-    if (e.target === popup) {
-      closePopup();
+
+    function nextImage() { showImage(currentIndex + 1); resetAutoSlide(); }
+    function prevImage() { showImage(currentIndex - 1); resetAutoSlide(); }
+
+    function startAutoSlide() {
+        if(images.length > 1) {
+            autoSlideTimer = setInterval(() => showImage(currentIndex + 1), 5000);
+        }
     }
-  });
-  
-  // Prevenir que clicks en el wrapper cierren el popup
-  popupWrapper.addEventListener('click', function(e) {
-    e.stopPropagation();
-  });
-  
-  // Navegación con teclado
-  document.addEventListener('keydown', function(e) {
-    if (isZoomed) {
-      if (e.key === 'Escape') {
+
+    function resetAutoSlide() {
+        clearInterval(autoSlideTimer);
+        startAutoSlide();
+    }
+
+    function closePopup() {
+        if(popup) popup.style.display = 'none';
+        clearInterval(autoSlideTimer);
         closeZoom();
-      }
-    } else {
-      if (e.key === 'ArrowLeft') {
-        previousImage();
-      } else if (e.key === 'ArrowRight') {
-        nextImage();
-      } else if (e.key === 'Escape') {
-        closePopup();
-      }
     }
-  });
-  
-  // Inicializar
-  document.addEventListener('DOMContentLoaded', function() {
-    startAutoSlide();
-    console.log('Carrusel iniciado');
-  });
+
+    function openZoom(src) {
+        zoomedImage.src = src;
+        zoomContainer.classList.add('active');
+        clearInterval(autoSlideTimer);
+    }
+
+    function closeZoom() {
+        zoomContainer.classList.remove('active');
+        if(popup.style.display !== 'none') startAutoSlide();
+    }
+
+    // === EVENTOS ===
+    if(prevBtn) prevBtn.addEventListener('click', (e) => { e.stopPropagation(); prevImage(); });
+    if(nextBtn) nextBtn.addEventListener('click', (e) => { e.stopPropagation(); nextImage(); });
+    if(closeBtn) closeBtn.addEventListener('click', (e) => { e.stopPropagation(); closePopup(); });
+    
+    // Click fuera del popup para cerrar
+    if(popup) popup.addEventListener('click', (e) => { if(e.target === popup) closePopup(); });
+
+    // Click en imágenes para zoom
+    images.forEach(img => {
+        img.addEventListener('click', (e) => {
+            e.stopPropagation();
+            openZoom(img.src);
+        });
+    });
+
+    // Cerrar zoom
+    if(zoomContainer) zoomContainer.addEventListener('click', () => closeZoom());
+
+    // Indicadores
+    indicators.forEach(ind => {
+        ind.addEventListener('click', (e) => {
+            e.stopPropagation();
+            showImage(parseInt(ind.dataset.index));
+            resetAutoSlide();
+        });
+    });
+
+    // Teclado
+    document.addEventListener('keydown', (e) => {
+        if(zoomContainer.classList.contains('active')) {
+            if(e.key === 'Escape') closeZoom();
+        } else if (popup.style.display !== 'none') {
+            if(e.key === 'Escape') closePopup();
+            if(e.key === 'ArrowRight') nextImage();
+            if(e.key === 'ArrowLeft') prevImage();
+        }
+    });
+
+    // === INICIALIZACIÓN ===
+    if(images.length === 0) {
+        if(popup) popup.style.display = 'none';
+    } else {
+        updateActionButton(0); // Verificar la primera imagen al cargar
+        startAutoSlide();
+    }
+});
 </script>
