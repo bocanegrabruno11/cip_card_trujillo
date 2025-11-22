@@ -51,6 +51,11 @@
                     </div>
 
                     <div class="col-md-2">
+                        <label class="form-label small fw-bold">Nombres</label>
+                        <input type="text" name="nombres" class="form-control form-control-sm" placeholder="Buscar ..." value="{{ request('nombres') }}">
+                    </div>
+
+                    <div class="col-md-1">
                         <label class="form-label small fw-bold">Mes</label>
                         <select name="mes" class="form-select form-select-sm">
                             <option value="">Todos</option>
@@ -62,7 +67,7 @@
                         </select>
                     </div>
 
-                    <div class="col-md-2">
+                    <div class="col-md-1">
                         <label class="form-label small fw-bold">Año</label>
                         <select name="anio" class="form-select form-select-sm">
                             <option value="">Todos</option>

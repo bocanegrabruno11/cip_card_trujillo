@@ -59,7 +59,7 @@
                     <div class="col-md-5">
                         <label class="form-label fw-bold">Imagen Principal (Primera a mostrar)</label>
                         <div class="input-group mb-3">
-                            <input type="file" name="imagen_principal" class="form-control" id="inputMainImg" accept="image/*" required>
+                            <input type="file" name="imagen_principal" class="form-control" id="inputMainImg" accept=".jpg,.jpeg,.png" required>
                         </div>
                         <div class="mb-3">
                              <label class="form-label small text-muted">Enlace URL (Opcional)</label>
@@ -127,7 +127,7 @@
             <div class="row align-items-center">
                 <div class="col-md-4">
                     <label class="form-label small fw-bold">Archivo de Imagen <span class="text-danger">*</span></label>
-                    <input type="file" name="galeria[INDEX][imagen]" class="form-control form-control-sm" accept="image/*" required>
+                    <input type="file" name="galeria[INDEX][imagen]" class="form-control form-control-sm" accept=".jpg,.jpeg,.png" required>
                     
                     <div class="mt-2" style="height: 100px; background: #f8f9fa; border: 1px dashed #ccc; display: flex; align-items: center; justify-content: center; overflow: hidden;">
                         <img src="" class="img-preview d-none" 

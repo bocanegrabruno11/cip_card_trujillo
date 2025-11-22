@@ -230,7 +230,7 @@
     </div>
 
     <div class="pagination-wrapper">
-        {{ $comunicados->links() }} {{-- Usa estilos de Bootstrap por defecto si están cargados, sino se verán simples --}}
+        {{ $comunicados->links('pagination::bootstrap-4') }} {{-- Usa estilos de Bootstrap por defecto si están cargados, sino se verán simples --}}
     </div>
 
 </div>

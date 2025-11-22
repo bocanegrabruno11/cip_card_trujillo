@@ -37,7 +37,7 @@
 
                     <div class="col-md-5">
                         <label class="form-label fw-bold">Imagen del Comunicado <span class="text-danger">*</span></label>
-                        <input type="file" name="imagen" class="form-control mb-3" id="inputImg" accept="image/*" required>
+                        <input type="file" name="imagen" class="form-control mb-3" id="inputImg" accept=".jpg,.jpeg,.png" required>
                         
                         <div class="bg-light border rounded d-flex align-items-center justify-content-center position-relative" style="height: 250px; overflow: hidden;">
                             

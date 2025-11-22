@@ -51,7 +51,7 @@
                 <div class="card border-0 shadow-sm mb-4">
                     <div class="card-header bg-white fw-bold text-danger">Imagen Principal <span class="text-danger">*</span></div>
                     <div class="card-body text-center">
-                        <input type="file" name="imagen_principal" class="form-control mb-3" id="inputMain" accept="image/*" required>
+                        <input type="file" name="imagen_principal" class="form-control mb-3" id="inputMain" accept=".jpg,.jpeg,.png" required>
                         
                         <div class="bg-light border rounded d-flex align-items-center justify-content-center overflow-hidden" style="height: 200px;">
                             <img id="previewMain" src="" 
@@ -84,7 +84,7 @@
         <div class="row align-items-center">
             <div class="col-md-8">
                 <label class="form-label small fw-bold">Archivo de Imagen</label>
-                <input type="file" name="galeria[]" class="form-control form-control-sm gallery-input" accept="image/*" required>
+                <input type="file" name="galeria[]" class="form-control form-control-sm gallery-input" accept=".jpg,.jpeg,.png" required>
             </div>
             
             <div class="col-md-4 text-center">

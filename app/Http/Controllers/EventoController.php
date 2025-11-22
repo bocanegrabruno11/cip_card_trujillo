@@ -31,7 +31,7 @@ class EventoController extends Controller
             return $q->whereYear('fecha_evento', $request->anio);
         });
 
-        $eventos = $query->orderBy('created_at', 'desc')->paginate(2)->appends($request->all());
+        $eventos = $query->orderBy('created_at', 'desc')->paginate(10)->appends($request->all());
 
         return view('gestion-contenido.eventos.index', compact('eventos'));
     }
@@ -51,9 +51,9 @@ class EventoController extends Controller
                 'fecha_evento' => 'required|date',
                 'lugar' => 'nullable|string|max:255',
                 'descripcion' => 'nullable|string',
-                'imagen_principal' => 'required|file|max:10240', // Obligatoria
+                'imagen_principal' => 'required|file|mimes:jpeg,png,jpg,gif,svg,webp,avif|max:5120', // Obligatoria
                 'galeria' => 'nullable|array',
-                'galeria.*' => 'file|max:10240'
+                'galeria.*' => 'file|mimes:jpeg,png,jpg,gif,svg,webp,avif|max:5120'
             ]);
 
             DB::transaction(function () use ($request) {
@@ -123,7 +123,7 @@ class EventoController extends Controller
             $request->validate([
                 'titulo' => 'required|string|max:255',
                 'fecha_evento' => 'required|date',
-                'imagen_principal' => 'nullable|file|max:10240',
+                'imagen_principal' => 'nullable|file|mimes:jpeg,png,jpg,gif,svg,webp,avif|max:5120',
             ]);
 
             DB::transaction(function () use ($request, $evento) {

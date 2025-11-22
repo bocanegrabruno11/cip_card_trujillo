@@ -75,7 +75,7 @@
                 <div class="card border-0 shadow-sm mb-4">
                     <div class="card-header bg-white fw-bold">Imagen Principal</div>
                     <div class="card-body text-center">
-                        <input type="file" name="imagen_principal" class="form-control mb-3" id="inputMain" accept="image/*">
+                        <input type="file" name="imagen_principal" class="form-control mb-3" id="inputMain" accept=".jpg,.jpeg,.png">
                         <div class="bg-light border rounded d-flex align-items-center justify-content-center overflow-hidden" style="height: 200px;">
                             @if($imagenPrincipal)
                                 <img id="previewMain" 
@@ -112,7 +112,7 @@
         <div class="row align-items-center">
             <div class="col-md-8">
                 <label class="form-label small fw-bold mb-1">Archivo de Imagen</label>
-                <input type="file" name="galeria_nueva[]" class="form-control form-control-sm input-new-img" accept="image/*" required>
+                <input type="file" name="galeria_nueva[]" class="form-control form-control-sm input-new-img" accept=".jpg,.jpeg,.png" required>
             </div>
             
             <div class="col-md-4 text-center">

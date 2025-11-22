@@ -276,7 +276,7 @@
                 <div class="hero-buttons">
                     <a href="#" class="btn-hero btn-red-light">Arbitraje</a>
                     <a href="#" class="btn-hero btn-gold">Junta de Resolución de Disputas</a>
-                    <a href="#" class="btn-hero btn-red-light">Dispute Boards</a>
+                    <a href="#" class="btn-hero btn-red-light">Mesa de partes</a>
                 </div>
             </div>
 

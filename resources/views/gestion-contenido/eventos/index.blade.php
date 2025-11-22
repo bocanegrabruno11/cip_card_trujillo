@@ -119,7 +119,7 @@
                             <form action="{{ route('eventos.toggle', $ev->id) }}" method="POST" class="d-inline">
                                 @csrf @method('PUT')
                                 <button type="submit" class="btn btn-sm btn-icon {{ $ev->activo ? 'btn-outline-success' : 'btn-outline-secondary' }}" title="Cambiar Estado">
-                                    <i class="fas {{ $ev->activo ? 'fa-eye' : 'fa-eye-slash' }}"></i>
+                                    <i class="fas {{ $ev->activo ? 'fa-eye' : 'fa-eye-slash' }}" onclick="return confirm('¿Seguro de cambiar visibilidad?')"></i>
                                 </button>
                             </form>
                             <a href="{{ route('eventos.edit', $ev->id) }}" class="btn btn-sm btn-warning text-white" title="Editar">

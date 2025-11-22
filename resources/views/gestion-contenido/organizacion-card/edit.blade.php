@@ -53,7 +53,7 @@
                 <div class="card border-0 shadow-sm mb-4">
                     <div class="card-header bg-white fw-bold">Foto del Miembro</div>
                     <div class="card-body text-center">
-                        <input type="file" name="imagen" class="form-control mb-3" id="inputImg" accept="image/*">
+                        <input type="file" name="imagen" class="form-control mb-3" id="inputImg" accept=".jpg,.jpeg,.png">
                         
                         <div class="bg-light rounded-circle d-flex align-items-center justify-content-center mx-auto overflow-hidden" style="width: 200px; height: 200px; border: 5px solid #fff; box-shadow: 0 0 10px rgba(0,0,0,0.1);">
                             @if($miembro->ruta_imagen)

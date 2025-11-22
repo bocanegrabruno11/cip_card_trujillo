@@ -80,10 +80,12 @@ class PageController extends Controller
     public function eventos()
     {
         // 1. Obtener el evento DESTACADO (el último activo)
+        $hoy = now()->format('Y-m-d');
         $destacado = Evento::with('detalles')
-            ->where('activo', true)
-            ->latest('fecha_evento')
-            ->first();
+        ->where('activo', true)
+        ->whereDate('fecha_evento', '>=', $hoy) // Solo eventos futuros o de hoy
+        ->orderBy('fecha_evento', 'asc') // Ordenar: El más cercano primero
+        ->first();
 
         // 2. Obtener el resto de eventos (excluyendo el destacado para no repetir)
         $listaEventos = Evento::with('detalles')
@@ -92,7 +94,7 @@ class PageController extends Controller
                 return $query->where('id', '!=', $destacado->id);
             })
             ->latest('fecha_evento')
-            ->paginate(6);
+            ->paginate(10);
 
         return view('contenido.eventos', compact('destacado', 'listaEventos'));
     }

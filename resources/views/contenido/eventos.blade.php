@@ -171,8 +171,8 @@
                 </a>
             @endforeach
             
-            <div class="mt-3">
-                {{ $listaEventos->links() }}
+            <div class="mt-4">
+                {{ $listaEventos->links('pagination::bootstrap-4') }}
             </div>
         </div>
 

@@ -120,25 +120,32 @@
         @include('plantilla.footer')
 
     </div>
-
-    <script>
+<script>
         document.addEventListener('DOMContentLoaded', function () {
             const loader = document.getElementById('loader');
             const mainWrapper = document.getElementById('mainWrapper');
             
-            // 1. Espera inicial breve
-            setTimeout(() => {
-                // 2. Inicia animación diagonal
-                loader.classList.add('active'); 
-                
+            // Verificamos si estamos en la página de inicio
+            // window.location.pathname devuelve "/" en el home
+            const isHome = window.location.pathname === '/' || window.location.pathname === '/public/'; // Ajuste para entornos locales
+
+            if (isHome) {
+                // === ANIMACIÓN COMPLETA SOLO EN HOME ===
                 setTimeout(() => {
-                    // 3. Muestra el contenido
-                    mainWrapper.classList.add('visible'); 
+                    loader.classList.add('active'); 
                     
-                    // 4. Elimina el loader del DOM (Espera a que termine la transición CSS de 1.0s)
-                    setTimeout(() => { loader.style.display = 'none'; }, 1000);
-                }, 300);
-            }, 500); 
+                    setTimeout(() => {
+                        mainWrapper.classList.add('visible'); 
+                        setTimeout(() => { loader.style.display = 'none'; }, 1000);
+                    }, 300);
+                }, 500); 
+            } else {
+                // === OTRAS PÁGINAS: MOSTRAR DIRECTO ===
+                loader.style.display = 'none';
+                mainWrapper.classList.add('visible');
+                mainWrapper.style.transition = 'none'; // Quitar efecto fade para que sea instantáneo
+                mainWrapper.style.opacity = '1';
+            }
         });
     </script>
     

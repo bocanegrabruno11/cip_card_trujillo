@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\OrganizacionCard;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 
 class OrganizacionCardController extends Controller
@@ -36,6 +37,11 @@ class OrganizacionCardController extends Controller
         $query->when($request->filled('anio'), function ($q) use ($request) {
             return $q->whereYear('created_at', $request->anio);
         });
+
+        // Filtro por Orden
+        $query->when($request->filled('nombres'), function ($q) use ($request) {
+            return $q->where('nombres', 'like', '%' . $request->nombres . '%');
+        });
         
 
         // Ordenar por Grupo y luego por el número de Orden manual
@@ -51,42 +57,73 @@ class OrganizacionCardController extends Controller
 
     public function store(Request $request)
     {
-        // 1. Validamos SIN el campo 'orden'
-        $request->validate([
-            'nombres' => 'required|string|max:255',
-            'cargo'   => 'nullable|string|max:255',
-            'grupo'   => 'required|string',
-            // 'orden' => 'required', // <--- ELIMINADO
-            'imagen'  => 'nullable|image|max:5120',
-            'email'   => 'nullable|email',
-        ]);
+        // LOG 1: Ver qué llega exactamente
+        Log::info('--- INICIO STORE ORGANIZACION ---');
+        Log::info('Datos recibidos:', $request->except('imagen'));
 
-        $ruta = null;
-        if ($request->hasFile('imagen')) {
-            $ruta = $request->file('imagen')->store('organizacion', 'public');
+        try {
+            // 1. Validación
+            $request->validate([
+                'nombres' => 'required|string|max:255',
+                'cargo'   => 'nullable|string|max:255',
+                'grupo'   => 'required|string',
+                // Validamos la imagen con soporte amplio
+                'imagen'  => 'nullable|file|mimes:jpeg,png,jpg,gif,svg,webp,avif|max:5120', 
+                'email'   => 'nullable|email',
+            ]);
+
+            // LOG 2: Validación pasó
+            Log::info('Validación exitosa.');
+
+            $ruta = null;
+            if ($request->hasFile('imagen')) {
+                $archivo = $request->file('imagen');
+                
+                // Verificar si el archivo es válido antes de guardar
+                if ($archivo->isValid()) {
+                    $ruta = $archivo->store('organizacion', 'public');
+                    Log::info('Imagen guardada en: ' . $ruta);
+                } else {
+                    Log::error('El archivo de imagen se recibió pero NO es válido (Error PHP: ' . $archivo->getError() . ')');
+                }
+            } else {
+                Log::info('No se recibió archivo de imagen.');
+            }
+
+            // 2. Cálculo Automático del Orden
+            $ultimoOrden = OrganizacionCard::where('grupo', $request->grupo)->max('orden');
+            $nuevoOrden = $ultimoOrden ? ($ultimoOrden + 1) : 1;
+            
+            Log::info("Orden calculado: {$nuevoOrden} para el grupo: {$request->grupo}");
+
+            // 3. Crear Registro
+            $miembro = OrganizacionCard::create([
+                'nombres'     => $request->nombres,
+                'cargo'       => $request->cargo,
+                'grupo'       => $request->grupo,
+                'orden'       => $nuevoOrden,
+                'email'       => $request->email,
+                'telefono'    => $request->telefono,
+                'ruta_imagen' => $ruta,
+                'activo'      => true
+            ]);
+
+            Log::info('Registro creado en BD con ID: ' . $miembro->id);
+
+            return redirect()->route('organizacion-gestion.index')
+                ->with('success', 'Miembro registrado correctamente al final de la lista.');
+
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            // Si falla la validación, logueamos POR QUÉ falló
+            Log::error('Fallo de Validación:', $e->errors());
+            return back()->withErrors($e->errors())->withInput();
+
+        } catch (\Exception $e) {
+            // Cualquier otro error (Base de datos, permisos, etc.)
+            Log::error('ERROR CRÍTICO en Organizacion Store: ' . $e->getMessage());
+            return back()->withInput()
+                ->withErrors(['error' => 'Error del sistema: ' . $e->getMessage()]);
         }
-
-        // 2. CÁLCULO AUTOMÁTICO DEL ORDEN
-        // Buscamos el número más alto actual en ESE grupo específico
-        $ultimoOrden = OrganizacionCard::where('grupo', $request->grupo)->max('orden');
-        
-        // Si existe, le sumamos 1. Si no existe (es el primero), empezamos en 1.
-        $nuevoOrden = $ultimoOrden ? ($ultimoOrden + 1) : 1;
-
-        // 3. Crear
-        OrganizacionCard::create([
-            'nombres'     => $request->nombres,
-            'cargo'       => $request->cargo,
-            'grupo'       => $request->grupo,
-            'orden'       => $nuevoOrden, // <--- Asignamos el valor calculado
-            'email'       => $request->email,
-            'telefono'    => $request->telefono,
-            'ruta_imagen' => $ruta,
-            'activo'      => true
-        ]);
-
-        return redirect()->route('organizacion-gestion.index')
-            ->with('success', 'Miembro registrado correctamente al final de la lista.');
     }
 
     public function edit($id)
@@ -105,7 +142,7 @@ class OrganizacionCardController extends Controller
             'cargo'   => 'nullable|string|max:255', 
             'grupo'   => 'required|string',
            // 'orden'   => 'required|integer',
-            'imagen'  => 'nullable|image|max:5120',
+            'imagen'  => 'nullable|file|mimes:jpeg,png,jpg,gif,svg,webp,avif|max:5120',
         ]);
 
         $datos = $request->all();
