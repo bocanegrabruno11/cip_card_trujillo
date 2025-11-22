@@ -207,25 +207,25 @@
 <div class="contenedor-home">
     
     <aside class="menu-lateral">
-        <a href="#" class="item rojo">
+        <a href="{{ route('presentacion') }}" class="item rojo">
             <i class="fas fa-building"></i> EL CARD<span>Institución</span>
         </a>
-        <a href="#" class="item rojo">
+        <a href="{{ route('arbitral') }}" class="item rojo">
             <i class="fas fa-file-contract"></i> Cláusulas<span>Reglamentos</span>
         </a>
         <a href="#" class="item dorado">
             <i class="fas fa-gavel"></i> Servicios<span>Arbitraje</span>
         </a>
-        <a href="#" class="item negro">
+        <a href="{{ route('comunicados') }}" class="item negro">
             <i class="fas fa-bullhorn"></i> Comunicados<span>Noticias</span>
         </a>
-        <a href="#" class="item dorado">
+        <a href="{{ route('eventos') }}" class="item dorado">
             <i class="fas fa-calendar-alt"></i> Eventos<span>Actividades</span>
         </a>
-        <a href="#" class="item rojo">
+        <a href="{{ route('contactos') }}" class="item rojo">
             <i class="fas fa-phone"></i> Contactos<span>Info</span>
         </a>
-        <a href="#" class="item negro">
+        <a href="{{ route('login') }}" class="item negro">
             <i class="fas fa-envelope-open-text"></i> Mesa de Partes<span>Trámites</span>
         </a>
     </aside>

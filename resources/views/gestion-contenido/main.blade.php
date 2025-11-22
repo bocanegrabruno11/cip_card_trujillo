@@ -158,7 +158,7 @@
 
         <ul class="sidebar-menu">
             <li class="menu-item">
-                <a href="#" class="menu-link">
+                <a href="{{ route('gestion-contenido') }}" class="menu-link">
                     <i class="fas fa-home"></i> <span>Principal</span>
                 </a>
             </li>
@@ -168,13 +168,18 @@
                 </a>
             </li>
             <li class="menu-item">
-                <a href="#" class="menu-link">
+                <a href="{{ route('comunicados.index') }}" class="menu-link">
                     <i class="fas fa-file"></i> <span>Comunicados</span>
                 </a>
             </li>
             <li class="menu-item">
-                <a href="#" class="menu-link">
+                <a href="{{ route('eventos.index') }}" class="menu-link">
                     <i class="fas fa-calendar"></i> <span>Eventos</span>
+                </a>
+            </li>
+            <li class="menu-item">
+                <a href="{{ route('organizacion-gestion.index') }}" class="menu-link">
+                    <i class="fas fa-users"></i> <span>Organización</span>
                 </a>
             </li>
         </ul>

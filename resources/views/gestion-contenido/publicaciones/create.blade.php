@@ -59,7 +59,7 @@
                     <div class="col-md-5">
                         <label class="form-label fw-bold">Imagen Principal (Primera a mostrar)</label>
                         <div class="input-group mb-3">
-                            <input type="file" name="imagen_principal" class="form-control" id="inputMainImg" accept="image/*">
+                            <input type="file" name="imagen_principal" class="form-control" id="inputMainImg" accept="image/*" required>
                         </div>
                         <div class="mb-3">
                              <label class="form-label small text-muted">Enlace URL (Opcional)</label>

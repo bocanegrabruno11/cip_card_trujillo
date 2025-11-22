@@ -335,12 +335,12 @@
                     <a href="javascript:void(0)">CARD</a>
                     <ul class="dropdown-menu">
                         <li><a href="{{ route('presentacion') }}" onclick="handleMenuClick(event, this)">Presentación</a></li>
-                        <li><a href="#" onclick="handleMenuClick(event, this)">Organización del CARD</a></li>
+                        <li><a href="{{ route('organizacion-card') }}" onclick="handleMenuClick(event, this)">Organización del CARD</a></li>
                         <li><a href="{{ route('mision-vision') }}" onclick="handleMenuClick(event, this)">Visión y Misión</a></li>
-                        <li><a href="#" onclick="handleMenuClick(event, this)">Organigrama</a></li>
-                        <li><a href="#" onclick="handleMenuClick(event, this)">Nuestro equipo</a></li>
-                        <li><a href="#" onclick="handleMenuClick(event, this)">Certificaciones ISO</a></li>
-                        <li><a href="#" onclick="handleMenuClick(event, this)">Licencia de funcionamiento</a></li>
+                        <li><a href="{{ route('organigrama') }}" onclick="handleMenuClick(event, this)">Organigrama</a></li>
+                        <li><a href="{{ route('nuestro-equipo') }}" onclick="handleMenuClick(event, this)">Nuestro equipo</a></li>
+                        <li><a href="{{ route('certificaciones') }}" onclick="handleMenuClick(event, this)">Certificaciones ISO</a></li>
+                        <li><a href="{{ route('licencias') }}" onclick="handleMenuClick(event, this)">Licencia de funcionamiento</a></li>
                     </ul>
                 </li>
                 
@@ -348,10 +348,10 @@
                 <li class="has-dropdown {{ request()->routeIs('clausulas.*') ? 'current-menu-item' : '' }}" onclick="toggleMobileDropdown(this)">
                     <a href="javascript:void(0)">MODELOS DE CLÁUSULAS</a>
                     <ul class="dropdown-menu">
-                        <li><a href="#" onclick="handleMenuClick(event, this)">Modelo de Cláusula Arbitral</a></li>
-                        <li><a href="#" onclick="handleMenuClick(event, this)">Modelo de cláusula Junta de Resolución de Disputas</a></li>
-                        <li><a href="#" onclick="handleMenuClick(event, this)">Cláusula modelo Dispute Review Board (DRB)</a></li>
-                        <li><a href="#" onclick="handleMenuClick(event, this)">Cláusula modelo Dispute Avoidance Resolution Board (DARB)</a></li>
+                        <li><a href="{{ route('arbitral') }}" onclick="handleMenuClick(event, this)">Modelo de Cláusula Arbitral</a></li>
+                        <li><a href="{{ route('junta-res-disputas') }}" onclick="handleMenuClick(event, this)">Modelo de cláusula Junta de Resolución de Disputas</a></li>
+                        <li><a href="{{ route('dispute-review') }}" onclick="handleMenuClick(event, this)">Cláusula modelo Dispute Review Board (DRB)</a></li>
+                        <li><a href="{{ route('dispute-avoidance-res') }}" onclick="handleMenuClick(event, this)">Cláusula modelo Dispute Avoidance Resolution Board (DARB)</a></li>
                     </ul>
                 </li>
                 
@@ -361,18 +361,17 @@
                     <ul class="dropdown-menu">
                         <li><a href="#" onclick="handleMenuClick(event, this)">Institución Arbitral</a></li>
                         <li><a href="#" onclick="handleMenuClick(event, this)">Junta de Prevención y Resolución de Disputas (CAJPRD)</a></li>
-                        <li><a href="#" onclick="handleMenuClick(event, this)">Dispute Boards</a></li>
                     </ul>
                 </li>
                 
                 {{-- 5. COMUNICADOS --}}
-                <li><a href="#" onclick="handleMenuClick(event, this)">COMUNICADOS</a></li>
+                <li><a href="{{ route('comunicados') }}" onclick="handleMenuClick(event, this)">COMUNICADOS</a></li>
                 
                 {{-- 6. EVENTOS --}}
-                <li><a href="#" onclick="handleMenuClick(event, this)">EVENTOS</a></li>
+                <li><a href="{{ route('eventos') }}" onclick="handleMenuClick(event, this)">EVENTOS</a></li>
                 
                 {{-- 7. CONTACTOS --}}
-                <li><a href="#" onclick="handleMenuClick(event, this)">CONTACTOS</a></li>
+                <li><a href="{{ route('contactos') }}" onclick="handleMenuClick(event, this)">CONTACTOS</a></li>
                 <li><a href="{{ route('login') }}" onclick="handleMenuClick(event, this)">MESA DE PARTES - VIRTUAL</a></li>
                 
             </ul>

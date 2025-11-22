@@ -87,6 +87,7 @@
 
     <div class="card border-0 shadow-sm">
         <div class="card-body">
+            <div class="table-responsive">
             <table class="table table-hover align-middle">
                 <thead class="table-light">
                     <tr>
@@ -174,9 +175,10 @@
                     @endforeach
                 </tbody>
             </table>
+            </div>
             
             <div class="mt-3">
-                {{ $publicaciones->links() }}
+                {{ $publicaciones->links('pagination::bootstrap-4') }}
             </div>
         </div>
     </div>
