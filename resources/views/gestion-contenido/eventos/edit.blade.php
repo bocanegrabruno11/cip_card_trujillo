@@ -29,7 +29,8 @@
                             <input type="text" name="lugar" class="form-control" value="{{ $evento->lugar }}">
                         </div>
                         <div class="mb-3">
-                            <textarea name="descripcion" class="form-control" rows="5">{{ $evento->descripcion }}</textarea>
+                            <label class="form-label fw-bold">Descripción</label>
+                            <textarea name="descripcion" id="editor" class="form-control">{{ $evento->descripcion }}</textarea>
                         </div>
                     </div>
                 </div>
@@ -126,9 +127,17 @@
         </div>
     </div>
 </template>
-
+<script src="https://cdn.ckeditor.com/ckeditor5/40.2.0/classic/ckeditor.js"></script>
 <script>
     // 1. Preview Main
+document.addEventListener('DOMContentLoaded', function() {
+    ClassicEditor
+        .create(document.querySelector('#editor'), {
+            toolbar: [ 'heading', '|', 'bold', 'italic', 'link', 'bulletedList', 'numberedList', 'blockQuote', 'undo', 'redo' ]
+        })
+        .catch(error => {
+            console.error(error);
+        });
     document.getElementById('inputMain').addEventListener('change', function(e) {
         const file = e.target.files[0];
         if (file) {
@@ -200,5 +209,6 @@
             document.getElementById('modalImg').src = src;
         });
     }
+    });
 </script>
 @endsection

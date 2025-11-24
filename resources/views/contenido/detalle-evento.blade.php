@@ -5,7 +5,7 @@
 @section('styles')
 <style>
     .detail-container {
-        max-width: 1000px; /* Un poco más angosto para lectura */
+        max-width: 1000px;
         margin: 0 auto;
         padding: 50px 20px;
         background: #fff;
@@ -22,13 +22,23 @@
         width: 100%; height: 400px; overflow: hidden; border-radius: 8px; margin-bottom: 40px;
         box-shadow: 0 5px 20px rgba(0,0,0,0.1);
     }
-    .main-image { width: 100%; height: 100%; object-fit: cover; }
+    .main-image { width: 100%; height: 100%; object-fit: cover; cursor: pointer; }
 
+    /* === ESTILOS CUERPO DEL EVENTO (Importante para CKEditor) === */
     .event-body {
-        font-size: 16px; line-height: 1.8; color: #444; text-align: justify; margin-bottom: 50px;
+        font-size: 16px; 
+        line-height: 1.8; 
+        color: #444; 
+        text-align: left; /* Mejor lectura que justify para web */
+        margin-bottom: 50px;
     }
+    /* Dar espacio a los párrafos y listas generados por el editor */
+    .event-body p { margin-bottom: 15px; }
+    .event-body ul, .event-body ol { margin-bottom: 15px; padding-left: 20px; }
+    .event-body li { margin-bottom: 5px; }
+    .event-body strong { color: #222; }
 
-    /* Galería (Estilos reutilizados de Presentación pero simplificados) */
+    /* Galería */
     .gallery-title { font-size: 20px; font-weight: bold; margin-bottom: 20px; border-left: 4px solid #AD2B2E; padding-left: 10px; }
     
     .gallery-grid {
@@ -42,7 +52,7 @@
     .gallery-thumb { width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s; }
     .gallery-item:hover .gallery-thumb { transform: scale(1.1); }
 
-    /* LIGHTBOX (Pega aquí el CSS del lightbox que te di antes o ponlo global en inicio) */
+    /* LIGHTBOX */
     .lightbox-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 10000; justify-content: center; align-items: center; }
     .lightbox-overlay.active { display: flex; }
     .lightbox-img { max-width: 95%; max-height: 90vh; object-fit: contain; border-radius: 4px; }
@@ -83,7 +93,8 @@
     @endif
 
     <div class="event-body">
-        {!! nl2br(e($evento->descripcion)) !!}
+        {{-- AQUÍ ESTABA EL ERROR: Cambiamos nl2br(e(...)) por solo la variable --}}
+        {!! $evento->descripcion !!}
     </div>
 
     @if($galeria->count() > 0)
@@ -102,7 +113,7 @@
 </div>
 
 <div class="text-center mb-5">
-    <a href="{{ route('eventos') }}" class="btn-read-more" style="background: #eee; color: #333;">
+    <a href="{{ route('eventos') }}" class="btn-read-more" style="background: #eee; color: #333; padding: 10px 20px; text-decoration: none; border-radius: 4px; display: inline-block;">
         <i class="fas fa-arrow-left me-2"></i> Volver a Eventos
     </a>
 </div>

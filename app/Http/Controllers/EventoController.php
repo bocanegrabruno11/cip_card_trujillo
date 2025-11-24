@@ -204,4 +204,16 @@ class EventoController extends Controller
         $evento->save();
         return redirect()->back()->with('success', 'Estado actualizado.');
     }
+    public function show($id)
+    {
+        // Buscamos el evento y cargamos sus detalles (imágenes)
+        $evento = Evento::with('detalles')->findOrFail($id);
+
+        // Separamos la imagen principal de la galería
+        $imagenPrincipal = $evento->detalles->where('tipo', 'principal')->first();
+        $galeria = $evento->detalles->where('tipo', 'galeria');
+
+        // Retornamos la vista
+        return view('gestion-contenido.eventos.show', compact('evento', 'imagenPrincipal', 'galeria'));
+    }
 }

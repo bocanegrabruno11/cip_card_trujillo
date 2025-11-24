@@ -101,7 +101,7 @@
        ========================================= */
     .nav-menu {
         display: flex;
-        list-style: none; /* Quita los puntos */
+        list-style: none;
         height: 100%;
         margin: 0;
         padding: 0;
@@ -112,7 +112,7 @@
     
     .nav-menu > li > a {
         color: white;
-        text-decoration: none;
+        text-decoration: none !important; /* Sin subrayado en menú principal */
         font-weight: bold;
         font-size: 15px;
         padding: 0 15px;
@@ -125,42 +125,45 @@
     
     .nav-menu > li > a:hover { background-color: #8B0000; }
 
-    /* DROPDOWNS (Submenús) */
+    /* === ESTILOS DEL DROPDOWN (ESTILO DORADO) === */
     .dropdown-menu {
         position: absolute;
         top: 100%;
         left: 0;
-        background-color: white;
-        min-width: 240px;
-        box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+        background-color: #D7B56D; /* COLOR DORADO DE LA IMAGEN */
+        min-width: 260px;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.2);
         display: none;
         flex-direction: column;
         z-index: 1105;
-        list-style: none; /* Asegura que no haya puntos */
-        padding: 10px 0; /* Un poco de espacio arriba y abajo */
+        list-style: none;
+        padding: 0;
     }
     
     .nav-menu li:hover > .dropdown-menu { display: flex; } 
 
     .dropdown-menu li { 
         width: 100%; 
-        border-bottom: none; /* <--- CORRECCIÓN: Sin borde abajo */
-        list-style: none; /* <--- CORRECCIÓN: Sin círculos */
+        border-bottom: 1px solid rgba(255,255,255,0.3); /* Línea separadora blanca sutil */
+        list-style: none;
     }
+    .dropdown-menu li:last-child { border-bottom: none; }
 
     .dropdown-menu li a {
-        color: #333; 
+        color: white; /* TEXTO BLANCO */
         height: auto;
-        padding: 10px 20px;
+        padding: 12px 20px;
         font-size: 14px;
         text-transform: none;
+        text-decoration: none !important; /* IMPORTANTE: QUITA EL SUBRAYADO */
         display: block;
+        transition: background-color 0.2s;
     }
     
-    /* Hover suave gris */
+    /* Hover: Un poco más oscuro o claro para feedback */
     .dropdown-menu li a:hover {
-        background-color: #f5f5f5;
-        color: #AD2B2E;
+        background-color: rgba(0,0,0,0.1); /* Oscurece levemente el dorado */
+        color: white;
     }
 
     /* HAMBURGUESA (Oculta en Desktop) */
@@ -224,7 +227,7 @@
         .nav-menu > li {
             width: 100%;
             height: auto;
-            border-bottom: 1px solid #eee; /* Aquí sí dejamos una línea suave para separar secciones principales */
+            border-bottom: 1px solid #eee; 
         }
 
         .nav-menu > li > a {
@@ -232,6 +235,7 @@
             height: 55px;
             width: 100%;
             justify-content: space-between; 
+            text-decoration: none !important;
         }
         
         .nav-menu > li > a:hover {
@@ -253,6 +257,7 @@
         }
 
         /* Dropdowns estáticos en móvil */
+        /* En móvil mantenemos fondo claro para legibilidad, pero sin subrayado */
         .dropdown-menu {
             position: static; 
             box-shadow: none;
@@ -262,13 +267,19 @@
             padding: 0;
         }
         
-        /* En móvil, los items del dropdown tampoco tendrán borde para mantener limpieza */
         .dropdown-menu li {
             border-bottom: none;
         }
         
         .dropdown-menu li a {
-            padding-left: 30px; /* Indentación para indicar jerarquía */
+            color: #555; /* Texto gris oscuro en móvil */
+            padding-left: 30px; 
+            text-decoration: none !important;
+        }
+        
+        .dropdown-menu li a:hover {
+            background-color: #eee;
+            color: #AD2B2E;
         }
 
         .nav-menu li.open > .dropdown-menu {
@@ -313,7 +324,7 @@
             <div class="logo-container">
                 <img src="{{ asset('img/logo.png') }}" alt="Logo CIP">
                 <div class="logo-text">
-                    CENTRO DE ARBITRAJE Y RESOLUCIÓN DE DISPUTAS DEL CIP TRUJILLO
+                    CENTRO DE ARBITRAJE Y RESOLUCIÓN DE DISPUTAS DEL CIP CD LA LIBERTAD
                 </div>
             </div>
             
@@ -359,8 +370,8 @@
                 <li class="has-dropdown {{ request()->routeIs('servicios.*') ? 'current-menu-item' : '' }}" onclick="toggleMobileDropdown(this)">
                     <a href="javascript:void(0)">SERVICIOS</a>
                     <ul class="dropdown-menu">
-                        <li><a href="#" onclick="handleMenuClick(event, this)">Institución Arbitral</a></li>
-                        <li><a href="#" onclick="handleMenuClick(event, this)">Junta de Prevención y Resolución de Disputas (CAJPRD)</a></li>
+                        <li><a href="{{ route('institucion-arbitral') }}" onclick="handleMenuClick(event, this)">Institución Arbitral</a></li>
+                        <li><a href="{{ route('junta-prevencion') }}" onclick="handleMenuClick(event, this)">Junta de Prevención y Resolución de Disputas (CAJPRD)</a></li>
                     </ul>
                 </li>
                 

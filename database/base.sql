@@ -95,3 +95,17 @@ CREATE TABLE `organizacion_card` (
   
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+
+CREATE TABLE documentos (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    titulo VARCHAR(255) NOT NULL,
+    descripcion TEXT NULL,
+    fecha_publicacion DATE NOT NULL,
+    seccion VARCHAR(50) NOT NULL COMMENT 'institucion, junta, convocatorias',
+    categoria VARCHAR(50) NULL COMMENT 'normativa, tarifario, etc.',
+    ruta_archivo VARCHAR(255) NOT NULL,
+    activo TINYINT(1) NOT NULL DEFAULT 1,
+    created_at TIMESTAMP NULL,
+    updated_at TIMESTAMP NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

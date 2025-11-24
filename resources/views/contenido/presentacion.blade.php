@@ -170,18 +170,19 @@
 
     /* === MODAL LIGHTBOX (PURO CSS) === */
     .lightbox-overlay {
-        display: none; /* Oculto por defecto */
+        display: none;
         position: fixed;
         top: 0;
         left: 0;
         width: 100%;
         height: 100%;
-        background-color: rgba(0, 0, 0, 0.9); /* Fondo oscuro */
-        z-index: 10000; /* Por encima de todo */
+        background-color: rgba(0, 0, 0, 0.95); /* Fondo muy oscuro para enfoque total */
+        z-index: 10000;
         justify-content: center;
         align-items: center;
         opacity: 0;
         transition: opacity 0.3s ease;
+        backdrop-filter: blur(5px); /* Efecto borroso en el fondo */
     }
 
     .lightbox-overlay.active {
@@ -191,36 +192,47 @@
 
     .lightbox-content {
         position: relative;
-        max-width: 90%;
-        max-height: 90%;
-        box-shadow: 0 0 20px rgba(0,0,0,0.5);
-        border-radius: 8px;
-        overflow: hidden;
+        width: 100%;
+        height: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 20px; /* Espacio para no pegar a los bordes */
     }
 
     .lightbox-img {
-        display: block;
         max-width: 100%;
-        max-height: 90vh;
-        object-fit: contain;
+        max-height: 100%;
+        object-fit: contain; /* CLAVE: Muestra toda la imagen sin recortar */
+        border-radius: 4px;
+        box-shadow: 0 0 50px rgba(0,0,0,0.8);
     }
 
     .lightbox-close {
         position: absolute;
-        top: -40px;
-        right: 0;
+        top: 20px;
+        right: 20px;
         color: white;
-        font-size: 30px;
+        font-size: 40px;
         cursor: pointer;
-        background: none;
-        border: none;
-        padding: 5px;
-        transition: transform 0.2s;
+        background: rgba(255, 255, 255, 0.1);
+        border: 2px solid white;
+        border-radius: 50%;
+        width: 50px;
+        height: 50px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.3s;
+        z-index: 10001;
+        line-height: 1;
+        padding-bottom: 5px; /* Ajuste visual del caracter X */
     }
 
     .lightbox-close:hover {
-        transform: scale(1.2);
-        color: #FF6B6B;
+        background-color: #FF6B6B;
+        border-color: #FF6B6B;
+        transform: rotate(90deg);
     }
 
     /* === RESPONSIVIDAD === */
@@ -331,54 +343,69 @@
 </div>
 
 <script>
-    // 1. Slider Logic
-    const scrollContainer = document.getElementById('galleryScroll');
-    const btnPrev = document.getElementById('gPrev');
-    const btnNext = document.getElementById('gNext');
+    document.addEventListener('DOMContentLoaded', function() {
+        
+        // 1. Slider Logic (Mejorado)
+        const scrollContainer = document.getElementById('galleryScroll');
+        const btnPrev = document.getElementById('gPrev');
+        const btnNext = document.getElementById('gNext');
 
-    if(scrollContainer && btnPrev && btnNext) {
-        btnNext.addEventListener('click', () => {
-            scrollContainer.scrollBy({ left: 300, behavior: 'smooth' });
-        });
-        btnPrev.addEventListener('click', () => {
-            scrollContainer.scrollBy({ left: -300, behavior: 'smooth' });
-        });
-    }
+        if (scrollContainer && btnPrev && btnNext) {
+            
+            // Cantidad de desplazamiento (aprox el ancho de una tarjeta + gap)
+            const scrollAmount = 220; 
 
-    // 2. Lightbox Logic (Puro JS)
-    const lightboxOverlay = document.getElementById('lightboxOverlay');
-    const lightboxImage = document.getElementById('lightboxImage');
-    const lightboxClose = document.getElementById('lightboxClose');
+            btnNext.addEventListener('click', () => {
+                // Verificamos si se puede scrollear a la derecha
+                if (scrollContainer.scrollWidth > (scrollContainer.scrollLeft + scrollContainer.clientWidth)) {
+                    scrollContainer.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+                } else {
+                    // Opcional: Volver al inicio si llegó al final (Loop)
+                    scrollContainer.scrollTo({ left: 0, behavior: 'smooth' });
+                }
+            });
 
-    function openLightbox(src) {
-        lightboxImage.src = src;
-        lightboxOverlay.classList.add('active'); // Mostrar usando clase CSS
-        document.body.style.overflow = 'hidden'; // Evitar scroll de fondo
-    }
+            btnPrev.addEventListener('click', () => {
+                // Verificamos si se puede scrollear a la izquierda
+                if (scrollContainer.scrollLeft > 0) {
+                    scrollContainer.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
+                } else {
+                     // Opcional: Ir al final si está al principio
+                     scrollContainer.scrollTo({ left: scrollContainer.scrollWidth, behavior: 'smooth' });
+                }
+            });
+        }
 
-    function closeLightbox() {
-        lightboxOverlay.classList.remove('active');
-        lightboxImage.src = '';
-        document.body.style.overflow = 'auto'; // Restaurar scroll
-    }
+        // 2. Lightbox Logic (Sin cambios, funciona bien)
+        const lightboxOverlay = document.getElementById('lightboxOverlay');
+        const lightboxImage = document.getElementById('lightboxImage');
+        const lightboxClose = document.getElementById('lightboxClose');
 
-    // Eventos de cierre
-    if(lightboxClose) lightboxClose.addEventListener('click', closeLightbox);
-    
-    if(lightboxOverlay) {
-        lightboxOverlay.addEventListener('click', (e) => {
-            // Cerrar si se hace clic fuera de la imagen
-            if(e.target === lightboxOverlay) {
+        window.openLightbox = function(src) { // Hacemos la función global para que funcione el onclick del HTML
+            lightboxImage.src = src;
+            lightboxOverlay.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        };
+
+        function closeLightbox() {
+            lightboxOverlay.classList.remove('active');
+            setTimeout(() => { lightboxImage.src = ''; }, 300);
+            document.body.style.overflow = 'auto';
+        }
+
+        if(lightboxClose) lightboxClose.addEventListener('click', closeLightbox);
+        
+        if(lightboxOverlay) {
+            lightboxOverlay.addEventListener('click', (e) => {
+                if(e.target === lightboxOverlay) closeLightbox();
+            });
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if(e.key === 'Escape' && lightboxOverlay.classList.contains('active')) {
                 closeLightbox();
             }
         });
-    }
-
-    // Cerrar con tecla ESC
-    document.addEventListener('keydown', (e) => {
-        if(e.key === 'Escape' && lightboxOverlay.classList.contains('active')) {
-            closeLightbox();
-        }
     });
 </script>
 @endsection

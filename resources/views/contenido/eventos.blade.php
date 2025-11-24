@@ -18,6 +18,26 @@
     }
     .page-title h1 { color: #333; margin: 0; font-weight: 700; }
 
+    .btn-convocatoria {
+        background-color: #D7B56D; /* Color Dorado/Premium */
+        color: white;
+        text-decoration: none;
+        padding: 10px 20px;
+        border-radius: 6px;
+        font-weight: bold;
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        box-shadow: 0 3px 6px rgba(0,0,0,0.15);
+        transition: all 0.3s ease;
+        text-transform: uppercase;
+        font-size: 14px;
+    }
+    .btn-convocatoria:hover {
+        background-color: #c4a055;
+        transform: translateY(-2px);
+    }
+
     /* === LAYOUT GRID === */
     .events-grid {
         display: grid;
@@ -115,6 +135,9 @@
 <div class="events-container">
     <div class="page-title">
         <h1>Próximos Eventos</h1>
+        <a href="{{ route('convocatoria') }}" class="btn-convocatoria">
+            <i class="fas fa-bullhorn"></i> Ver Convocatorias
+        </a>
     </div>
 
     <div class="events-grid">

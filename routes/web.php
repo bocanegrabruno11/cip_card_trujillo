@@ -7,6 +7,7 @@ use App\Http\Controllers\PublicacionController;
 use App\Http\Controllers\ComunicadoController;
 use App\Http\Controllers\EventoController;
 use App\Http\Controllers\OrganizacionCardController;
+use App\Http\Controllers\DocumentacionController;
 
 Route::get('/', [PageController::class, 'welcome'])->name('welcome');
 
@@ -17,6 +18,8 @@ Route::get('/eventos', [PageController::class, 'eventos'])->name('eventos');
 Route::get('/detalle-evento/{id}', [PageController::class, 'detalleEvento'])->name('detalle-evento');
 Route::get('/organizacion-card', [PageController::class, 'organizacionCard'])->name('organizacion-card');
 Route::get('/organigrama', [PageController::class, 'organigrama'])->name('organigrama');
+Route::get('/institucion-arbitral', [PageController::class, 'institucionArbitral'])->name('institucion-arbitral');
+Route::get('/junta-prevencion', [PageController::class, 'juntaPrevencion'])->name('junta-prevencion');
 Route::get('/nuestro-equipo', [PageController::class, 'nuestroEquipo'])->name('nuestro-equipo');
 Route::get('/certificaciones', [PageController::class, 'certificaciones'])->name('certificaciones');
 Route::get('/licencias', [PageController::class, 'licencias'])->name('licencias');
@@ -25,6 +28,13 @@ Route::get('/arbitral', [PageController::class, 'arbitral'])->name('arbitral');
 Route::get('/junta-res-disputas', [PageController::class, 'juntaResDisputas'])->name('junta-res-disputas');
 Route::get('/dispute-review', [PageController::class, 'disputeReview'])->name('dispute-review');
 Route::get('/dispute-avoidance-res', [PageController::class, 'disputeAvoidanceRes'])->name('dispute-avoidance-res');
+Route::get('/convocatoria', [PageController::class, 'convocatoria'])->name('convocatoria');
+
+Route::get('/calculadora/institucion/determinada', [PageController::class, 'calcInstDeterminada'])->name('calc.inst.det');
+Route::get('/calculadora/institucion/indeterminada', [PageController::class, 'calcInstIndeterminada'])->name('calc.inst.indet');
+Route::get('/calculadora/junta/determinada', [PageController::class, 'calcJuntaDeterminada'])->name('calc.junta.det');
+Route::get('/calculadora/junta/indeterminada', [PageController::class, 'calcJuntaIndeterminada'])->name('calc.junta.indet');
+
 Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
 Route::get('/register', [AuthController::class, 'showRegisterForm'])->name('register');
 Route::get('/gestion-contenido', [PageController::class, 'gestionContenido'])->name('gestion-contenido');
@@ -41,3 +51,5 @@ Route::resource('gestor/eventos', EventoController::class)->names('eventos');
 Route::put('/gestor/eventos/{id}/estado', [EventoController::class, 'toggleEstado'])->name('eventos.toggle');
 Route::resource('gestor/organizacion', OrganizacionCardController::class)->names('organizacion-gestion');
 Route::put('/gestor/organizacion/{id}/estado', [OrganizacionCardController::class, 'toggleEstado'])->name('organizacion-gestion.toggle');
+Route::resource('gestor/documentos', DocumentacionController::class)->names('documentos-gestion');
+Route::put('/gestor/documentos/{id}/estado', [DocumentacionController::class, 'toggleEstado'])->name('documentos-gestion.toggle');

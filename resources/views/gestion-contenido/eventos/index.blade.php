@@ -80,61 +80,89 @@
                         <th class="text-end pe-4">Acciones</th>
                     </tr>
                 </thead>
-                <tbody>
+               <tbody>
                     @forelse($eventos as $ev)
                     <tr>
+                        {{-- 1. IMAGEN (Igual que antes) --}}
                         <td class="ps-4">
                             @php $main = $ev->detalles->where('tipo', 'principal')->first(); @endphp
                             @if($main)
                                 <img src="{{ asset('storage/' . $main->ruta_imagen) }}" 
-                                     class="rounded border" 
-                                     style="width: 60px; height: 60px; object-fit: cover; cursor: pointer;" 
-                                     data-bs-toggle="modal" 
-                                     data-bs-target="#imageModal" 
-                                     data-full-src="{{ asset('storage/' . $main->ruta_imagen) }}">
+                                    class="rounded border" 
+                                    style="width: 50px; height: 50px; object-fit: cover; cursor: pointer;" 
+                                    data-bs-toggle="modal" 
+                                    data-bs-target="#imageModal" 
+                                    data-full-src="{{ asset('storage/' . $main->ruta_imagen) }}">
                             @else
-                                <div class="rounded bg-light border d-flex align-items-center justify-content-center text-muted" style="width: 60px; height: 60px;">
+                                <div class="rounded bg-light border d-flex align-items-center justify-content-center text-muted" style="width: 50px; height: 50px;">
                                     <i class="fas fa-image"></i>
                                 </div>
                             @endif
                         </td>
+
+                        {{-- 2. TÍTULO Y LUGAR --}}
                         <td>
-                            <div class="fw-bold">{{ $ev->titulo }}</div>
+                            <div class="fw-bold text-dark">{{ $ev->titulo }}</div>
                             <small class="text-muted"><i class="fas fa-map-marker-alt me-1"></i>{{ $ev->lugar ?? 'Virtual' }}</small>
                         </td>
-                        <td>{{ \Carbon\Carbon::parse($ev->created_at)->format('d/m/Y') }}</td>
+
+                        {{-- 3. FECHAS --}}
+                        <td><small>{{ \Carbon\Carbon::parse($ev->created_at)->format('d/m/Y') }}</small></td>
                         <td>
                             <span class="badge bg-light text-dark border">
                                 {{ \Carbon\Carbon::parse($ev->fecha_evento)->format('d/m/Y') }}
                             </span>
                         </td>
+
+                        {{-- 4. ESTADO INTERACTIVO (MEJORA UX) --}}
                         <td class="text-center">
-                            @if($ev->activo)
-                                <span class="badge bg-success-subtle text-success border border-success-subtle">Activo</span>
-                            @else
-                                <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle">Inactivo</span>
-                            @endif
-                        </td>
-                        <td class="text-end pe-4">
                             <form action="{{ route('eventos.toggle', $ev->id) }}" method="POST" class="d-inline">
                                 @csrf @method('PUT')
-                                <button type="submit" class="btn btn-sm btn-icon {{ $ev->activo ? 'btn-outline-success' : 'btn-outline-secondary' }}" title="Cambiar Estado">
-                                    <i class="fas {{ $ev->activo ? 'fa-eye' : 'fa-eye-slash' }}" onclick="return confirm('¿Seguro de cambiar visibilidad?')"></i>
+                                <button type="submit" 
+                                        class="badge border-0 {{ $ev->activo ? 'bg-success' : 'bg-secondary' }}" 
+                                        style="cursor: pointer;"
+                                        onclick="return confirm('¿Deseas cambiar el estado de visibilidad?')"
+                                        title="Clic para cambiar estado">
+                                    {{ $ev->activo ? 'Publicado' : 'Borrador' }}
                                 </button>
                             </form>
-                            <a href="{{ route('eventos.edit', $ev->id) }}" class="btn btn-sm btn-warning text-white" title="Editar">
-                                <i class="fas fa-edit"></i>
-                            </a>
-                            <form action="{{ route('eventos.destroy', $ev->id) }}" method="POST" class="d-inline">
-                                @csrf @method('DELETE')
-                                <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('¿Estás seguro de eliminar este evento?')" title="Eliminar">
-                                    <i class="fas fa-trash"></i>
+                        </td>
+
+                        {{-- 5. ACCIONES CON DROPDOWN (MEJORA VISUAL) --}}
+                        <td class="text-end pe-4">
+                            <div class="dropdown">
+                                <button class="btn btn-light btn-sm border shadow-sm" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <i class="fas fa-ellipsis-v text-muted"></i>
                                 </button>
-                            </form>
+                                <ul class="dropdown-menu dropdown-menu-end border-0 shadow">
+                                    {{-- Ver --}}
+                                    <li>
+                                        <a class="dropdown-item py-2" href="{{ route('eventos.show', $ev->id) }}">
+                                            <i class="fas fa-eye text-primary me-2" style="width: 20px;"></i> Ver Detalle
+                                        </a>
+                                    </li>
+                                    {{-- Editar --}}
+                                    <li>
+                                        <a class="dropdown-item py-2" href="{{ route('eventos.edit', $ev->id) }}">
+                                            <i class="fas fa-pen text-warning me-2" style="width: 20px;"></i> Editar
+                                        </a>
+                                    </li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    {{-- Eliminar --}}
+                                    <li>
+                                        <form action="{{ route('eventos.destroy', $ev->id) }}" method="POST">
+                                            @csrf @method('DELETE')
+                                            <button type="submit" class="dropdown-item py-2 text-danger" onclick="return confirm('¿Estás seguro de eliminar este evento permanentemente?')">
+                                                <i class="fas fa-trash me-2" style="width: 20px;"></i> Eliminar
+                                            </button>
+                                        </form>
+                                    </li>
+                                </ul>
+                            </div>
                         </td>
                     </tr>
                     @empty
-                    <tr><td colspan="5" class="text-center py-5 text-muted">No hay eventos registrados.</td></tr>
+                    <tr><td colspan="6" class="text-center py-5 text-muted">No hay eventos registrados.</td></tr>
                     @endforelse
                 </tbody>
             </table>

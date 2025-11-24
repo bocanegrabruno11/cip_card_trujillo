@@ -182,6 +182,11 @@
                     <i class="fas fa-users"></i> <span>Organización</span>
                 </a>
             </li>
+             <li class="menu-item">
+                <a href="{{ route('documentos-gestion.index') }}" class="menu-link">
+                    <i class="fas fa-users"></i> <span>Documentación</span>
+                </a>
+            </li>
         </ul>
 
         <div class="user-footer">

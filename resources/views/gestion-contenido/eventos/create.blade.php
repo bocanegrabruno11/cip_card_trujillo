@@ -31,9 +31,9 @@
                             <label class="form-label fw-bold">Lugar / Dirección (Opcional)</label>
                             <input type="text" name="lugar" class="form-control" placeholder="Ej: Auditorio Principal" value="{{ old('lugar') }}">
                         </div>
-                        <div class="mb-3">
+                       <div class="mb-3">
                             <label class="form-label fw-bold">Descripción</label>
-                            <textarea name="descripcion" class="form-control" rows="5">{{ old('descripcion') }}</textarea>
+                            <textarea name="descripcion" id="editor" class="form-control">{{ old('descripcion') }}</textarea>
                         </div>
                     </div>
                 </div>
@@ -98,11 +98,18 @@
         </div>
     </div>
 </template>
-
+<script src="https://cdn.ckeditor.com/ckeditor5/40.2.0/classic/ckeditor.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
 
     // 1. Preview Main
+    ClassicEditor
+        .create(document.querySelector('#editor'), {
+            toolbar: [ 'heading', '|', 'bold', 'italic', 'link', 'bulletedList', 'numberedList', 'blockQuote', 'undo', 'redo' ]
+        })
+        .catch(error => {
+            console.error(error);
+        });
     document.getElementById('inputMain').addEventListener('change', function(e) {
         const file = e.target.files[0];
         if (file) {

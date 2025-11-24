@@ -3,9 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Models\Comunicado;
+use App\Models\Documentacion;
 use App\Models\Evento;
 use App\Models\OrganizacionCard;
 use App\Models\Publicacion;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 
 class PageController extends Controller
@@ -32,8 +34,15 @@ class PageController extends Controller
             ->latest()
             ->first();
 
+        $proximosEventos = Evento::with('detalles')
+            ->where('activo', true)
+            ->whereDate('fecha_evento', '>=', \Carbon\Carbon::today())
+            ->orderBy('fecha_evento', 'asc')
+            ->take(4)
+            ->get();
+
         // Pasamos ambas variables
-        return view('welcome', compact('popupData', 'sliderData'));
+        return view('welcome', compact('popupData', 'sliderData', 'proximosEventos'));
     }
 
     public function presentacion()
@@ -211,6 +220,65 @@ class PageController extends Controller
     public function juntaResDisputas()
     {
         return view('contenido.clausulas.junta-res-disputas');
+    }
+    
+    public function institucionArbitral()
+    {
+        // 1. Obtenemos documentos de 'institucion', que estén activos, ordenados por fecha
+        $documentos = Documentacion::where('seccion', 'institucion')
+            ->where('activo', true)
+            ->whereDate('fecha_publicacion', '<=', Carbon::today())
+            ->orderBy('fecha_publicacion', 'desc')
+            ->get();
+
+        // 2. Los agrupamos por la columna 'categoria'
+        // Esto crea un array asociativo donde la llave es 'normativa', 'tarifario', etc.
+        $docsPorCategoria = $documentos->groupBy('categoria');
+
+        return view('contenido.servicios.institucion-arbitral', compact('docsPorCategoria'));
+    }
+
+    public function juntaPrevencion()
+    {
+        // Misma lógica para la Junta
+        $documentos = Documentacion::where('seccion', 'junta')
+            ->where('activo', true)
+            ->whereDate('fecha_publicacion', '<=', Carbon::today())
+            ->orderBy('fecha_publicacion', 'desc')
+            ->get();
+
+        $docsPorCategoria = $documentos->groupBy('categoria');
+
+        return view('contenido.servicios.junta-prevencion', compact('docsPorCategoria'));
+    }
+
+    public function convocatoria()
+    {
+        // Obtenemos solo los documentos de la sección 'convocatorias' que estén activos
+        // Ordenamos descendente para que el último subido (ej: Resultados Finales) salga arriba o primero
+        $documentos = Documentacion::where('seccion', 'convocatorias')
+            ->where('activo', true)
+            ->whereDate('fecha_publicacion', '<=', Carbon::today())
+            ->orderBy('fecha_publicacion', 'desc') 
+            ->get();
+
+        return view('contenido.convocatoria', compact('documentos'));
+    }
+
+    public function calcInstDeterminada() {
+        return view('contenido.calculadoras.institucion-determinada');
+    }
+
+    public function calcInstIndeterminada() {
+        return view('contenido.calculadoras.institucion-indeterminada');
+    }
+
+    public function calcJuntaDeterminada() {
+        return view('contenido.calculadoras.junta-determinada');
+    }
+
+    public function calcJuntaIndeterminada() {
+        return view('contenido.calculadoras.junta-indeterminada');
     }
     
 }
