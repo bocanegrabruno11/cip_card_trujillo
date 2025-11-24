@@ -41,23 +41,19 @@ Route::get('/calculadora/junta/determinada', [PageController::class, 'calcJuntaD
 Route::get('/calculadora/junta/indeterminada', [PageController::class, 'calcJuntaIndeterminada'])->name('calc.junta.indet');
 
 Route::middleware(['auth', 'checkrole:gestor_contenido'])->group(function () {
-Route::get('/gestion-contenido', [PageController::class, 'gestionContenido'])->name('gestion-contenido');
-Route::resource('publicaciones', PublicacionController::class);
-Route::put('/gestor/publicaciones/{id}/estado', [PublicacionController::class, 'toggleEstado'])
-         ->name('publicaciones.toggle');
-
-Route::resource('gestor/comunicados', ComunicadoController::class)->names('comunicados');
-    
-// Ruta para el interruptor de estado
-Route::put('/gestor/comunicados/{id}/estado', [ComunicadoController::class, 'toggleEstado'])
-         ->name('comunicados.toggle');
-Route::resource('gestor/eventos', EventoController::class)->names('eventos');
-Route::put('/gestor/eventos/{id}/estado', [EventoController::class, 'toggleEstado'])->name('eventos.toggle');
-Route::resource('gestor/organizacion', OrganizacionCardController::class)->names('organizacion-gestion');
-Route::put('/gestor/organizacion/{id}/estado', [OrganizacionCardController::class, 'toggleEstado'])->name('organizacion-gestion.toggle');
-
-Route::resource('gestor/documentos', DocumentacionController::class)->names('documentos-gestion');
-Route::put('/gestor/documentos/{id}/estado', [DocumentacionController::class, 'toggleEstado'])->name('documentos-gestion.toggle');
+    Route::get('/gestion-contenido', [PageController::class, 'gestionContenido'])->name('gestion-contenido');
+    Route::resource('publicaciones', PublicacionController::class);
+    Route::put('/gestor/publicaciones/{id}/estado', [PublicacionController::class, 'toggleEstado'])
+            ->name('publicaciones.toggle');
+    Route::resource('gestor/comunicados', ComunicadoController::class)->names('comunicados');
+    Route::put('/gestor/comunicados/{id}/estado', [ComunicadoController::class, 'toggleEstado'])
+            ->name('comunicados.toggle');
+    Route::resource('gestor/eventos', EventoController::class)->names('eventos');
+    Route::put('/gestor/eventos/{id}/estado', [EventoController::class, 'toggleEstado'])->name('eventos.toggle');
+    Route::resource('gestor/organizacion', OrganizacionCardController::class)->names('organizacion-gestion');
+    Route::put('/gestor/organizacion/{id}/estado', [OrganizacionCardController::class, 'toggleEstado'])->name('organizacion-gestion.toggle');
+    Route::resource('gestor/documentos', DocumentacionController::class)->names('documentos-gestion');
+    Route::put('/gestor/documentos/{id}/estado', [DocumentacionController::class, 'toggleEstado'])->name('documentos-gestion.toggle');
 
 });
 
@@ -65,7 +61,6 @@ Route::put('/gestor/documentos/{id}/estado', [DocumentacionController::class, 't
 Route::get('mesa-partes/dashboard', function () {
     return view('mesa-partes/dashboard');
 })->middleware(['auth', 'checkrole:mesa_partes'])->name('dashboard');
-
 
 
 Route::middleware('auth')->group(function () {

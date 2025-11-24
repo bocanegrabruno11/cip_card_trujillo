@@ -321,15 +321,17 @@
             <div id="repositorio" class="tab-pane">
                 <div class="normativa-section-title">REPOSITORIO DE DECISIONES</div>
 
-                @php $docs = $docsPorCategoria->get('repositorio', collect()); @endphp
-                @forelse($docs as $doc)
-                    <a href="{{ asset('storage/' . $doc->ruta_archivo) }}" target="_blank" class="doc-btn" style="background-color: #607D8B;">
-                        <i class="fas fa-book"></i> {{ $doc->titulo }}
+                <div style="text-align: center; padding: 30px 0;">
+                    <p style="color: #666; margin-bottom: 25px; font-style: italic;">
+                        El Centro de Arbitraje y Resolución de Disputas del CIP CDLIMA realiza la publicación de 
+                        las decisiones emitidas, con el fin de brindar el acceso de esta información
+                         al público en general. Para localizar la Decisión de su interés, puede ingresar al siguiente enlace:
+                    </p>
+
+                    <a href="#" target="_blank" class="doc-btn" style="justify-content: center; max-width: 400px; margin: 0 auto;">
+                        <i class="fas fa-external-link-alt"></i> ACCEDER AL REPOSITORIO
                     </a>
-                    <div class="doc-meta">Fecha: {{ $doc->fecha_publicacion->format('d/m/Y') }}</div>
-                @empty
-                    <p class="empty-msg">No se encontraron decisiones archivadas.</p>
-                @endforelse
+                </div>
             </div>
 
         </div>

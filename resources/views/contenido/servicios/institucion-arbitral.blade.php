@@ -288,18 +288,18 @@
             </div>
 
              {{-- 7. REPOSITORIO --}}
-             <div id="repositorio" class="tab-pane">
+            <div id="repositorio" class="tab-pane">
                 <div class="normativa-section-title">REPOSITORIO DE LAUDOS</div>
 
-                @php $docs = $docsPorCategoria->get('repositorio', collect()); @endphp
-                @forelse($docs as $doc)
-                    <a href="{{ asset('storage/' . $doc->ruta_archivo) }}" target="_blank" class="doc-btn">
-                        <i class="fas fa-book"></i> {{ $doc->titulo }}
+                <div style="text-align: center; padding: 30px 0;">
+                    <p style="color: #666; margin-bottom: 25px; font-style: italic;">
+                        Acceda a nuestra plataforma digital para consultar el histórico de laudos y decisiones arbitrales.
+                    </p>
+
+                    <a href="#" target="_blank" class="doc-btn" style="justify-content: center; max-width: 400px; margin: 0 auto;">
+                        <i class="fas fa-external-link-alt"></i> ACCEDER AL REPOSITORIO
                     </a>
-                    <div class="doc-meta">Fecha: {{ $doc->fecha_publicacion->format('d/m/Y') }}</div>
-                @empty
-                    <p class="empty-msg">No se encontraron laudos archivados.</p>
-                @endforelse
+                </div>
             </div>
 
         </div>
