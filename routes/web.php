@@ -7,6 +7,8 @@ use App\Http\Controllers\PublicacionController;
 use App\Http\Controllers\ComunicadoController;
 use App\Http\Controllers\EventoController;
 use App\Http\Controllers\OrganizacionCardController;
+use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\AdminController;
 
 Route::get('/', [PageController::class, 'welcome'])->name('welcome');
 
@@ -25,8 +27,11 @@ Route::get('/arbitral', [PageController::class, 'arbitral'])->name('arbitral');
 Route::get('/junta-res-disputas', [PageController::class, 'juntaResDisputas'])->name('junta-res-disputas');
 Route::get('/dispute-review', [PageController::class, 'disputeReview'])->name('dispute-review');
 Route::get('/dispute-avoidance-res', [PageController::class, 'disputeAvoidanceRes'])->name('dispute-avoidance-res');
-Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
-Route::get('/register', [AuthController::class, 'showRegisterForm'])->name('register');
+
+
+// aca entra el contenido de proteccion de rutas
+Route::middleware(['auth', 'checkrole:gestor_contenido'])->group(function () {
+
 Route::get('/gestion-contenido', [PageController::class, 'gestionContenido'])->name('gestion-contenido');
 Route::resource('publicaciones', PublicacionController::class);
 Route::put('/gestor/publicaciones/{id}/estado', [PublicacionController::class, 'toggleEstado'])
@@ -41,3 +46,26 @@ Route::resource('gestor/eventos', EventoController::class)->names('eventos');
 Route::put('/gestor/eventos/{id}/estado', [EventoController::class, 'toggleEstado'])->name('eventos.toggle');
 Route::resource('gestor/organizacion', OrganizacionCardController::class)->names('organizacion-gestion');
 Route::put('/gestor/organizacion/{id}/estado', [OrganizacionCardController::class, 'toggleEstado'])->name('organizacion-gestion.toggle');
+
+});
+
+
+Route::get('mesa-partes/dashboard', function () {
+    return view('mesa-partes/dashboard');
+})->middleware(['auth', 'checkrole:mesa_partes'])->name('dashboard');
+
+
+
+Route::middleware('auth')->group(function () {
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+});
+
+Route::get('/admin/dashboard', function () {
+    return view('Admin/dashboard');
+})->middleware(['auth','checkrole:admin'])
+  ->name('Admin/dashboard');
+
+
+require __DIR__.'/auth.php';
