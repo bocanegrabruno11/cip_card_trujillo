@@ -116,7 +116,7 @@
     .doc-btn {
         display: flex;
         align-items: center;
-        background-color: #ff6b6b;
+        background-color: #AD2B2E;
         color: white;
         padding: 15px 20px;
         border-radius: 6px;
@@ -198,13 +198,11 @@
                 <div class="presentacion-layout">
                     <div class="presentacion-text">
                         <p>
-                            Con Resolución de Consejo CDL CIP, el servicio de arbitraje en el Centro de Arbitraje y Resolución de Disputas (CARD) del Consejo Departamental de La Libertad del Colegio de Ingenieros del Perú nació para servir a la comunidad.
+                            El servicio de Juntas de Resolución de Disputas (JRD) del CARD CD La Libertad fue creado con la vocación de servir a la comunidad. Como órgano especializado, nos encargamos de la administración y organización de estas Juntas, garantizando un acompañamiento técnico, imparcial y transparente que asegura la eficiencia en la ejecución de los proyectos.
                         </p>
-                        <p>
-                            En el actual estatuto del Colegio de Ingenieros del Perú, en el artículo 4.02 literal c., el CARD se encuentra como su órgano especializado encargado de la administración y organización de arbitrajes institucionales, garantizando imparcialidad, eficiencia y transparencia en la resolución de controversias.
-                        </p>
+                       
                     </div>
-                    <img src="{{ asset('img/appmovil.jpg') }}" alt="Sala de Reuniones" class="presentacion-img">
+                    <img src="{{ asset('img/main-site/2.jpg') }}" alt="Sala de Reuniones" class="presentacion-img">
                 </div>
             </div>
 
@@ -261,7 +259,7 @@
                     
                     @php $docs = $docsPorCategoria->get('tarifario', collect()); @endphp
                     @forelse($docs as $doc)
-                        <a href="{{ asset('storage/' . $doc->ruta_archivo) }}" target="_blank" class="doc-btn" style="background-color: #ff7043; font-size: 13px;">
+                        <a href="{{ asset('storage/' . $doc->ruta_archivo) }}" target="_blank" class="doc-btn">
                             <i class="fas fa-file-pdf"></i> {{ $doc->titulo }}
                         </a>
                         <div class="doc-meta">Publicado el {{ $doc->fecha_publicacion->format('d/m/Y') }}</div>
@@ -278,7 +276,7 @@
                 
                 @php $docs = $docsPorCategoria->get('incorporacion', collect()); @endphp
                 @forelse($docs as $doc)
-                    <a href="{{ asset('storage/' . $doc->ruta_archivo) }}" target="_blank" class="doc-btn" style="background-color: #2196F3;">
+                    <a href="{{ asset('storage/' . $doc->ruta_archivo) }}" target="_blank" class="doc-btn">
                         <i class="fas fa-users"></i> {{ $doc->titulo }}
                     </a>
                     <div class="doc-meta">Actualizado el {{ $doc->fecha_publicacion->format('d/m/Y') }}</div>
@@ -293,7 +291,7 @@
 
                 @php $docs = $docsPorCategoria->get('requisitos', collect()); @endphp
                 @forelse($docs as $doc)
-                    <a href="{{ asset('storage/' . $doc->ruta_archivo) }}" target="_blank" class="doc-btn" style="background-color: #FF9800;">
+                    <a href="{{ asset('storage/' . $doc->ruta_archivo) }}" target="_blank" class="doc-btn" >
                         <i class="fas fa-list-check"></i> {{ $doc->titulo }}
                     </a>
                     <div class="doc-meta">{{ $doc->descripcion ?? 'Publicado el ' . $doc->fecha_publicacion->format('d/m/Y') }}</div>
@@ -308,7 +306,7 @@
 
                 @php $docs = $docsPorCategoria->get('solicitar', collect()); @endphp
                 @forelse($docs as $doc)
-                    <a href="{{ asset('storage/' . $doc->ruta_archivo) }}" target="_blank" class="doc-btn" style="background-color: #9C27B0;">
+                    <a href="{{ asset('storage/' . $doc->ruta_archivo) }}" target="_blank" class="doc-btn">
                         <i class="fas fa-file-signature"></i> {{ $doc->titulo }}
                     </a>
                     <div class="doc-meta">Publicado el {{ $doc->fecha_publicacion->format('d/m/Y') }}</div>
@@ -323,12 +321,12 @@
 
                 <div style="text-align: center; padding: 30px 0;">
                     <p style="color: #666; margin-bottom: 25px; font-style: italic;">
-                        El Centro de Arbitraje y Resolución de Disputas del CIP CDLIMA realiza la publicación de 
+                        El Centro de Arbitraje y Resolución de Disputas del CIP CD LA LIBERTAD realiza la publicación de 
                         las decisiones emitidas, con el fin de brindar el acceso de esta información
                          al público en general. Para localizar la Decisión de su interés, puede ingresar al siguiente enlace:
                     </p>
 
-                    <a href="#" target="_blank" class="doc-btn" style="justify-content: center; max-width: 400px; margin: 0 auto;">
+                    <a href="https://drive.google.com/drive/folders/1aRepyc-6g5MhhtFqvnqUcJdTjrLqNqvV?usp=drive_link" target="_blank" class="doc-btn" style="justify-content: center; max-width: 400px; margin: 0 auto;">
                         <i class="fas fa-external-link-alt"></i> ACCEDER AL REPOSITORIO
                     </a>
                 </div>

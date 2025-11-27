@@ -142,12 +142,7 @@
         
         <div class="map-column">
            <div class="map-wrapper">
-                <iframe 
-                    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3949.936394189018!2d-79.02854282500953!3d-8.108028491920575!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x91ad3d8450273c03%3A0x460c56f7d555031a!2sFrancisco%20Borja%20250%2C%20Trujillo%2013001!5e0!3m2!1ses!2spe!4v1708630000000!5m2!1ses!2spe" 
-                    allowfullscreen="" 
-                    loading="lazy" 
-                    referrerpolicy="no-referrer-when-downgrade">
-                </iframe>
+                <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d698.2323527845317!2d-79.03755024624849!3d-8.121972155743038!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x91ad3d73f5f841bb%3A0x695f9a8cf95bb611!2sMart%C3%ADnez%20de%20Compa%C3%B1%C3%B3n%20901%2C%20V%C3%ADctor%20Larco%20Herrera%2013008!5e0!3m2!1ses!2spe!4v1764254842091!5m2!1ses!2spe" width="600" height="450" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
             </div>
         </div>
 
@@ -157,40 +152,31 @@
             <div class="info-block">
                 <span class="info-label">Horario de atención presencial:</span>
                 <div class="info-text">
-                    Lunes a viernes, de 8:30 a 12:30 horas y de 13:30 a 18:00 horas.
+                    Lunes a viernes, de 9:00am a 01:00pm y de 4:00pm a 8:00pm.
+                </div>
+                <div class="info-text">
+                    Sábado, de 9:00am a 01:00pm.
                 </div>
             </div>
 
             <div class="info-block">
                 <span class="info-label">Correos electrónicos:</span>
                 <div class="info-text">
-                    <div><a href="mailto:mesadepartescard@ciplalibertad.org.pe" class="info-link">mesadepartescard@ciplalibertad.org.pe</a></div>
-                    <div><a href="mailto:mesadepartesjrd@ciplalibertad.org.pe" class="info-link">mesadepartesjrd@ciplalibertad.org.pe</a></div>
+                    <div><a href="arbitrajecdll@cip.org.pe" class="info-link">arbitrajecdll@cip.org.pe</a></div>
                 </div>
             </div>
 
             <div class="info-block">
-                <span class="info-label">Teléfonos:</span>
-                <div class="info-text phone-list">
-                    <span>202-5045</span>
-                    <span>202-5069</span>
-                    <span>202-5064</span>
-                    <span>202-5081</span>
-                </div>
-            </div>
-
-            <div class="info-block">
-                <span class="info-label">Móviles:</span>
+                <span class="info-label">Teléfono:</span>
                 <div class="info-text">
-                    <div>941 965 539 | 963 848 824 (Arbitraje)</div>
-                    <div>987 818 665 (Junta de Resolución de Disputas)</div>
+                    <div> 044-340010 - Anexo: 229</div>
                 </div>
             </div>
 
             <div class="info-block">
                 <span class="info-label">Dirección:</span>
                 <div class="info-text">
-                    Urb. La Merced, Francisco Borja N° 250, Trujillo, La Libertad.
+                    Martínez de Compañon #901 - Urb. San Andrés - Trujillo
                 </div>
             </div>
 

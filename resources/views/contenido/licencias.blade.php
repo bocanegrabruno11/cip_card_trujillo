@@ -71,7 +71,7 @@
     </div>
 
     <div class="license-wrapper">
-        <img src="{{ asset('img/licencia.jpg') }}" 
+        <img src="{{ asset('img/licencias/2025.png') }}" 
              alt="Licencia de Funcionamiento CARD" 
              class="license-img"
              onclick="openLightbox(this.src)">

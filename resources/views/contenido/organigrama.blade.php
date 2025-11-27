@@ -67,8 +67,8 @@
     </div>
 
     <div class="chart-wrapper">
-        <img src="{{ asset('img/organigrama.png') }}" 
-             alt="Organigrama CIP" 
+        <img src="{{ asset('img/organigrama_2025.png') }}" 
+             alt="Organigrama CARD CD La Libertad" 
              class="organigrama-img" 
              onclick="openLightbox(this.src)">
     </div>

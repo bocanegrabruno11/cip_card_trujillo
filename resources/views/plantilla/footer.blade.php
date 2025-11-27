@@ -197,10 +197,10 @@
             <div class="footer-logo-container">
                 <img src="{{ asset('img/logo.png') }}" alt="Logo CIP" class="footer-logo">
                 {{-- CAMBIO: TRUJILLO --}}
-                <h3>CONSEJO DEPARTAMENTAL <br> DE TRUJILLO</h3>
+                <h3>CONSEJO DEPARTAMENTAL <br> LA LIBERTAD</h3>
             </div>
             <p>
-                El Centro de Arbitraje y Resolución de Disputas del Consejo Departamental de Trujillo del Colegio de Ingenieros del Perú, en adelante el CARD, es un ente encargado de la dirección y administración de unidades de solución de conflicto, orientadas a brindar a la sociedad alternativas eficientes para la solución de controversias.
+                El Centro de Arbitraje y Resolución de Disputas del Consejo Departamental de La Libertad del Colegio de Ingenieros del Perú, en adelante el CARD, es un ente encargado de la dirección y administración de unidades de solución de conflicto, orientadas a brindar a la sociedad alternativas eficientes para la solución de controversias.
             </p>
         </div>
 
@@ -214,8 +214,7 @@
                     Sábados: 9:00 a 13:00 horas.
                 </p>
                 <strong>Correos electrónicos:</strong>
-                <a href="mailto:mesadepartescard@ciptrujillo.org.pe">mesadepartescard@ciptrujillo.org.pe</a>
-                <a href="mailto:mesadepartesjrd@ciptrujillo.org.pe">mesadepartesjrd@ciptrujillo.org.pe</a>
+                <a href="mailto:arbitrajecdll@cip.org.pe">arbitrajecdll@cip.org.pe</a>
             </div>
         </div>
 
@@ -223,10 +222,10 @@
         <div class="footer-section">
             <h3>Síguenos en:</h3>
             <div class="social-icons">
-                <a href="https://www.facebook.com/CIP.ConsejoDepartamentalTrujillo" target="_blank" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
-                <a href="https://www.instagram.com/ciptrujillo" target="_blank" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+                <a href="https://www.facebook.com/CIPLaLibertad?locale=es_LA" target="_blank" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+                <!-- <a href="https://www.instagram.com/ciptrujillo" target="_blank" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
                 <a href="https://www.linkedin.com/company/ciptrujillo" target="_blank" aria-label="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
-                <a href="https://www.youtube.com/channel/UC-CIP_Trujillo" target="_blank" aria-label="YouTube"><i class="fab fa-youtube"></i></a>
+                <a href="https://www.youtube.com/channel/UC-CIP_Trujillo" target="_blank" aria-label="YouTube"><i class="fab fa-youtube"></i></a> -->
             </div>
         </div>
     </div>
@@ -234,14 +233,13 @@
     {{-- Footer inferior con Copyright y Enlaces --}}
     <div class="footer-bottom">
         {{-- CAMBIO: TRUJILLO --}}
-        <span>Copyright 2025 - Oficina de Comunicaciones del CDTrujillo - CIP</span>
+        <span>Copyright {{ date('Y') }} - CENTRO DE ARBITRAJE Y RESOLUCIÓN DE DISPUTAS CD LL</span>
         <div class="footer-bottom-links">
             {{-- Mantenemos los enlaces sin ruta (#) según la solicitud --}}
-            <a href="#">Presentación</a>
-            <a href="#">Eventos</a>
-            <a href="#">Dispute Boards</a>
-            <a href="#">Junta de Prevención y Resolución de Disputas (CAJPRD)</a>
-            <a href="#">Institución Arbitral</a>
+            <a href="{{ route('presentacion') }}">Presentación</a>
+            <a href="{{ route('eventos') }}">Eventos</a>
+            <a href="{{ route('junta-prevencion') }}">Junta de Prevención y Resolución de Disputas (CAJPRD)</a>
+            <a href="{{ route('institucion-arbitral') }}">Institución Arbitral</a>
         </div>
     </div>
 

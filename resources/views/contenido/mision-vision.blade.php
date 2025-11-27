@@ -125,7 +125,8 @@
             </div>
             <h2>Misión</h2>
             <p>
-                Somos una institución representativa de los ingenieros del Perú, que impulsa el desarrollo de la ingeniería nacional, promoviendo la excelencia en el ejercicio profesional, el comportamiento ético y la responsabilidad social, contribuyendo al desarrollo sostenible del país y la calidad de vida de la sociedad.
+                Administrar servicios especializados de arbitraje y resolución de disputas con imparcialidad, transparencia y la correcta aplicación de los reglamentos, garantizando procesos eficientes y confiables que contribuyan a la solución oportuna de controversias en los sectores público y privado, promoviendo la integridad, la ética profesional y el desarrollo sostenible en beneficio de la sociedad. 
+
             </p>
         </div>
 
@@ -135,7 +136,7 @@
             </div>
             <h2>Visión</h2>
             <p>
-                Ser reconocidos como una institución sólida, líder y referente técnico en la sociedad peruana, que promueve la innovación, la investigación y el desarrollo tecnológico, garantizando la competencia y el desempeño ético de sus colegiados para el bienestar general de la nación.
+                Consolidarnos como un centro líder en arbitraje y resolución de disputas, reconocido por la calidad, transparencia y eficiencia en la solución de controversias, contribuyendo al fortalecimiento de la gestión pública y/o privada.
             </p>
         </div>
 

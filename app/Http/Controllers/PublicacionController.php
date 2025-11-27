@@ -296,4 +296,10 @@ class PublicacionController extends Controller
 
         return redirect()->back()->with('success', "Publicación {$estado} correctamente.");
     }
+
+    public function show($id)
+    {
+        $publicacion = Publicacion::with('detalles')->findOrFail($id);
+        return view('gestion-contenido.publicaciones.show', compact('publicacion'));
+    }
 }

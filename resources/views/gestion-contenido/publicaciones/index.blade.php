@@ -135,30 +135,26 @@
                         </td>
                         <td>{{  Carbon\Carbon::parse($pub->fecha)->format('d/m/Y') }}</td>
 
-                        <td>
-                            <span class="badge {{ $pub->activo ? 'bg-success' : 'bg-danger' }}">
-                                {{ $pub->activo ? 'Activo' : 'Inactivo' }}
-                            </span>
+                         <td class="text-center">
+                            <form action="{{ route('publicaciones.toggle', $pub->id) }}" method="POST" class="d-inline">
+                                @csrf @method('PUT')
+                                <button type="submit" 
+                                        class="badge border-0 {{ $pub->activo ? 'bg-success' : 'bg-secondary' }}" 
+                                        style="cursor: pointer;"
+                                        onclick="return confirm('¿Deseas cambiar el estado de visibilidad?')"
+                                        title="Clic para cambiar estado">
+                                    {{ $pub->activo ? 'Publicado' : 'Oculto' }}
+                                </button>
+                            </form>
                         </td>
                         
                         <td>
                             <div class="d-flex gap-1">
-                                
-                                {{-- BOTÓN TOGGLE ESTADO --}}
-                                <form action="{{ route('publicaciones.toggle', $pub->id) }}" method="POST">
-                                    @csrf
-                                    @method('PUT')
-                                    @if($pub->activo)
-                                        <button type="submit" class="btn btn-sm btn-outline-success" onclick="return confirm('¿Estás seguro de ocultar esta publicación?')" title="Click para Ocultar">
-                                            <i class="fas fa-eye"></i>
-                                        </button>
-                                    @else
-                                        <button type="submit" class="btn btn-sm btn-outline-secondary" onclick="return confirm('¿Estás seguro de mostrar esta publicación?')" title="Click para Mostrar">
-                                            <i class="fas fa-eye-slash"></i>
-                                        </button>
-                                    @endif
-                                </form>
-
+                                <a href="{{ route('publicaciones.show', $pub->id) }}" 
+                                class="btn btn-sm btn-info text-white" 
+                                title="Ver Detalle">
+                                    <i class="fas fa-eye"></i>
+                                </a>
                                 <a href="{{ route('publicaciones.edit', $pub->id) }}" class="btn btn-sm btn-warning text-white" title="Editar">
                                     <i class="fas fa-edit"></i>
                                 </a>

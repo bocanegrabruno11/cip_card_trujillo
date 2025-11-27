@@ -128,7 +128,7 @@
         <h1>Organización del CARD</h1>
     </div>
 
-    <div class="section-title">ÓRGANO DIRECTIVO - CIP LIMA</div>
+    <div class="section-title">ÓRGANO DIRECTIVO - CIP LA LIBERTAD</div>
 
     <div class="team-row">
         @forelse($directivos as $persona)

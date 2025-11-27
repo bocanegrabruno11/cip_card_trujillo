@@ -350,7 +350,7 @@
                         <li><a href="{{ route('mision-vision') }}" onclick="handleMenuClick(event, this)">Visión y Misión</a></li>
                         <li><a href="{{ route('organigrama') }}" onclick="handleMenuClick(event, this)">Organigrama</a></li>
                         <li><a href="{{ route('nuestro-equipo') }}" onclick="handleMenuClick(event, this)">Nuestro equipo</a></li>
-                        <li><a href="{{ route('certificaciones') }}" onclick="handleMenuClick(event, this)">Certificaciones ISO</a></li>
+                        <li><a href="{{ route('certificaciones') }}" onclick="handleMenuClick(event, this)">Certificaciones</a></li>
                         <li><a href="{{ route('licencias') }}" onclick="handleMenuClick(event, this)">Licencia de funcionamiento</a></li>
                     </ul>
                 </li>
@@ -361,8 +361,6 @@
                     <ul class="dropdown-menu">
                         <li><a href="{{ route('arbitral') }}" onclick="handleMenuClick(event, this)">Modelo de Cláusula Arbitral</a></li>
                         <li><a href="{{ route('junta-res-disputas') }}" onclick="handleMenuClick(event, this)">Modelo de cláusula Junta de Resolución de Disputas</a></li>
-                        <li><a href="{{ route('dispute-review') }}" onclick="handleMenuClick(event, this)">Cláusula modelo Dispute Review Board (DRB)</a></li>
-                        <li><a href="{{ route('dispute-avoidance-res') }}" onclick="handleMenuClick(event, this)">Cláusula modelo Dispute Avoidance Resolution Board (DARB)</a></li>
                     </ul>
                 </li>
                 
@@ -391,22 +389,13 @@
 
     
     <div class="social-bubbles">
-        <div class="social-bubble messenger" onclick="window.open('https://m.me/CIPLaLibertad', '_blank')">
-            <img src="https://cdn-icons-png.flaticon.com/512/5968/5968771.png" alt="Messenger">
-            <span class="social-text">Messenger</span>
-        </div>
-        <div class="social-bubble instagram" onclick="window.open('https://instagram.com/CIPLaLibertad', '_blank')">
-            <img src="https://cdn-icons-png.flaticon.com/512/2111/2111463.png" alt="Instagram">
-            <span class="social-text">Instagram</span>
-        </div>
-        <div class="social-bubble facebook" onclick="window.open('https://facebook.com/CIPLaLibertad', '_blank')">
+       
+    
+        <div class="social-bubble facebook" onclick="window.open('https://www.facebook.com/CIPLaLibertad?locale=es_LA', '_blank')">
             <img src="https://cdn-icons-png.flaticon.com/512/733/733547.png" alt="Facebook">
             <span class="social-text">Facebook</span>
         </div>
-        <div class="social-bubble youtube" onclick="window.open('https://youtube.com/CIPLaLibertad', '_blank')">
-            <img src="https://cdn-icons-png.flaticon.com/512/1384/1384060.png" alt="YouTube">
-            <span class="social-text">YouTube</span>
-        </div>
+       
     </div>
 
     <script>

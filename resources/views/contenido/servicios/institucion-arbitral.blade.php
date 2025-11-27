@@ -171,10 +171,11 @@
             <div id="presentacion" class="tab-pane active">
                 <div class="presentacion-layout">
                     <div class="presentacion-text">
-                        <p>Con Resolución de Consejo CDL CIP, el servicio de arbitraje en el Centro de Arbitraje y Resolución de Disputas (CARD) del Consejo Departamental de La Libertad del Colegio de Ingenieros del Perú nació para servir a la comunidad.</p>
-                        <p>En el actual estatuto del Colegio de Ingenieros del Perú, en el artículo 4.02 literal c., el CARD se encuentra como su órgano especializado encargado de la administración y organización de arbitrajes institucionales, garantizando imparcialidad, eficiencia y transparencia en la resolución de controversias.</p>
+                        <p>
+                            El Centro de Arbitraje y Resolución de Disputas (CARD) del Consejo Departamental de La Libertad del Colegio de Ingenieros del Perú fue creado con el firme propósito de servir a la comunidad. Como órgano especializado de nuestra institución, somos los encargados de la administración y organización de arbitrajes institucionales, garantizando imparcialidad, eficiencia y transparencia en la resolución de controversias.
+                        </p>
                     </div>
-                    <img src="{{ asset('img/appmovil.jpg') }}" alt="Sala de Reuniones" class="presentacion-img">
+                    <img src="{{ asset('img/main-site/2.jpg') }}" alt="Sala de Reuniones" class="presentacion-img">
                 </div>
             </div>
 
@@ -296,7 +297,7 @@
                         Acceda a nuestra plataforma digital para consultar el histórico de laudos y decisiones arbitrales.
                     </p>
 
-                    <a href="#" target="_blank" class="doc-btn" style="justify-content: center; max-width: 400px; margin: 0 auto;">
+                    <a href="https://drive.google.com/drive/folders/1pql46UGfcFt7Z5lWvqCLIu5tzIVwN3cW?usp=drive_link" target="_blank" class="doc-btn" style="justify-content: center; max-width: 400px; margin: 0 auto;">
                         <i class="fas fa-external-link-alt"></i> ACCEDER AL REPOSITORIO
                     </a>
                 </div>

@@ -67,7 +67,12 @@
 
     <div class="clause-box">
         <p class="clause-text">
-            <span class="quote-mark">«</span>Lorem ipsum dolor sit amet consectetur adipisicing elit. Corporis nobis dolorem perspiciatis, amet atque molestias architecto provident sint fugit, ipsa, dolor ex. Perspiciatis consectetur ea ratione voluptatum? Blanditiis, perspiciatis? Perferendis?<span class="quote-mark">”.</span>
+            <span class="quote-mark">«</span>Las partes acuerdan para la solución de las controversias derivadas 
+            del presente Contrato de Obra /Suministro conformar una junta de Prevención y Resolución de Disputas 
+            (en adelante, la JPRD) de acuerdo a las disposiciones de la Ley General de Contrataciones Públicas, su 
+            Reglamento y la directiva emitida por el OECE sobre la materia (en adelante, las "Normas Aplicables a la JPRD"). 
+            encargando su organización y administración al Centro de Arbitraje y Resolución de Disputas del Colegio de 
+            ingenieros del Perú – Consejo Departamental de La Libertad.<span class="quote-mark">”.</span>
         </p>
     </div>
 

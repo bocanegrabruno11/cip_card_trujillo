@@ -276,22 +276,33 @@
                     <img src="{{ $imgUrl }}" alt="Principal" class="main-building-img" onclick="openLightbox('{{ $imgUrl }}')">
                 @endif
             @else
-                @php $imgUrl = asset('img/appmovil.jpg'); @endphp
+                @php $imgUrl = asset('img/main-site/2.jpg'); @endphp
                 <img src="{{ $imgUrl }}" alt="Default" class="main-building-img" onclick="openLightbox('{{ $imgUrl }}')">
             @endif
         </div>
 
         <div class="right-column">
             <div class="text-content">
-                <p>El Centro de Arbitraje y Resolución de Disputas del Consejo Departamental de La Libertad del Colegio de Ingenieros del Perú, en adelante el CARD, es un ente encargado de la dirección y administración de unidades de solución de conflicto orientadas a brindar a la sociedad alternativas eficientes para la solución de controversias.</p>
-                <p>El Centro de Arbitraje y Resolución de Disputas tiene por finalidad coadyuvar a la solución de controversias por medio de la administración de arbitrajes y juntas de resolución de disputas ("dispute boards"), entre otros.</p>
+                <p>
+                    El Centro de Arbitraje y Resolución de Disputas del Colegio de Ingenieros del Perú Consejo
+                     Departamental La Libertad, inició sus actividades el 19 de junio del año 2000 y ha ido ingresando
+                      en el competitivo ámbito del Arbitraje y Resolución de Disputas para la prevención y solución 
+                      de controversias, asimismo de manera particular realiza capacitaciones brindadas a los interesados
+                       y público en general que requieren conocimientos en temas de arbitrajes y Juntas de prevención 
+                       y solución de controversias.
+
+                </p>
+                <p>
+                    El Centro de Arbitraje y Resolución de Disputas del Colegio de Ingenieros del Perú Consejo Departamental
+                     La Libertad, desempeña sus actividades en cumplimiento a la Directiva 02-2025-OECE-CB del 19-04-2025 
+                     (Nueva Ley de General de Contrataciones Públicas) y sus modificatorias atendiendo los requerimientos 
+                     de organizaciones que desarrollan contratos de obra y suministro para situaciones que surgen como parte 
+                     de la interacción entre estas organizaciones y el Estado Peruano.
+
+                </p>
             </div>
 
-            <div class="certification-logos">
-                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/53/ISO_9001-2015.svg/1200px-ISO_9001-2015.svg.png" class="cert-logo" alt="ISO 9001">
-                <img src="https://seeklogo.com/images/S/sgs-logo-0449458015-seeklogo.com.png" class="cert-logo" alt="SGS">
-                <img src="https://seeklogo.com/images/I/icontec-internacional-logo-2D0D470768-seeklogo.com.png" class="cert-logo" alt="Icontec">
-            </div>
+           
         </div>
     </div>
 
@@ -316,7 +327,7 @@
                     @endforeach
                 @else
                     {{-- Fallback --}}
-                    @php $statics = ['pop-up1.png', 'pop-up2.png', 'gestion.png', 'denuncia.png', 'appmovil.jpg']; @endphp
+                    @php $statics = ['main-site/1.png', 'main-site/2.jpg']; @endphp
                     @foreach($statics as $sImg)
                         @php $sUrl = asset('img/' . $sImg); @endphp
                         <div class="gallery-img-wrapper">

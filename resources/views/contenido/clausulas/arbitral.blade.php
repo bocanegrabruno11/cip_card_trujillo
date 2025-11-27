@@ -67,7 +67,11 @@
 
     <div class="clause-box">
         <p class="clause-text">
-            <span class="quote-mark">«</span>Lorem ipsum dolor sit amet consectetur adipisicing elit. Corporis nobis dolorem perspiciatis, amet atque molestias architecto provident sint fugit, ipsa, dolor ex. Perspiciatis consectetur ea ratione voluptatum? Blanditiis, perspiciatis? Perferendis?<span class="quote-mark">”.</span>
+            <span class="quote-mark">«</span>Las partes acuerdan que todo litigio o controversia resultante de este contrato 
+            o relativo a este, se resolverá mediante el arbitraje organizado y administrado por el Centro de Arbitraje 
+            del Colegio de Ingenieros del Perú – Consejo Departamental de La Libertad, de conformidad con sus reglamentos 
+            vigentes, a los cuales las partes se someten libremente, señalando que el laudo que se emita en el proceso 
+            será inapelable y definitivo.<span class="quote-mark">”.</span>
         </p>
     </div>
 

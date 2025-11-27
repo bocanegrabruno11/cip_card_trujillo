@@ -295,7 +295,7 @@
                             <button class="slider-arrow next-arrow" id="sliderNext">❯</button>
                         @endif
                     @else
-                        <img src="{{ asset('img/appmovil.jpg') }}" class="hero-slide active">
+                        <img src="{{ asset('img/main-site/1.png') }}" class="hero-slide active">
                     @endif
                 </div>
             </div>
