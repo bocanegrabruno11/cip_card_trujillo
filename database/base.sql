@@ -109,3 +109,31 @@ CREATE TABLE documentos (
     created_at TIMESTAMP NULL,
     updated_at TIMESTAMP NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS `tarifas_escalas` (
+  `id` BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  
+  `tipo` ENUM('arbitro_unico', 'tribunal_arbitral', 'gastos_administrativos') NOT NULL COMMENT 'Define la tabla de origen del PDF',
+  
+  `rango_letra` VARCHAR(5) NOT NULL COMMENT 'Ej: A, B, C...',
+  
+  `monto_min` DECIMAL(15, 2) NOT NULL COMMENT 'Inicio del rango',
+  `monto_max` DECIMAL(15, 2) NULL COMMENT 'Fin del rango. NULL para rangos "A más" o infinitos',
+  
+  `monto_fijo` DECIMAL(15, 2) NOT NULL DEFAULT 0.00 COMMENT 'La tarifa base fija',
+  `porcentaje_exceso` DECIMAL(5, 3) NOT NULL DEFAULT 0.000 COMMENT 'Ej: 0.70 para 0.70%. Guardar como valor porcentual',
+  `base_exceso` DECIMAL(15, 2) NOT NULL DEFAULT 0.00 COMMENT 'Monto sobre el cual se calcula el exceso',
+  
+  `activo` TINYINT(1) NOT NULL DEFAULT 1,
+  `created_at` TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS `tarifas_configuracion` (
+  `id` BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  `clave` VARCHAR(50) NOT NULL UNIQUE COMMENT 'Identificador único para usar en código',
+  `valor` DECIMAL(15, 2) NOT NULL COMMENT 'Valor numérico',
+  `descripcion` VARCHAR(255) NULL COMMENT 'Explicación de qué es este valor',
+  `created_at` TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
