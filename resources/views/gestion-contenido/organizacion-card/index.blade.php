@@ -78,7 +78,9 @@
                     </div>
 
                     <div class="col-md-3 text-end">
-                        <a href="{{ route('organizacion-gestion.index') }}" class="btn btn-sm btn-outline-secondary">Limpiar</a>
+                        <a href="{{ route('organizacion-gestion.index') }}" class="btn btn-sm btn-outline-secondary">
+                            <i class="fas fa-eraser"></i>
+                        </a>
                         <button type="submit" class="btn btn-sm btn-dark px-3">Filtrar</button>
                     </div>
                 </div>

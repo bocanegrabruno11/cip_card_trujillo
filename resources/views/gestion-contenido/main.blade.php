@@ -273,6 +273,11 @@
                     <i class="fas fa-folder-open"></i> <span>Documentación</span>
                 </a>
             </li>
+            <li class="menu-item">
+                <a href="{{ route('calculadoras-gestion.index') }}" class="menu-link {{ request()->routeIs('calculadoras*') ? 'active' : '' }}">
+                    <i class="fas fa-calculator"></i> <span>Calculadoras</span>
+                </a>
+            </li>
         </ul>
 
         <div class="user-footer">

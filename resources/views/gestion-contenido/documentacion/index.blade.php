@@ -50,8 +50,13 @@
                             @endforeach
                         </select>
                     </div>
-                    <div class="col-md-2 d-grid">
-                        <button type="submit" class="btn btn-sm btn-dark">Filtrar</button>
+                    <div class="col-md-2 d-flex gap-2">
+                        <a href="{{ route('documentos-gestion.index') }}" class="btn btn-sm btn-outline-secondary w-50" title="Limpiar filtros">
+                            <i class="fas fa-eraser"></i>
+                        </a>
+                        <button type="submit" class="btn btn-sm btn-dark w-100">
+                            <i class="fas fa-search me-1"></i> Filtrar
+                        </button>
                     </div>
                 </div>
             </form>

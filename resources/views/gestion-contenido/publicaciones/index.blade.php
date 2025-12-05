@@ -74,7 +74,7 @@
 
                     <div class="col-md-3 text-end">
                         <a href="{{ route('publicaciones.index') }}" class="btn btn-sm btn-outline-secondary me-1">
-                            <i class="fas fa-eraser"></i> Limpiar
+                            <i class="fas fa-eraser"></i>
                         </a>
                         <button type="submit" class="btn btn-sm btn-dark px-3">
                             <i class="fas fa-search"></i> Buscar

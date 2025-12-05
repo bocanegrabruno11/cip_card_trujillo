@@ -311,7 +311,7 @@
                 @endif
                 <div class="hero-buttons">
                     <a href="{{ route('institucion-arbitral') }}" class="btn-hero btn-red-light">Arbitraje</a>
-                    <a href="{{ route('junta-prevencion') }}" class="btn-hero btn-gold">Junta de Resolución</a>
+                    <a href="{{ route('junta-prevencion') }}" class="btn-hero btn-gold">Junta de Prevención</a>
                     <a href="{{ route('login') }}" class="btn-hero btn-red-light">Mesa de partes</a>
                 </div>
             </div>

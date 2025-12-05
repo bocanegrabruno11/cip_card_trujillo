@@ -7,8 +7,9 @@ use App\Http\Controllers\PublicacionController;
 use App\Http\Controllers\ComunicadoController;
 use App\Http\Controllers\EventoController;
 use App\Http\Controllers\OrganizacionCardController;
-
+use App\Http\Controllers\CalculadoraController;
 use App\Http\Controllers\DocumentacionController;
+use App\Http\Controllers\TarifaConfiguracionController;
 
 use App\Http\Controllers\ProfileController;
 
@@ -37,8 +38,7 @@ Route::get('/convocatoria', [PageController::class, 'convocatoria'])->name('conv
 
 Route::get('/calculadora/institucion/determinada', [PageController::class, 'calcInstDeterminada'])->name('calc.inst.det');
 Route::get('/calculadora/institucion/indeterminada', [PageController::class, 'calcInstIndeterminada'])->name('calc.inst.indet');
-Route::get('/calculadora/junta/determinada', [PageController::class, 'calcJuntaDeterminada'])->name('calc.junta.det');
-Route::get('/calculadora/junta/indeterminada', [PageController::class, 'calcJuntaIndeterminada'])->name('calc.junta.indet');
+Route::get('/calculadora/junta/calc', [PageController::class, 'calcJunta'])->name('calc.junta');
 
 Route::middleware(['auth', 'checkrole:gestor_contenido'])->group(function () {
     Route::get('/gestion-contenido', [PageController::class, 'gestionContenido'])->name('gestion-contenido');
@@ -54,7 +54,8 @@ Route::middleware(['auth', 'checkrole:gestor_contenido'])->group(function () {
     Route::put('/gestor/organizacion/{id}/estado', [OrganizacionCardController::class, 'toggleEstado'])->name('organizacion-gestion.toggle');
     Route::resource('gestor/documentos', DocumentacionController::class)->names('documentos-gestion');
     Route::put('/gestor/documentos/{id}/estado', [DocumentacionController::class, 'toggleEstado'])->name('documentos-gestion.toggle');
-
+    Route::resource('gestor/calculadoras', CalculadoraController::class)->names('calculadoras-gestion');
+    Route::resource('gestor/tarifas_config', TarifaConfiguracionController::class)->names('tarifas_config');
 });
 
 

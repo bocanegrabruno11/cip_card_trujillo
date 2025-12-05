@@ -252,7 +252,7 @@
                     <a href="{{ asset('storage/' . $doc->ruta_archivo) }}" target="_blank" class="doc-btn">
                         <i class="fas fa-users"></i> {{ $doc->titulo }}
                     </a>
-                    <div class="doc-meta">Actualizado el {{ $doc->fecha_publicacion->format('d/m/Y') }}</div>
+                    <div class="doc-meta">Publicado el {{ $doc->fecha_publicacion->format('d/m/Y') }}</div>
                 @empty
                     <p class="empty-msg">No hay documentos disponibles.</p>
                 @endforelse

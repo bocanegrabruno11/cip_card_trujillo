@@ -381,7 +381,30 @@
                 
                 {{-- 7. CONTACTOS --}}
                 <li><a href="{{ route('contactos') }}" onclick="handleMenuClick(event, this)">CONTACTOS</a></li>
-                <li><a href="{{ route('login') }}" onclick="handleMenuClick(event, this)">MESA DE PARTES - VIRTUAL</a></li>
+                {{-- 8. MESA DE PARTES VIRTUAL (Dinámico) --}}
+                <li>
+                    @guest
+                        {{-- Si NO está logueado -> Login --}}
+                        <a href="{{ route('login') }}" onclick="handleMenuClick(event, this)">MESA DE PARTES - VIRTUAL</a>
+                    @endguest
+
+                    @auth
+                        {{-- Si SÍ está logueado -> Redirigir según Rol --}}
+                        @if(Auth::user()->hasRole('admin'))
+                            <a href="{{ route('Admin/dashboard') }}" onclick="handleMenuClick(event, this)">MESA DE PARTES - VIRTUAL</a>
+                        
+                        @elseif(Auth::user()->hasRole('gestor_contenido'))
+                            <a href="{{ route('gestion-contenido') }}" onclick="handleMenuClick(event, this)">MESA DE PARTES - VIRTUAL</a>
+                        
+                        @elseif(Auth::user()->hasRole('mesa_partes'))
+                            <a href="{{ route('dashboard') }}" onclick="handleMenuClick(event, this)">MESA DE PARTES - VIRTUAL</a>
+                        
+                        @else
+                            {{-- Default si tiene otro rol (o ninguno) --}}
+                            <a href="{{ url('/') }}" onclick="handleMenuClick(event, this)">MESA DE PARTES - VIRTUAL</a>
+                        @endif
+                    @endauth
+                </li>
                 
             </ul>
         </div>

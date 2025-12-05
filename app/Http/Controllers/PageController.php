@@ -7,6 +7,8 @@ use App\Models\Documentacion;
 use App\Models\Evento;
 use App\Models\OrganizacionCard;
 use App\Models\Publicacion;
+use App\Models\TarifaConfiguracion;
+use App\Models\TarifaEscala;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 
@@ -265,20 +267,42 @@ class PageController extends Controller
         return view('contenido.convocatoria', compact('documentos'));
     }
 
-    public function calcInstDeterminada() {
-        return view('contenido.calculadoras.institucion-determinada');
+    public function calcInstDeterminada()
+    {
+        $escalas = TarifaEscala::where('activo', true)->get();
+
+        $data = [
+            'unico'    => $escalas->where('tipo', 'arbitro_unico')->values(),
+            'tribunal' => $escalas->where('tipo', 'tribunal_arbitral')->values(),
+            'gastos'   => $escalas->where('tipo', 'gastos_administrativos')->values(),
+        ];
+
+        $configIgv = TarifaConfiguracion::where('clave', 'igv')->first();
+        $igv = $configIgv ? floatval($configIgv->valor) : 18.00;
+
+        return view('contenido.calculadoras.institucion-determinada', compact('data', 'igv'));
     }
 
-    public function calcInstIndeterminada() {
-        return view('contenido.calculadoras.institucion-indeterminada');
+    public function calcInstIndeterminada()
+    {
+        $escalas = TarifaEscala::where('activo', true)->get();
+        $data = [
+            'unico'    => $escalas->where('tipo', 'arbitro_unico')->values(),
+            'tribunal' => $escalas->where('tipo', 'tribunal_arbitral')->values(),
+            'gastos'   => $escalas->where('tipo', 'gastos_administrativos')->values(),
+        ];
+
+        $config = TarifaConfiguracion::whereIn('clave', ['igv', 'porcentaje_indeterminado'])->pluck('valor', 'clave');
+        
+        $igv = floatval($config['igv'] ?? 18.00);
+        $porcentajeIndeterminado = floatval($config['porcentaje_indeterminado'] ?? 5.00); // El 5% del PDF
+
+        return view('contenido.calculadoras.institucion-indeterminada', compact('data', 'igv', 'porcentajeIndeterminado'));
     }
 
-    public function calcJuntaDeterminada() {
-        return view('contenido.calculadoras.junta-determinada');
+    public function calcJunta() {
+        return view('contenido.calculadoras.junta');
     }
 
-    public function calcJuntaIndeterminada() {
-        return view('contenido.calculadoras.junta-indeterminada');
-    }
     
 }

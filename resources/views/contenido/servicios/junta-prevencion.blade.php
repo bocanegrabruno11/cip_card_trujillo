@@ -243,13 +243,11 @@
                             <h5 class="fw-bold mb-1" style="color: #333;">Calculadoras de la Junta de Resolución</h5>
                             <p class="text-muted small mb-4">Colegio de Ingenieros del Perú - Consejo Departamental de La Libertad</p>
 
-                            <button onclick="openCalculator('{{ route('calc.junta.det') }}')" class="btn-calc-red">
-                                CALCULADORA PARA CUANTÍA DETERMINADA
+                            <button onclick="openCalculator('{{ route('calc.junta') }}')" class="btn-calc-red">
+                                ABRIR CALCULADORA
                             </button>
 
-                            <button onclick="openCalculator('{{ route('calc.junta.indet') }}')" class="btn-calc-red">
-                                CALCULADORA PARA CUANTÍA INDETERMINADA
-                            </button>
+                 
                         </div>
                     </div>
                 </div>
@@ -279,7 +277,7 @@
                     <a href="{{ asset('storage/' . $doc->ruta_archivo) }}" target="_blank" class="doc-btn">
                         <i class="fas fa-users"></i> {{ $doc->titulo }}
                     </a>
-                    <div class="doc-meta">Actualizado el {{ $doc->fecha_publicacion->format('d/m/Y') }}</div>
+                    <div class="doc-meta">Publicado el {{ $doc->fecha_publicacion->format('d/m/Y') }}</div>
                 @empty
                     <p class="empty-msg">No hay documentos disponibles.</p>
                 @endforelse
