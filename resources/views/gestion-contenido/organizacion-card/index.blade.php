@@ -10,19 +10,27 @@
         </a>
     </div>
 
+    {{-- ALERTAS --}}
     @if(session('success'))
         <div class="alert alert-success alert-dismissible fade show" id="autoDismissAlert">
-            {{ session('success') }} 
+            <i class="fas fa-check-circle me-1"></i> {{ session('success') }} 
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    @endif
+    @if(session('error'))
+        <div class="alert alert-danger alert-dismissible fade show">
+            <i class="fas fa-exclamation-circle me-1"></i> {{ session('error') }}
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
     @endif
 
+    {{-- FILTROS --}}
     <div class="card border-0 shadow-sm mb-4">
         <div class="card-body bg-light">
             <form action="{{ route('organizacion-gestion.index') }}" method="GET">
                 <div class="row g-3 align-items-end">
                     
-                    <div class="col-md-2">
+                    <div class="col-md-3">
                         <label class="form-label small fw-bold">Grupo</label>
                         <select name="grupo" class="form-select form-select-sm">
                             <option value="">Todos los grupos</option>
@@ -41,7 +49,7 @@
                         <input type="text" name="cargo" class="form-control form-control-sm" placeholder="Ej: Decano" value="{{ request('cargo') }}">
                     </div>
 
-                    <div class="col-md-1">
+                    <div class="col-md-2">
                         <label class="form-label small fw-bold">Estado</label>
                         <select name="estado" class="form-select form-select-sm">
                             <option value="">Todos</option>
@@ -50,44 +58,23 @@
                         </select>
                     </div>
 
-                    <div class="col-md-2">
+                    <div class="col-md-3">
                         <label class="form-label small fw-bold">Nombres</label>
                         <input type="text" name="nombres" class="form-control form-control-sm" placeholder="Buscar ..." value="{{ request('nombres') }}">
                     </div>
 
-                    <div class="col-md-1">
-                        <label class="form-label small fw-bold">Mes</label>
-                        <select name="mes" class="form-select form-select-sm">
-                            <option value="">Todos</option>
-                            @foreach(range(1, 12) as $m)
-                                <option value="{{ $m }}" {{ request('mes') == $m ? 'selected' : '' }}>
-                                    {{ DateTime::createFromFormat('!m', $m)->format('F') }}
-                                </option>
-                            @endforeach
-                        </select>
-                    </div>
-
-                    <div class="col-md-1">
-                        <label class="form-label small fw-bold">Año</label>
-                        <select name="anio" class="form-select form-select-sm">
-                            <option value="">Todos</option>
-                            @foreach(range(2020, date('Y')) as $a)
-                                <option value="{{ $a }}" {{ request('anio') == $a ? 'selected' : '' }}>{{ $a }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-
-                    <div class="col-md-3 text-end">
-                        <a href="{{ route('organizacion-gestion.index') }}" class="btn btn-sm btn-outline-secondary">
+                    <div class="col-md-2 text-end d-flex gap-2">
+                        <a href="{{ route('organizacion-gestion.index') }}" class="btn btn-sm btn-outline-secondary w-50" title="Limpiar">
                             <i class="fas fa-eraser"></i>
                         </a>
-                        <button type="submit" class="btn btn-sm btn-dark px-3">Filtrar</button>
+                        <button type="submit" class="btn btn-sm btn-dark w-100">Filtrar</button>
                     </div>
                 </div>
             </form>
         </div>
     </div>
 
+    {{-- TABLA --}}
     <div class="card border-0 shadow-sm">
         <div class="card-body p-0">
             <div class="table-responsive">
@@ -107,7 +94,6 @@
                         <tr>
                             <td class="ps-4">
                                 @if($item->ruta_imagen)
-                                    {{-- === CAMBIO 1: Agregamos atributos para el modal === --}}
                                     <img src="{{ asset('storage/' . $item->ruta_imagen) }}" 
                                          class="rounded-circle border" 
                                          style="width: 50px; height: 50px; object-fit: cover; cursor: pointer;"
@@ -122,23 +108,47 @@
                             <td class="fw-bold">{{ $item->nombres }}</td>
                             <td>{{ $item->cargo }}</td>
                             <td><span class="badge bg-light text-dark border">{{ $item->grupo }}</span></td>
+                            
+                            {{-- ESTADO INTERACTIVO --}}
                             <td class="text-center">
-                                @if($item->activo)
-                                    <span class="badge bg-success-subtle text-success border border-success-subtle">Activo</span>
-                                @else
-                                    <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle">Inactivo</span>
-                                @endif
-                            </td>
-                            <td class="text-end pe-4">
-                                <form action="{{ route('organizacion-gestion.toggle', $item->id) }}" method="POST" class="d-inline">
+                                <form action="{{ route('organizacion-gestion.toggle', $item->id) }}" method="POST">
                                     @csrf @method('PUT')
-                                    <button type="submit" class="btn btn-sm btn-icon {{ $item->activo ? 'btn-outline-success' : 'btn-outline-secondary' }}" onclick="return confirm('¿Confirmar cambio de visibilidad?')"><i class="fas {{ $item->activo ? 'fa-eye' : 'fa-eye-slash' }}"></i></button>
+                                    <button type="button" 
+                                            class="badge border-0 {{ $item->activo ? 'bg-success' : 'bg-secondary' }}" 
+                                            style="cursor: pointer;"
+                                            onclick="confirmAction('{{ route('organizacion-gestion.toggle', $item->id) }}', 'toggle')">
+                                        {{ $item->activo ? 'Activo' : 'Inactivo' }}
+                                    </button>
                                 </form>
-                                <a href="{{ route('organizacion-gestion.edit', $item->id) }}" class="btn btn-sm btn-warning text-white"><i class="fas fa-edit"></i></a>
-                                <form action="{{ route('organizacion-gestion.destroy', $item->id) }}" method="POST" class="d-inline">
-                                    @csrf @method('DELETE')
-                                    <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('¿Eliminar?')"><i class="fas fa-trash"></i></button>
-                                </form>
+                            </td>
+
+                            {{-- ACCIONES DROPDOWN --}}
+                            <td class="text-end pe-4">
+                                <div class="dropdown">
+                                    <button class="btn btn-light btn-sm border shadow-sm" data-bs-toggle="dropdown">
+                                        <i class="fas fa-ellipsis-v text-muted"></i>
+                                    </button>
+                                    <ul class="dropdown-menu dropdown-menu-end border-0 shadow">
+                                        <li>
+                                            <a class="dropdown-item py-2" href="{{ route('organizacion-gestion.edit', $item->id) }}">
+                                                <i class="fas fa-edit text-warning me-2"></i> Editar
+                                            </a>
+                                        </li>
+                                        <li><hr class="dropdown-divider"></li>
+                                        <li>
+                                            <a class="dropdown-item py-2" href="{{ route('organizacion-gestion.show', $item->id) }}">
+                                                <i class="fas fa-eye text-info me-2"></i> Ver
+                                            </a>
+                                        </li>
+                                        <li><hr class="dropdown-divider"></li>
+                                        <li>
+                                            <button class="dropdown-item py-2 text-danger" 
+                                                    onclick="confirmAction('{{ route('organizacion-gestion.destroy', $item->id) }}', 'delete')">
+                                                <i class="fas fa-trash me-2"></i> Eliminar
+                                            </button>
+                                        </li>
+                                    </ul>
+                                </div>
                             </td>
                         </tr>
                         @empty
@@ -147,7 +157,6 @@
                     </tbody>
                 </table>
             </div>
-           
         </div>
         <div class="card-footer bg-white d-flex justify-content-end py-3">
             {{ $miembros->links('pagination::bootstrap-4') }}
@@ -155,7 +164,6 @@
     </div>
 </div>
 
-{{-- === CAMBIO 2: Estructura del Modal para la Imagen === --}}
 <div class="modal fade" id="imageModal" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content bg-transparent border-0">
@@ -167,28 +175,79 @@
   </div>
 </div>
 
+<div class="modal fade" id="confirmationModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-0 shadow-lg">
+      <div class="modal-header text-white border-0" id="modalHeaderBg">
+        <h5 class="modal-title fw-bold" id="modalTitle">Confirmar Acción</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body text-center p-4">
+        <div class="mb-3" id="modalIconContainer"></div>
+        <h5 class="fw-bold mb-2" id="modalHeader">¿Estás seguro?</h5>
+        <p class="text-muted mb-0" id="modalMessage">...</p>
+      </div>
+      <div class="modal-footer border-0 justify-content-center pb-4">
+        <button type="button" class="btn btn-light px-4" data-bs-dismiss="modal">Cancelar</button>
+        <form id="confirmForm" action="" method="POST">
+            @csrf 
+            <input type="hidden" name="_method" id="formMethod" value="">
+            <button type="submit" class="btn px-4 fw-bold text-white" id="confirmBtn"></button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        // Alerta autodescartable
         const alert = document.getElementById('autoDismissAlert');
         if (alert) setTimeout(() => new bootstrap.Alert(alert).close(), 3000);
 
-        // === CAMBIO 3: Lógica para cargar la imagen en el modal ===
+        // Lógica Modal Imagen
         const modal = document.getElementById('imageModal');
         if(modal) {
             modal.addEventListener('show.bs.modal', function (event) {
-                // Botón (imagen) que disparó el modal
-                const trigger = event.relatedTarget;
-                // Extraer la ruta de la imagen desde data-full-src
-                const src = trigger.getAttribute('data-full-src');
-                // Actualizar la fuente de la imagen del modal
-                const modalImg = modal.querySelector('#modalImagePreview');
-                modalImg.src = src;
+                const src = event.relatedTarget.getAttribute('data-full-src');
+                modal.querySelector('#modalImagePreview').src = src;
             });
         }
     });
+
+    // Lógica Modal Confirmación
+    function confirmAction(url, type) {
+        const modal = new bootstrap.Modal(document.getElementById('confirmationModal'));
+        const form = document.getElementById('confirmForm');
+        const methodInput = document.getElementById('formMethod');
+        
+        const headerBg = document.getElementById('modalHeaderBg');
+        const iconContainer = document.getElementById('modalIconContainer');
+        const headerText = document.getElementById('modalHeader');
+        const messageText = document.getElementById('modalMessage');
+        const confirmBtn = document.getElementById('confirmBtn');
+
+        form.action = url;
+
+        if (type === 'delete') {
+            methodInput.value = 'DELETE';
+            headerBg.className = 'modal-header bg-danger text-white border-0';
+            iconContainer.innerHTML = '<i class="fas fa-user-times fa-3x text-danger"></i>';
+            headerText.innerText = '¿Eliminar Miembro?';
+            messageText.innerText = 'El registro se eliminará permanentemente.';
+            confirmBtn.className = 'btn btn-danger px-4 fw-bold';
+            confirmBtn.innerText = 'Sí, eliminar';
+        } 
+        else if (type === 'toggle') {
+            methodInput.value = 'PUT';
+            headerBg.className = 'modal-header bg-primary text-white border-0';
+            iconContainer.innerHTML = '<i class="fas fa-exchange-alt fa-3x text-primary"></i>';
+            headerText.innerText = '¿Cambiar Estado?';
+            messageText.innerText = 'El estado activo/inactivo del miembro cambiará.';
+            confirmBtn.className = 'btn btn-primary px-4 fw-bold';
+            confirmBtn.innerText = 'Sí, cambiar';
+        }
+
+        modal.show();
+    }
 </script>
-<style>
-    .btn-icon { width: 32px; height: 32px; padding: 0; display: inline-flex; align-items: center; justify-content: center; }
-</style>
 @endsection

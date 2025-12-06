@@ -26,6 +26,8 @@
                             <option value="institucion" {{ request('seccion') == 'institucion' ? 'selected' : '' }}>Institución Arbitral</option>
                             <option value="junta" {{ request('seccion') == 'junta' ? 'selected' : '' }}>Junta de Prevención</option>
                             <option value="convocatorias" {{ request('seccion') == 'convocatorias' ? 'selected' : '' }}>Convocatorias</option>
+                            <option value="certificaciones" {{ request('seccion') == 'certificaciones' ? 'selected' : '' }}>Certificaciones</option>
+                            <option value="politicas" {{ request('seccion') == 'politicas' ? 'selected' : '' }}>Políticas</option>
                         </select>
                     </div>
                     <div class="col-md-3">
@@ -70,8 +72,7 @@
                     <tr>
                         <th class="ps-4">Sección / Categoría</th>
                         <th>Documento</th>
-                         <th>Fecha Registro</th>
-
+                        <th>Fecha Registro</th>
                         <th>Fecha Publicación</th>
                         <th>Archivo</th>
                         <th class="text-center">Estado</th>
@@ -101,12 +102,13 @@
                             </a>
                         </td>
                         <td class="text-center">
-                            <form action="{{ route('documentos-gestion.toggle', $doc->id) }}" method="POST">
-                                @csrf @method('PUT')
-                                <button type="submit"  class="badge border-0 {{ $doc->activo ? 'bg-success' : 'bg-secondary' }}" style="cursor: pointer;" onclick="return confirm('¿Deseas cambiar el estado de visibilidad?')">
-                                    {{ $doc->activo ? 'Visible' : 'Oculto' }}
-                                </button>
-                            </form>
+                            {{-- Botón Estado con Modal --}}
+                            <button type="button" 
+                                    class="badge border-0 {{ $doc->activo ? 'bg-success' : 'bg-secondary' }}" 
+                                    style="cursor: pointer;"
+                                    onclick="confirmAction('{{ route('documentos-gestion.toggle', $doc->id) }}', 'toggle')">
+                                {{ $doc->activo ? 'Visible' : 'Oculto' }}
+                            </button>
                         </td>
                         <td class="text-end pe-4">
                             <div class="dropdown">
@@ -115,17 +117,19 @@
                                     <li><a class="dropdown-item" href="{{ route('documentos-gestion.edit', $doc->id) }}"><i class="fas fa-edit text-warning me-2"></i> Editar</a></li>
                                     <li><hr class="dropdown-divider"></li>
                                     <li>
-                                        <form action="{{ route('documentos-gestion.destroy', $doc->id) }}" method="POST">
-                                            @csrf @method('DELETE')
-                                            <button type="submit" class="dropdown-item text-danger" onclick="return confirm('¿Eliminar archivo?')"><i class="fas fa-trash me-2"></i> Eliminar</button>
-                                        </form>
+                                        {{-- Botón Eliminar con Modal --}}
+                                        <button type="button" 
+                                                class="dropdown-item text-danger" 
+                                                onclick="confirmAction('{{ route('documentos-gestion.destroy', $doc->id) }}', 'delete')">
+                                            <i class="fas fa-trash me-2"></i> Eliminar
+                                        </button>
                                     </li>
                                 </ul>
                             </div>
                         </td>
                     </tr>
                     @empty
-                    <tr><td colspan="6" class="text-center py-4 text-muted">No hay documentos registrados.</td></tr>
+                    <tr><td colspan="7" class="text-center py-4 text-muted">No hay documentos registrados.</td></tr>
                     @endforelse
                 </tbody>
             </table>
@@ -136,10 +140,73 @@
     </div>
 </div>
 
+<div class="modal fade" id="confirmationModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-0 shadow-lg">
+      <div class="modal-header text-white border-0" id="modalHeaderBg">
+        <h5 class="modal-title fw-bold" id="modalTitle">Confirmar Acción</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body text-center p-4">
+        <div class="mb-3" id="modalIconContainer">
+            </div>
+        <h5 class="fw-bold mb-2" id="modalHeader">¿Estás seguro?</h5>
+        <p class="text-muted mb-0" id="modalMessage">...</p>
+      </div>
+      <div class="modal-footer border-0 justify-content-center pb-4">
+        <button type="button" class="btn btn-light px-4" data-bs-dismiss="modal">Cancelar</button>
+        
+        <form id="confirmForm" action="" method="POST">
+            @csrf 
+            <input type="hidden" name="_method" id="formMethod" value="">
+            <button type="submit" class="btn px-4 fw-bold text-white" id="confirmBtn"></button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
 <script>
     document.addEventListener('DOMContentLoaded', () => {
         const alert = document.getElementById('autoDismissAlert');
         if (alert) setTimeout(() => new bootstrap.Alert(alert).close(), 3000);
     });
+
+    // === FUNCIÓN PARA ABRIR MODAL DINÁMICO ===
+    function confirmAction(url, type) {
+        const modal = new bootstrap.Modal(document.getElementById('confirmationModal'));
+        const form = document.getElementById('confirmForm');
+        const methodInput = document.getElementById('formMethod');
+        
+        const headerBg = document.getElementById('modalHeaderBg');
+        const iconContainer = document.getElementById('modalIconContainer');
+        const headerText = document.getElementById('modalHeader');
+        const messageText = document.getElementById('modalMessage');
+        const confirmBtn = document.getElementById('confirmBtn');
+
+        // Configurar ruta
+        form.action = url;
+
+        if (type === 'delete') {
+            methodInput.value = 'DELETE';
+            headerBg.className = 'modal-header bg-danger text-white border-0';
+            iconContainer.innerHTML = '<i class="fas fa-trash-alt fa-3x text-danger"></i>';
+            headerText.innerText = '¿Eliminar Documento?';
+            messageText.innerText = 'El archivo y sus datos se eliminarán permanentemente.';
+            confirmBtn.className = 'btn btn-danger px-4 fw-bold';
+            confirmBtn.innerText = 'Sí, eliminar';
+        } 
+        else if (type === 'toggle') {
+            methodInput.value = 'PUT';
+            headerBg.className = 'modal-header bg-primary text-white border-0';
+            iconContainer.innerHTML = '<i class="fas fa-eye fa-3x text-primary"></i>';
+            headerText.innerText = '¿Cambiar Visibilidad?';
+            messageText.innerText = 'El estado público del documento cambiará.';
+            confirmBtn.className = 'btn btn-primary px-4 fw-bold';
+            confirmBtn.innerText = 'Sí, cambiar';
+        }
+
+        modal.show();
+    }
 </script>
 @endsection

@@ -27,6 +27,7 @@ Route::get('/institucion-arbitral', [PageController::class, 'institucionArbitral
 Route::get('/junta-prevencion', [PageController::class, 'juntaPrevencion'])->name('junta-prevencion');
 Route::get('/nuestro-equipo', [PageController::class, 'nuestroEquipo'])->name('nuestro-equipo');
 Route::get('/certificaciones', [PageController::class, 'certificaciones'])->name('certificaciones');
+Route::get('/politicas', [PageController::class, 'politicas'])->name('politicas');
 Route::get('/licencias', [PageController::class, 'licencias'])->name('licencias');
 Route::get('/contactos', [PageController::class, 'contactos'])->name('contactos');
 Route::get('/arbitral', [PageController::class, 'arbitral'])->name('arbitral');

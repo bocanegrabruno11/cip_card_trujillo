@@ -31,6 +31,8 @@
                                     <option value="institucion" {{ $documento->seccion == 'institucion' ? 'selected' : '' }}>Institución Arbitral</option>
                                     <option value="junta" {{ $documento->seccion == 'junta' ? 'selected' : '' }}>Junta de Prevención</option>
                                     <option value="convocatorias" {{ $documento->seccion == 'convocatorias' ? 'selected' : '' }}>Convocatorias</option>
+                                    <option value="certificaciones" {{ $documento->seccion == 'certificaciones' ? 'selected' : '' }}>Certificaciones</option>
+                                    <option value="politicas" {{ $documento->seccion == 'politicas' ? 'selected' : '' }}>Políticas</option>
                                 </select>
                             </div>
                         </div>

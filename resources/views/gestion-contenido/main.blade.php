@@ -63,7 +63,6 @@
         }
         .sidebar-header img:hover { transform: scale(1.05); }
 
-        /* Botón cerrar en móvil */
         .btn-close-sidebar {
             position: absolute; top: 15px; right: 15px;
             background: rgba(255,255,255,0.2); 
@@ -102,7 +101,6 @@
             padding: 10px 15px; 
             list-style: none; 
             overflow-y: auto;
-            /* Scrollbar personalizado fino */
             scrollbar-width: thin;
             scrollbar-color: rgba(255,255,255,0.3) transparent;
         }
@@ -128,11 +126,10 @@
             transition: transform 0.3s; 
         }
 
-        /* Animaciones Hover Sidebar */
         .menu-link:hover { 
             background-color: rgba(255,255,255,0.1); 
             color: white; 
-            padding-left: 25px; /* Pequeño desplazamiento a la derecha */
+            padding-left: 25px; 
         }
         .menu-link:hover i { 
             transform: scale(1.2); 
@@ -158,13 +155,14 @@
         .user-name { font-weight: 600; font-size: 14px; display: block; color: white; }
         .user-email { color: rgba(255,255,255,0.6); font-size: 12px; }
         
-        .btn-logout {
+        /* Botón Logout ahora es un button normal que abre modal */
+        .btn-logout-trigger {
             color: #ffb3b3; text-decoration: none; font-size: 13px;
             display: flex; align-items: center; gap: 8px;
             background: none; border: none; padding: 5px 0;
-            cursor: pointer; transition: all 0.3s;
+            cursor: pointer; transition: all 0.3s; width: 100%; text-align: left;
         }
-        .btn-logout:hover { color: white; transform: translateX(5px); }
+        .btn-logout-trigger:hover { color: white; transform: translateX(5px); }
 
         /* === CONTENIDO PRINCIPAL === */
         .main-wrapper {
@@ -205,7 +203,7 @@
             backdrop-filter: blur(3px);
         }
 
-        /* === RESPONSIVE === */
+        /* === RESPONSIVIDAD === */
         @media (max-width: 991.98px) {
             .sidebar { transform: translateX(-100%); }
             .sidebar.show { transform: translateX(0); }
@@ -285,23 +283,19 @@
                 <span class="user-name">{{ Auth::user()->name ?? 'Administrador' }}</span>
                 <span class="user-email">{{ Auth::user()->email ?? 'admin@cip.org.pe' }}</span>
             </div>
-            <form action="{{ route('logout') }}" method="POST">
-                @csrf
-                <button type="submit" class="btn-logout">
-                    <i class="fas fa-sign-out-alt"></i> Cerrar Sesión
-                </button>
-            </form>
+            
+            <button type="button" class="btn-logout-trigger" data-bs-toggle="modal" data-bs-target="#logoutModal">
+                <i class="fas fa-sign-out-alt"></i> Cerrar Sesión
+            </button>
         </div>
     </nav>
 
     <div class="main-wrapper">
-        
         <header class="mobile-header">
             <button class="btn btn-light border shadow-sm" onclick="toggleSidebar()">
                 <i class="fas fa-bars text-dark"></i>
             </button>
             <span class="fw-bold text-dark">Gestión de Contenidos</span>
-            
             <a href="{{ route('welcome') }}" target="_blank" class="btn btn-sm btn-outline-danger">
                 <i class="fas fa-external-link-alt"></i>
             </a>
@@ -312,12 +306,35 @@
         </main>
     </div>
 
+    <div class="modal fade" id="logoutModal" tabindex="-1" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg">
+          <div class="modal-header bg-dark text-white border-0">
+            <h5 class="modal-title fw-bold">Cerrar Sesión</h5>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body text-center p-4">
+            <i class="fas fa-sign-out-alt fa-3x text-secondary mb-3"></i>
+            <h5 class="fw-bold mb-2">¿Deseas salir del sistema?</h5>
+            <p class="text-muted mb-0">Selecciona "Salir" si estás listo para finalizar tu sesión actual.</p>
+          </div>
+          <div class="modal-footer border-0 justify-content-center pb-4">
+            <button type="button" class="btn btn-light px-4" data-bs-dismiss="modal">Cancelar</button>
+            
+            <form action="{{ route('logout') }}" method="POST">
+                @csrf
+                <button type="submit" class="btn btn-danger px-4 fw-bold">Salir</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote-lite.min.js"></script>
 
     <script>
-        // Lógica del Menú Móvil
         function toggleSidebar() {
             const sidebar = document.getElementById('sidebar');
             const overlay = document.getElementById('sidebarOverlay');
@@ -325,7 +342,6 @@
             overlay.classList.toggle('show');
         }
 
-        // Inicializar Summernote (Configuración mejorada)
         $(document).ready(function() {
             if ($('#summernote').length > 0) {
                 $('#summernote').summernote({
@@ -340,12 +356,7 @@
                         ['table', ['table']],
                         ['insert', ['link', 'picture']],
                         ['view', ['fullscreen', 'codeview', 'help']]
-                    ],
-                    callbacks: {
-                        onImageUpload: function(files) {
-                            // Aquí podrías agregar lógica para subir imágenes al servidor si fuera necesario
-                        }
-                    }
+                    ]
                 });
             }
         });

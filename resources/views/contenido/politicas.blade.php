@@ -1,6 +1,6 @@
 @extends('inicio')
 
-@section('title', 'Certificaciones - CIP La Libertad')
+@section('title', 'Políticas - CIP La Libertad')
 
 @section('styles')
 <style>
@@ -27,7 +27,7 @@
         margin: 0 auto 60px;
     }
 
-    /* === GRID DE CERTIFICADOS === */
+    /* === GRID DE DOCUMENTOS === */
     .cert-grid {
         display: flex;
         justify-content: center;
@@ -93,36 +93,36 @@
 
 <div class="cert-container">
     <div class="page-header">
-        <h1>Certificaciones</h1>
+        <h1>Políticas Institucionales</h1>
     </div>
 
     <div class="main-headline">
-        El CARD cuenta con el respaldo y certificación de las siguientes normas:
+        Conoce las políticas y lineamientos que rigen el funcionamiento ético y administrativo del CARD.
     </div>
 
     <div class="cert-grid">
         
-        @forelse($certificados as $cert)
+        @forelse($politicas as $pol)
             <div class="cert-card">
                 {{-- Enlace al PDF (abre en nueva pestaña) --}}
-                <a href="{{ asset('storage/' . $cert->ruta_archivo) }}" target="_blank" class="pdf-link-wrapper" style="text-decoration: none;">
+                <a href="{{ asset('storage/' . $pol->ruta_archivo) }}" target="_blank" class="pdf-link-wrapper" style="text-decoration: none;">
                     
                     <div class="pdf-thumbnail-wrapper">
                         <i class="fas fa-spinner fa-spin loading-icon"></i>
                         
                         {{-- Canvas dinámico con la ruta del archivo --}}
-                        <canvas class="pdf-canvas" data-url="{{ asset('storage/' . $cert->ruta_archivo) }}"></canvas>
+                        <canvas class="pdf-canvas" data-url="{{ asset('storage/' . $pol->ruta_archivo) }}"></canvas>
                     </div>
                 </a>
                 
-                <div class="cert-title">{{ $cert->titulo }}</div>
+                <div class="cert-title">{{ $pol->titulo }}</div>
                 
-                @if($cert->descripcion)
-                    <div class="cert-desc">{{ $cert->descripcion }}</div>
+                @if($pol->descripcion)
+                    <div class="cert-desc">{{ $pol->descripcion }}</div>
                 @endif
             </div>
         @empty
-            <p class="empty-msg">No hay certificaciones vigentes publicadas por el momento.</p>
+            <p class="empty-msg">No hay políticas publicadas actualmente.</p>
         @endforelse
 
     </div>

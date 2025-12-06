@@ -351,6 +351,7 @@
                         <li><a href="{{ route('organigrama') }}" onclick="handleMenuClick(event, this)">Organigrama</a></li>
                         <li><a href="{{ route('nuestro-equipo') }}" onclick="handleMenuClick(event, this)">Nuestro equipo</a></li>
                         <li><a href="{{ route('certificaciones') }}" onclick="handleMenuClick(event, this)">Certificaciones</a></li>
+                        <li><a href="{{ route('politicas') }}" onclick="handleMenuClick(event, this)">Políticas</a></li>
                         <li><a href="{{ route('licencias') }}" onclick="handleMenuClick(event, this)">Licencia de funcionamiento</a></li>
                     </ul>
                 </li>

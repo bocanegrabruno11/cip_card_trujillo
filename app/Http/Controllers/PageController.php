@@ -191,8 +191,28 @@ class PageController extends Controller
 
     public function certificaciones()
     {
-        return view('contenido.certificaciones');
+        // Obtenemos documentos de la sección 'certificaciones' y categoría 'certificacion'
+        $certificados = Documentacion::where('seccion', 'certificaciones')
+            ->where('activo', true)
+            ->whereDate('fecha_publicacion', '<=', Carbon::today())
+            ->orderBy('fecha_publicacion', 'desc')
+            ->get();
+
+        return view('contenido.certificaciones', compact('certificados'));
     }
+
+    public function politicas()
+    {
+        // Documentos de sección 'politicas' y categoría 'politica'
+        $politicas = Documentacion::where('seccion', 'politicas')
+            ->where('activo', true)
+            ->whereDate('fecha_publicacion', '<=', Carbon::today())
+            ->orderBy('fecha_publicacion', 'desc')
+            ->get();
+
+        return view('contenido.politicas', compact('politicas'));
+    }
+
 
     public function licencias()
     {

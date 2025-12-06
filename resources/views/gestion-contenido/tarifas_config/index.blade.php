@@ -15,21 +15,22 @@
         </div>
     </div>
 
+    {{-- ALERTAS --}}
     @if(session('success'))
-        <div class="alert alert-success alert-dismissible fade show" id="autoDismissAlert">
+        <div class="alert alert-success alert-dismissible fade show">
             <i class="fas fa-check-circle me-1"></i> {{ session('success') }}
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
     @endif
 
-    {{-- ALERTA DE ERROR (Por si acaso) --}}
     @if($errors->any())
-        <div class="alert alert-danger alert-dismissible fade show" id="autoDismissError">
-            <i class="fas fa-exclamation-triangle me-1"></i> Por favor revisa los errores.
+        <div class="alert alert-danger alert-dismissible fade show">
+            <i class="fas fa-exclamation-triangle me-1"></i> {{ $errors->first() }}
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
     @endif
 
+    {{-- TABLA --}}
     <div class="card border-0 shadow-sm">
         <div class="card-body p-0">
             <div class="table-responsive">
@@ -52,12 +53,28 @@
                                 </span>
                             </td>
                             <td class="text-muted small">{{ $item->descripcion }}</td>
+                            
+                            {{-- ACCIONES --}}
                             <td class="text-end pe-4">
-                                <a href="{{ route('tarifas_config.edit', $item->id) }}" class="btn btn-sm btn-warning text-white me-1"><i class="fas fa-edit"></i></a>
-                                <form action="{{ route('tarifas_config.destroy', $item->id) }}" method="POST" class="d-inline" onsubmit="return confirm('¿Eliminar esta variable? Esto podría afectar los cálculos.');">
-                                    @csrf @method('DELETE')
-                                    <button type="submit" class="btn btn-sm btn-outline-danger"><i class="fas fa-trash"></i></button>
-                                </form>
+                                <div class="dropdown">
+                                    <button class="btn btn-light btn-sm border shadow-sm" data-bs-toggle="dropdown">
+                                        <i class="fas fa-ellipsis-v text-muted"></i>
+                                    </button>
+                                    <ul class="dropdown-menu dropdown-menu-end border-0 shadow">
+                                        <li>
+                                            <a class="dropdown-item py-2" href="{{ route('tarifas_config.edit', $item->id) }}">
+                                                <i class="fas fa-edit text-warning me-2"></i> Editar
+                                            </a>
+                                        </li>
+                                        <li><hr class="dropdown-divider"></li>
+                                        <li>
+                                            <button class="dropdown-item py-2 text-danger" 
+                                                    onclick="confirmAction('{{ route('tarifas_config.destroy', $item->id) }}')">
+                                                <i class="fas fa-trash me-2"></i> Eliminar
+                                            </button>
+                                        </li>
+                                    </ul>
+                                </div>
                             </td>
                         </tr>
                         @empty
@@ -67,21 +84,59 @@
                 </table>
             </div>
         </div>
+        <div class="card-footer bg-white py-3">
+            {{ $configs->links('pagination::bootstrap-4') }}
+        </div>
     </div>
 </div>
+
+<div class="modal fade" id="confirmationModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-0 shadow-lg">
+      <div class="modal-header bg-danger text-white border-0">
+        <h5 class="modal-title fw-bold">Confirmar Eliminación</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body text-center p-4">
+        <div class="mb-3">
+            <i class="fas fa-exclamation-triangle fa-3x text-warning"></i>
+        </div>
+        <h5 class="fw-bold mb-2">¿Estás seguro?</h5>
+        <p class="text-muted mb-0">Si eliminas esta variable, los cálculos de la calculadora podrían fallar.</p>
+      </div>
+      <div class="modal-footer border-0 justify-content-center pb-4">
+        <button type="button" class="btn btn-light px-4" data-bs-dismiss="modal">Cancelar</button>
+        
+        <form id="confirmForm" action="" method="POST">
+            @csrf 
+            <input type="hidden" name="_method" value="DELETE">
+            <button type="submit" class="btn btn-danger px-4 fw-bold">Sí, eliminar</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        // Selecciona todas las alertas que quieras cerrar (por clase o ID)
+        // Auto-cerrar alertas
         const alerts = document.querySelectorAll('.alert-dismissible');
-        
         alerts.forEach(function(alertNode) {
-            // Esperar 3 segundos (3000 ms)
             setTimeout(function() {
-                // Usar la API de Bootstrap para cerrar la alerta suavemente
-                const bsAlert = new bootstrap.Alert(alertNode);
-                bsAlert.close();
-            }, 3000);
+                if (alertNode) {
+                    const bsAlert = new bootstrap.Alert(alertNode);
+                    bsAlert.close();
+                }
+            }, 4000); 
         });
     });
+
+    // Función para abrir modal
+    function confirmAction(url) {
+        const modal = new bootstrap.Modal(document.getElementById('confirmationModal'));
+        const form = document.getElementById('confirmForm');
+        form.action = url;
+        modal.show();
+    }
 </script>
 @endsection

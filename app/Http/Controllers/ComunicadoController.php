@@ -139,4 +139,10 @@ class ComunicadoController extends Controller
         
         return redirect()->back()->with('success', 'Estado actualizado.');
     }
+
+    public function show($id)
+    {
+        $comunicado = Comunicado::findOrFail($id);
+        return view('gestion-contenido.comunicados.show', compact('comunicado'));
+    }
 }
