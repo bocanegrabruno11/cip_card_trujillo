@@ -10,9 +10,8 @@ use App\Http\Controllers\OrganizacionCardController;
 use App\Http\Controllers\CalculadoraController;
 use App\Http\Controllers\DocumentacionController;
 use App\Http\Controllers\TarifaConfiguracionController;
-
 use App\Http\Controllers\ProfileController;
-
+use App\Http\Controllers\PersonaController;
 
 Route::get('/', [PageController::class, 'welcome'])->name('welcome');
 
@@ -60,9 +59,33 @@ Route::middleware(['auth', 'checkrole:gestor_contenido'])->group(function () {
 });
 
 
-Route::get('mesa-partes/dashboard', function () {
-    return view('mesa-partes/dashboard');
-})->middleware(['auth', 'checkrole:mesa_partes'])->name('dashboard');
+Route::middleware(['auth', 'checkrole:mesa_partes'])->prefix('mesa-partes')->group(function () {
+
+    // Dashboard
+    Route::get('/dashboard', function () {
+        return view('mesa-partes.dashboard');
+    })->name('dashboard');
+
+    // Actualizar Información
+    Route::get('/actualizar', function () {
+        return view('mesa-partes.actualizar');
+    })->name('actualizar');
+
+    // Arbitraje
+    Route::get('/arbitraje', function () {
+        return view('mesa-partes.arbitraje');
+    })->name('arbitraje');
+
+    // JRD
+    Route::get('/jrd', function () {
+        return view('mesa-partes.jrd');
+    })->name('jrd');
+Route::get('/actualizar', [PersonaController::class, 'actualizar'])->name('persona.actualizar');
+Route::post('/persona/store', [PersonaController::class, 'store'])->name('persona.store');
+Route::post('/persona/update', [PersonaController::class, 'update'])->name('persona.update');
+
+});
+
 
 
 Route::middleware('auth')->group(function () {
