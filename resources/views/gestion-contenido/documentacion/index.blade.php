@@ -25,9 +25,11 @@
                             <option value="">Todas</option>
                             <option value="institucion" {{ request('seccion') == 'institucion' ? 'selected' : '' }}>Institución Arbitral</option>
                             <option value="junta" {{ request('seccion') == 'junta' ? 'selected' : '' }}>Junta de Prevención</option>
-                            <option value="convocatorias" {{ request('seccion') == 'convocatorias' ? 'selected' : '' }}>Convocatorias</option>
+                            <!-- <option value="convocatorias" {{ request('seccion') == 'convocatorias' ? 'selected' : '' }}>Convocatorias</option> -->
                             <option value="certificaciones" {{ request('seccion') == 'certificaciones' ? 'selected' : '' }}>Certificaciones</option>
                             <option value="politicas" {{ request('seccion') == 'politicas' ? 'selected' : '' }}>Políticas</option>
+                            <option value="presentacion" {{ request('seccion') == 'presentacion' ? 'selected' : '' }}>Presentación del CARD</option>
+                            <option value="organizacion" {{ request('seccion') == 'organizacion' ? 'selected' : '' }}>Organización del CARD</option>
                         </select>
                     </div>
                     <div class="col-md-3">
@@ -98,7 +100,7 @@
                         <td>{{ $doc->fecha_publicacion->format('d/m/Y') }}</td>
                         <td>
                             <a href="{{ asset('storage/' . $doc->ruta_archivo) }}" target="_blank" class="btn btn-sm btn-outline-danger">
-                                <i class="fas fa-file-pdf"></i> Ver
+                                <i class="fas fa-file"></i> Ver
                             </a>
                         </td>
                         <td class="text-center">

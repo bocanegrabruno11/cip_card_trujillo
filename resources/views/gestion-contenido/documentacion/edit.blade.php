@@ -17,7 +17,7 @@
                     <div class="col-md-6">
                         <div class="mb-3">
                             <label class="form-label fw-bold">Título</label>
-                            <input type="text" name="titulo" class="form-control" required value="{{ $documento->titulo }}">
+                            <input type="text" name="titulo" class="form-control" required value="{{ $documento->titulo }}" oninput="this.value = this.value.toUpperCase()">
                         </div>
                         
                         <div class="row">
@@ -30,9 +30,11 @@
                                 <select name="seccion" id="selectSeccion" class="form-select" required>
                                     <option value="institucion" {{ $documento->seccion == 'institucion' ? 'selected' : '' }}>Institución Arbitral</option>
                                     <option value="junta" {{ $documento->seccion == 'junta' ? 'selected' : '' }}>Junta de Prevención</option>
-                                    <option value="convocatorias" {{ $documento->seccion == 'convocatorias' ? 'selected' : '' }}>Convocatorias</option>
+                                    <!-- <option value="convocatorias" {{ $documento->seccion == 'convocatorias' ? 'selected' : '' }}>Convocatorias</option> -->
                                     <option value="certificaciones" {{ $documento->seccion == 'certificaciones' ? 'selected' : '' }}>Certificaciones</option>
                                     <option value="politicas" {{ $documento->seccion == 'politicas' ? 'selected' : '' }}>Políticas</option>
+                                    <option value="presentacion" {{ $documento->seccion == 'presentacion' ? 'selected' : '' }}>Presentación del CARD</option>
+                                    <option value="organizacion" {{ $documento->seccion == 'organizacion' ? 'selected' : '' }}>Organización del CARD</option>
                                 </select>
                             </div>
                         </div>
@@ -54,7 +56,7 @@
                     <div class="col-md-6">
                         <div class="mb-3">
                             <label class="form-label fw-bold">Reemplazar Archivo (Opcional)</label>
-                            <input type="file" name="archivo" class="form-control" accept=".pdf,.doc,.docx,.xls,.xlsx">
+                            <input type="file" name="archivo" class="form-control" accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png,.webp">
                             <div class="mt-2 small">
                                 Archivo actual: 
                                 <a href="{{ asset('storage/' . $documento->ruta_archivo) }}" target="_blank" class="text-danger fw-bold">

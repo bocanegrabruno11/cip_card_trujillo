@@ -135,9 +135,9 @@
 <div class="events-container">
     <div class="page-title">
         <h1>Próximos Eventos</h1>
-        <a href="{{ route('convocatoria') }}" class="btn-convocatoria">
+        <!-- <a href="{{ route('convocatoria') }}" class="btn-convocatoria">
             <i class="fas fa-bullhorn"></i> Ver Convocatorias
-        </a>
+        </a> -->
     </div>
 
     <div class="events-grid">

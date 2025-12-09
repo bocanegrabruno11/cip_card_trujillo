@@ -16,7 +16,15 @@
                     <div class="col-md-6">
                         <div class="mb-3">
                             <label class="form-label fw-bold">Título del Documento <span class="text-danger">*</span></label>
-                            <input type="text" name="titulo" class="form-control" required value="{{ old('titulo') }}" placeholder="Ej: Bases del Concurso...">
+                            <input 
+                                type="text" 
+                                name="titulo" 
+                                class="form-control" 
+                                required 
+                                value="{{ old('titulo') }}" 
+                                placeholder="Ej: Bases del Concurso..."
+                                oninput="this.value = this.value.toUpperCase()"
+                            >
                         </div>
                         
                         <div class="row">
@@ -30,9 +38,11 @@
                                     <option value="">Seleccione...</option>
                                     <option value="institucion">Institución Arbitral</option>
                                     <option value="junta">Junta de Prevención (JRD)</option>
-                                    <option value="convocatorias">Convocatorias</option>
+                                    <!-- <option value="convocatorias">Convocatorias</option> -->
                                     <option value="certificaciones">Certificaciones</option>
                                     <option value="politicas">Políticas</option>
+                                    <option value="presentacion">Presentación del CARD</option>
+                                    <option value="organizacion">Organización del CARD</option>
                                 </select>
                             </div>
                         </div>
@@ -53,9 +63,9 @@
 
                     <div class="col-md-6">
                         <div class="mb-3">
-                            <label class="form-label fw-bold">Archivo (PDF, Word, Excel) <span class="text-danger">*</span></label>
-                            <input type="file" name="archivo" class="form-control" required accept=".pdf,.doc,.docx,.xls,.xlsx">
-                            <div class="form-text">Máximo 10MB.</div>
+                            <label class="form-label fw-bold">Archivo (PDF, Word, Excel, Imagen) <span class="text-danger">*</span></label>
+                            <input type="file" name="archivo" class="form-control" required accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png,.webp">
+                            <div class="form-text">Máximo 20MB.</div>
                         </div>
 
                         <div class="mb-3">

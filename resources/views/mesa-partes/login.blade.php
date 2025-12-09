@@ -256,7 +256,7 @@
             </div>
             <div class="brand-title">CARD</div>
             <div class="brand-subtitle">
-                CENTRO DE ARBITRAJE Y RESOLUCIÓN DE DISPUTAS DEL CIP TRUJILLO
+                CENTRO DE ARBITRAJE Y RESOLUCIÓN DE DISPUTAS DEL CIP LA LIBERTAD
             </div>
 
             <div class="brand-footer-logo">

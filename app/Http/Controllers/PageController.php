@@ -56,6 +56,12 @@ class PageController extends Controller
             ->latest() // Ordena por created_at desc
             ->first();
 
+        $documentoPresentacion = Documentacion::where('seccion', 'presentacion')
+            ->where('activo', true)
+            ->whereDate('fecha_publicacion', '<=', Carbon::today())
+            ->orderBy('fecha_publicacion', 'desc')
+            ->first();
+
         // 2. Inicializamos variables vacías por si no hay registros aún
         $imagenPrincipal = null;
         $galeria = collect([]); 
@@ -69,7 +75,7 @@ class PageController extends Controller
             $galeria = $ultimaPublicacion->detalles->where('grupo', 'galeria');
         }
 
-        return view('contenido.presentacion', compact('imagenPrincipal', 'galeria'));
+        return view('contenido.presentacion', compact('imagenPrincipal', 'galeria','documentoPresentacion'));
     }
 
     public function gestionContenido()
@@ -148,12 +154,18 @@ class PageController extends Controller
             ->where('activo', true)
             ->first();
 
+        $documentoResolucion = Documentacion::where('seccion', 'organizacion')
+        ->where('activo', true)
+        ->whereDate('fecha_publicacion', '<=', Carbon::today())
+        ->orderBy('fecha_publicacion', 'desc')
+        ->first();
         // Retornamos todas las colecciones a la vista
         return view('contenido.organizacion-card', compact(
             'directivos', 
             'decisorioPresidente', 
             'decisorioMiembros', 
-            'secretaria'
+            'secretaria',
+            'documentoResolucion'
         ));
     }
 

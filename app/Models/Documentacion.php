@@ -15,6 +15,7 @@ class Documentacion extends Model
         'seccion',
         'categoria',
         'ruta_archivo',
+        'ruta_miniatura',
         'activo'
     ];
 

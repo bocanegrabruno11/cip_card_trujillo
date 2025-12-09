@@ -363,9 +363,17 @@
 
     <div class="row">
         <div class="col-md-12">
-            <a href="#" target="_blank" class="btn-resolution">
-                RESOLUCIÓN DE LA CONFORMACIÓN DEL DIRECTORIO
-            </a>
+            {{-- LÓGICA DINÁMICA PARA LA RESOLUCIÓN --}}
+            @if(isset($documentoResolucion) && $documentoResolucion)
+                <a href="{{ asset('storage/' . $documentoResolucion->ruta_archivo) }}" target="_blank" class="btn-resolution">
+                    {{ $documentoResolucion->titulo ?? 'RESOLUCIÓN DE LA CONFORMACIÓN DEL DIRECTORIO' }}
+                </a>
+            @else
+                {{-- Botón oculto o mensaje de pendiente --}}
+                <span class="btn-resolution" style="background-color: #ccc; cursor: default;">
+                    RESOLUCIÓN PENDIENTE DE PUBLICACIÓN
+                </span>
+            @endif
         </div>
     </div>
 

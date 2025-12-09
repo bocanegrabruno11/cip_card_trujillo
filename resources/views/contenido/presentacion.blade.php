@@ -262,9 +262,16 @@
     <div class="content-grid">
         
         <div class="left-column">
-            <a href="#" class="btn-download">
-                <i class="fas fa-file-pdf"></i> CREACION DEL CARD
-            </a>
+            @if(isset($documentoPresentacion) && $documentoPresentacion)
+                <a href="{{ asset('storage/' . $documentoPresentacion->ruta_archivo) }}" target="_blank" class="btn-download">
+                    <i class="fas fa-file-pdf"></i> {{ $documentoPresentacion->titulo ?? 'CREACIÓN DEL CARD' }}
+                </a>
+            @else
+                {{-- Botón deshabilitado o mensaje si no hay documento --}}
+                <button class="btn-download" style="opacity: 0.6; cursor: not-allowed;" disabled>
+                    <i class="fas fa-file-pdf"></i> DOCUMENTO PENDIENTE
+                </button>
+            @endif
             
             @if($imagenPrincipal)
                 @php $imgUrl = asset('storage/' . $imagenPrincipal->ruta_imagen); @endphp
