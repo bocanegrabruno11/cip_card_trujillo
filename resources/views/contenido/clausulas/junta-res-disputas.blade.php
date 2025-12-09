@@ -1,6 +1,6 @@
 @extends('inicio')
 
-@section('title', 'Modelo de Cláusula Arbitral - CIP La Libertad')
+@section('title', 'Modelo de Cláusula Arbitral - CARD CD La Libertad')
 
 @section('styles')
 <style>

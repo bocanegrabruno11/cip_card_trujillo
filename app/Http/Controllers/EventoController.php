@@ -8,7 +8,9 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-
+use Illuminate\Support\Str;
+use Intervention\Image\ImageManager; // Si usas Intervention V3 (Descomentar si da error la de arriba)
+use Intervention\Image\Drivers\Gd\Driver; // Si usas Intervention V3
 class EventoController extends Controller
 {
     // 1. INDEX CON FILTROS
@@ -51,12 +53,15 @@ class EventoController extends Controller
                 'fecha_evento' => 'required|date',
                 'lugar' => 'nullable|string|max:255',
                 'descripcion' => 'nullable|string',
-                'imagen_principal' => 'required|file|mimes:jpeg,png,jpg,gif,svg,webp,avif|max:5120', // Obligatoria
+                'imagen_principal' => 'required|file|mimes:jpeg,png,jpg,gif,svg,webp,avif|max:5120',
                 'galeria' => 'nullable|array',
                 'galeria.*' => 'file|mimes:jpeg,png,jpg,gif,svg,webp,avif|max:5120'
             ]);
 
             DB::transaction(function () use ($request) {
+                // Instancia del Manager de Imagenes (V3)
+                $manager = new ImageManager(new Driver());
+
                 // A. Crear Evento
                 $evento = Evento::create([
                     'titulo' => $request->titulo,
@@ -66,11 +71,17 @@ class EventoController extends Controller
                     'activo' => true
                 ]);
 
-                // B. Guardar Imagen Principal
+                // B. Guardar Imagen Principal (WEBP)
                 if ($request->hasFile('imagen_principal')) {
                     $archivo = $request->file('imagen_principal');
-                    $nombre = "main_" . time() . '.' . $archivo->getClientOriginalExtension();
-                    $ruta = $archivo->storeAs('eventos/' . $evento->id, $nombre, 'public');
+                    
+                    // 1. Generar nombre y ruta
+                    $nombre = Str::uuid() . '.webp';
+                    $ruta = 'eventos/' . $evento->id . '/' . $nombre;
+
+                    // 2. Convertir y Guardar
+                    $img = $manager->read($archivo)->toWebp(80);
+                    Storage::disk('public')->put($ruta, $img);
 
                     DetalleEvento::create([
                         'evento_id' => $evento->id,
@@ -79,12 +90,17 @@ class EventoController extends Controller
                     ]);
                 }
 
-                // C. Guardar Galería
+                // C. Guardar Galería (WEBP)
                 if ($request->has('galeria')) {
-                    foreach ($request->galeria as $index => $archivo) {
+                    foreach ($request->galeria as $archivo) {
                         if ($archivo->isValid()) {
-                            $nombre = "galeria_{$index}_" . time() . '.' . $archivo->getClientOriginalExtension();
-                            $ruta = $archivo->storeAs('eventos/' . $evento->id, $nombre, 'public');
+                            // 1. Generar nombre y ruta
+                            $nombre = Str::uuid() . '.webp';
+                            $ruta = 'eventos/' . $evento->id . '/' . $nombre;
+
+                            // 2. Convertir y Guardar
+                            $img = $manager->read($archivo)->toWebp(80);
+                            Storage::disk('public')->put($ruta, $img);
 
                             DetalleEvento::create([
                                 'evento_id' => $evento->id,
@@ -104,7 +120,6 @@ class EventoController extends Controller
         }
     }
 
-    // 4. EDIT
     public function edit($id)
     {
         $evento = Evento::with('detalles')->findOrFail($id);
@@ -127,35 +142,53 @@ class EventoController extends Controller
             ]);
 
             DB::transaction(function () use ($request, $evento) {
+                // Instancia del Manager de Imagenes (V3)
+                $manager = new ImageManager(new Driver());
+
                 // A. Actualizar Datos
                 $evento->update($request->only(['titulo', 'fecha_evento', 'lugar', 'descripcion']));
 
-                // B. Actualizar Principal
+                // B. Actualizar Principal (WEBP)
                 if ($request->hasFile('imagen_principal')) {
-                    // Borrar anterior
-                    $old = $evento->detalles->where('tipo', 'principal')->first();
-                    if ($old) {
-                        Storage::disk('public')->delete($old->ruta_imagen);
-                        $old->delete();
-                    }
-                    // Subir nueva
                     $archivo = $request->file('imagen_principal');
-                    $nombre = "main_" . time() . '.' . $archivo->getClientOriginalExtension();
-                    $ruta = $archivo->storeAs('eventos/' . $evento->id, $nombre, 'public');
 
-                    DetalleEvento::create([
-                        'evento_id' => $evento->id,
-                        'ruta_imagen' => $ruta,
-                        'tipo' => 'principal'
-                    ]);
+                    if ($archivo->isValid()) {
+                        // 1. Borrar anterior
+                        $old = $evento->detalles->where('tipo', 'principal')->first();
+                        if ($old) {
+                            if (Storage::disk('public')->exists($old->ruta_imagen)) {
+                                Storage::disk('public')->delete($old->ruta_imagen);
+                            }
+                            $old->delete();
+                        }
+                        
+                        // 2. Generar nombre y ruta
+                        $nombre = Str::uuid() . '.webp';
+                        $ruta = 'eventos/' . $evento->id . '/' . $nombre;
+
+                        // 3. Convertir y Guardar
+                        $img = $manager->read($archivo)->toWebp(80);
+                        Storage::disk('public')->put($ruta, $img);
+
+                        DetalleEvento::create([
+                            'evento_id' => $evento->id,
+                            'ruta_imagen' => $ruta,
+                            'tipo' => 'principal'
+                        ]);
+                    }
                 }
 
-                // C. Nuevas Imágenes Galería
+                // C. Nuevas Imágenes Galería (WEBP)
                 if ($request->has('galeria_nueva')) {
-                    foreach ($request->galeria_nueva as $index => $archivo) {
+                    foreach ($request->galeria_nueva as $archivo) {
                         if ($archivo->isValid()) {
-                            $nombre = "galeria_new_{$index}_" . time() . '.' . $archivo->getClientOriginalExtension();
-                            $ruta = $archivo->storeAs('eventos/' . $evento->id, $nombre, 'public');
+                            // 1. Generar nombre y ruta
+                            $nombre = Str::uuid() . '.webp';
+                            $ruta = 'eventos/' . $evento->id . '/' . $nombre;
+
+                            // 2. Convertir y Guardar
+                            $img = $manager->read($archivo)->toWebp(80);
+                            Storage::disk('public')->put($ruta, $img);
 
                             DetalleEvento::create([
                                 'evento_id' => $evento->id,
@@ -171,7 +204,9 @@ class EventoController extends Controller
                     $ids = $request->eliminar_detalles;
                     $borrar = DetalleEvento::whereIn('id', $ids)->get();
                     foreach ($borrar as $d) {
-                        Storage::disk('public')->delete($d->ruta_imagen);
+                        if (Storage::disk('public')->exists($d->ruta_imagen)) {
+                            Storage::disk('public')->delete($d->ruta_imagen);
+                        }
                         $d->delete();
                     }
                 }

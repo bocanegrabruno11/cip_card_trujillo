@@ -252,12 +252,16 @@ class PageController extends Controller
             ->whereDate('fecha_publicacion', '<=', Carbon::today())
             ->orderBy('fecha_publicacion', 'desc')
             ->get();
+        $arbitrosNomina = OrganizacionCard::where('grupo', 'arbitros-nomina')
+            ->where('activo', true)
+            ->orderBy('orden')
+            ->get();
 
         // 2. Los agrupamos por la columna 'categoria'
         // Esto crea un array asociativo donde la llave es 'normativa', 'tarifario', etc.
         $docsPorCategoria = $documentos->groupBy('categoria');
 
-        return view('contenido.servicios.institucion-arbitral', compact('docsPorCategoria'));
+        return view('contenido.servicios.institucion-arbitral', compact('docsPorCategoria','arbitrosNomina'));
     }
 
     public function juntaPrevencion()
@@ -271,7 +275,12 @@ class PageController extends Controller
 
         $docsPorCategoria = $documentos->groupBy('categoria');
 
-        return view('contenido.servicios.junta-prevencion', compact('docsPorCategoria'));
+        $adjudicadoresNomina = OrganizacionCard::where('grupo', 'adjudicadores-nomina')
+            ->where('activo', true)
+            ->orderBy('orden')
+            ->get();
+
+        return view('contenido.servicios.junta-prevencion', compact('docsPorCategoria','adjudicadoresNomina'));
     }
 
     public function convocatoria()

@@ -6,7 +6,9 @@ use App\Models\Comunicado;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
-
+use Illuminate\Support\Str;
+use Intervention\Image\ImageManager; // Si usas Intervention V3 (Descomentar si da error la de arriba)
+use Intervention\Image\Drivers\Gd\Driver; // Si usas Intervention V3
 class ComunicadoController extends Controller
 {
     // 1. LISTAR Y FILTRAR
@@ -52,10 +54,19 @@ class ComunicadoController extends Controller
             ]);
 
             $ruta = null;
-            if ($request->hasFile('imagen')) {
+
+            if ($request->hasFile('imagen') && $request->file('imagen')->isValid()) {
                 $archivo = $request->file('imagen');
-                $nombre = "comunicado_" . time() . '.' . $archivo->getClientOriginalExtension();
-                $ruta = $archivo->storeAs('comunicados', $nombre, 'public');
+                
+                // 1. Generar nombre único .webp
+                $nombre = Str::uuid() . '.webp';
+                $ruta = 'comunicados/' . $nombre;
+
+                // 2. Convertir y Guardar (WebP calidad 80)
+                $manager = new ImageManager(new Driver());
+                $img = $manager->read($archivo)->toWebp(80);
+                
+                Storage::disk('public')->put($ruta, $img);
             }
 
             Comunicado::create([
@@ -81,7 +92,6 @@ class ComunicadoController extends Controller
         return view('gestion-contenido.comunicados.edit', compact('comunicado'));
     }
 
-    // 5. ACTUALIZAR
     public function update(Request $request, $id)
     {
         $comunicado = Comunicado::findOrFail($id);
@@ -96,15 +106,22 @@ class ComunicadoController extends Controller
 
             $datos = $request->only(['titulo', 'descripcion', 'url_enlace']);
 
-            if ($request->hasFile('imagen')) {
-                // Borrar anterior
-                if ($comunicado->ruta_imagen) {
+            if ($request->hasFile('imagen') && $request->file('imagen')->isValid()) {
+                
+                if ($comunicado->ruta_imagen && Storage::disk('public')->exists($comunicado->ruta_imagen)) {
                     Storage::disk('public')->delete($comunicado->ruta_imagen);
                 }
-                // Subir nueva
+
                 $archivo = $request->file('imagen');
-                $nombre = "comunicado_" . time() . '.' . $archivo->getClientOriginalExtension();
-                $datos['ruta_imagen'] = $archivo->storeAs('comunicados', $nombre, 'public');
+                $nombre = Str::uuid() . '.webp';
+                $ruta = 'comunicados/' . $nombre;
+
+                $manager = new ImageManager(new Driver());
+                $img = $manager->read($archivo)->toWebp(80);
+                
+                Storage::disk('public')->put($ruta, $img);
+
+                $datos['ruta_imagen'] = $ruta;
             }
 
             $comunicado->update($datos);

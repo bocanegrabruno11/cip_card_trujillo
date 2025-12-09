@@ -8,7 +8,9 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
-
+use Illuminate\Support\Str;
+use Intervention\Image\ImageManager; // Si usas Intervention V3 (Descomentar si da error la de arriba)
+use Intervention\Image\Drivers\Gd\Driver; // Si usas Intervention V3
 class PublicacionController extends Controller
 {
     // 1. Listar Publicaciones
@@ -58,14 +60,12 @@ class PublicacionController extends Controller
                 'titulo' => 'required|string|max:255',
                 'seccion' => 'required|string',
                 
-                // CAMBIO AQUÍ: Usamos 'file' en vez de 'image' y agregamos 'avif'
                 'imagen_principal' => 'nullable|file|mimes:jpeg,png,jpg,gif,svg,webp,avif|max:10240',
                 
                 'descripcion' => 'nullable|string',
                 'url_enlace_principal' => 'nullable|url',
                 'galeria' => 'nullable|array',
                 
-                // CAMBIO AQUÍ TAMBIÉN:
                 'galeria.*.imagen' => 'required|file|mimes:jpeg,png,jpg,gif,svg,webp,avif|max:10240',
                 
                 'galeria.*.url_enlace' => 'nullable|url',
@@ -74,7 +74,7 @@ class PublicacionController extends Controller
 
             DB::transaction(function () use ($request) {
                 
-                // A. Crear Publicación Padre
+                $manager = new ImageManager(new Driver());
                 $publicacion = Publicacion::create([
                     'titulo' => $request->titulo,
                     'descripcion' => $request->descripcion,
@@ -82,14 +82,16 @@ class PublicacionController extends Controller
                     'activo' => true
                 ]);
 
-                // B. Guardar Imagen Principal
                 if ($request->hasFile('imagen_principal')) {
                     $archivo = $request->file('imagen_principal');
-                    // Obtenemos extensión segura del archivo
-                    $extension = $archivo->getClientOriginalExtension(); 
-                    $nombre = "main_" . time() . '.' . $extension;
                     
-                    $ruta = $archivo->storeAs('publicaciones/' . $publicacion->id, $nombre, 'public');
+                    // Generar nombre único .webp
+                    $nombre = Str::uuid() . '.webp';
+                    $ruta = 'publicaciones/' . $publicacion->id . '/' . $nombre;
+                    
+                    // Convertir y Guardar
+                    $img = $manager->read($archivo)->toWebp(80);
+                    Storage::disk('public')->put($ruta, $img);
 
                     DetallePublicacion::create([
                         'publicacion_id' => $publicacion->id,
@@ -99,7 +101,6 @@ class PublicacionController extends Controller
                     ]);
                 }
 
-                // C. Guardar Galería
                 if ($request->has('galeria') && is_array($request->galeria)) {
                     
                     foreach ($request->galeria as $index => $item) {
@@ -108,10 +109,14 @@ class PublicacionController extends Controller
 
                         if ($request->hasFile($keyFile)) {
                             $archivo = $request->file($keyFile);
-                            $extension = $archivo->getClientOriginalExtension();
-                            $nombre = "slider_{$index}_" . time() . '.' . $extension;
                             
-                            $ruta = $archivo->storeAs('publicaciones/' . $publicacion->id, $nombre, 'public');
+                            // Generar nombre único .webp
+                            $nombre = Str::uuid() . '.webp';
+                            $ruta = 'publicaciones/' . $publicacion->id . '/' . $nombre;
+
+                            // Convertir y Guardar
+                            $img = $manager->read($archivo)->toWebp(80);
+                            Storage::disk('public')->put($ruta, $img);
 
                             DetallePublicacion::create([
                                 'publicacion_id' => $publicacion->id,
@@ -157,12 +162,14 @@ class PublicacionController extends Controller
             // Validación
             $request->validate([
                 'url_enlace_principal' => 'nullable|url',
-                // Validar arrays de edición
                 'galeria_existente.*.url_enlace' => 'nullable|url',
                 'galeria_existente.*.descripcion' => 'nullable|string',
             ]);
 
             DB::transaction(function () use ($request, $publicacion) {
+                
+                // Instancia del Manager de Imagenes (V3)
+                $manager = new ImageManager(new Driver());
                 
                 // 1. Actualizar Maestro
                 $publicacion->update([
@@ -175,17 +182,33 @@ class PublicacionController extends Controller
                 $detallePrincipal = $publicacion->detalles->where('grupo', 'principal')->first();
 
                 if ($request->hasFile('imagen_principal')) {
-                    // CASO A: Subieron una nueva imagen -> Reemplazamos
+                    // CASO A: Subieron una nueva imagen -> Convertir a WebP y Reemplazar
                     $archivo = $request->file('imagen_principal');
                     
                     if ($archivo->isValid()) {
-                        if ($detallePrincipal) {
+                        // Borrar anterior si existe
+                        if ($detallePrincipal && Storage::disk('public')->exists($detallePrincipal->ruta_imagen)) {
                             Storage::disk('public')->delete($detallePrincipal->ruta_imagen);
-                            $detallePrincipal->delete();
+                            $detallePrincipal->delete(); // Lo borramos para recrearlo limpio o lo actualizamos abajo
                         }
+                        // Nota: Si borras el registro $detallePrincipal arriba, debes crear uno nuevo.
+                        // Para optimizar, mejor actualizamos el registro existente o creamos si no existe.
                         
-                        $nombre = "main_" . time() . '.' . $archivo->getClientOriginalExtension();
-                        $ruta = $archivo->storeAs('publicaciones/' . $publicacion->id, $nombre, 'public');
+                        $nombre = Str::uuid() . '.webp';
+                        $ruta = 'publicaciones/' . $publicacion->id . '/' . $nombre;
+
+                        // Convertir y Guardar
+                        $img = $manager->read($archivo)->toWebp(80);
+                        Storage::disk('public')->put($ruta, $img);
+
+                        // Si ya existía registro, actualizamos ruta, si no, creamos.
+                        if ($detallePrincipal) { // Si no lo borraste en el bloque if anterior
+                             // Si decides borrar el registro DB arriba, usa create. Si no, usa update.
+                             // Como en tu código original hacías delete(), haré create.
+                             
+                             // RE-VERIFICACIÓN: Tu código original borraba el registro DB ($detallePrincipal->delete()). 
+                             // Mantendré esa lógica para consistencia.
+                        }
 
                         DetallePublicacion::create([
                             'publicacion_id' => $publicacion->id,
@@ -203,15 +226,20 @@ class PublicacionController extends Controller
                     }
                 }
 
-                // 3. Agregar NUEVAS imágenes (Igual que antes)
+                // 3. Agregar NUEVAS imágenes a la galería (WEBP)
                 if ($request->has('galeria_nueva') && is_array($request->galeria_nueva)) {
                     foreach ($request->galeria_nueva as $index => $item) {
                         $fileKey = "galeria_nueva.{$index}.imagen";
                         if ($request->hasFile($fileKey)) {
                             $archivo = $request->file($fileKey);
                             if ($archivo->isValid()) {
-                                $nombre = "slider_{$index}_" . time() . '.' . $archivo->getClientOriginalExtension();
-                                $ruta = $archivo->storeAs('publicaciones/' . $publicacion->id, $nombre, 'public');
+                                
+                                $nombre = Str::uuid() . '.webp';
+                                $ruta = 'publicaciones/' . $publicacion->id . '/' . $nombre;
+
+                                // Convertir y Guardar
+                                $img = $manager->read($archivo)->toWebp(80);
+                                Storage::disk('public')->put($ruta, $img);
 
                                 DetallePublicacion::create([
                                     'publicacion_id' => $publicacion->id,
@@ -225,7 +253,7 @@ class PublicacionController extends Controller
                     }
                 }
 
-                // 4. ACTUALIZAR DATOS DE GALERÍA EXISTENTE (NUEVO)
+                // 4. ACTUALIZAR DATOS DE GALERÍA EXISTENTE (Sin cambios de imagen)
                 if ($request->has('galeria_existente') && is_array($request->galeria_existente)) {
                     foreach ($request->galeria_existente as $detalleId => $datos) {
                         $detalle = DetallePublicacion::find($detalleId);
@@ -243,7 +271,9 @@ class PublicacionController extends Controller
                     $idsBorrar = $request->eliminar_detalles;
                     $detallesBorrar = DetallePublicacion::whereIn('id', $idsBorrar)->get();
                     foreach ($detallesBorrar as $detalle) {
-                        Storage::disk('public')->delete($detalle->ruta_imagen);
+                        if(Storage::disk('public')->exists($detalle->ruta_imagen)){
+                            Storage::disk('public')->delete($detalle->ruta_imagen);
+                        }
                         $detalle->delete();
                     }
                 }
@@ -252,7 +282,7 @@ class PublicacionController extends Controller
             return redirect()->route('publicaciones.index')->with('success', 'Publicación actualizada correctamente.');
 
         } catch (\Exception $e) {
-            \Illuminate\Support\Facades\Log::error('Error Update: ' . $e->getMessage());
+            Log::error('Error Update: ' . $e->getMessage());
             return back()->withInput()->withErrors(['error' => 'Error: ' . $e->getMessage()]);
         }
     }

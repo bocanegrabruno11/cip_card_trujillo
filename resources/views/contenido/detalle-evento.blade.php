@@ -112,11 +112,7 @@
 
 </div>
 
-<div class="text-center mb-5">
-    <a href="{{ route('eventos') }}" class="btn-read-more" style="background: #eee; color: #333; padding: 10px 20px; text-decoration: none; border-radius: 4px; display: inline-block;">
-        <i class="fas fa-arrow-left me-2"></i> Volver a Eventos
-    </a>
-</div>
+
 @endsection
 
 @section('scripts')

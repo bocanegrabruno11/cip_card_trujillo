@@ -10,10 +10,13 @@ class OrganizacionCard extends Model
 
     protected $fillable = [
         'nombres',
+        'codigo',
         'cargo',
+        'especialidad',
         'email',
         'telefono',
         'ruta_imagen',
+        'ruta_cv',
         'grupo',
         'orden',
         'activo'

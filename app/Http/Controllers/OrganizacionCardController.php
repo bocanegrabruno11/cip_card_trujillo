@@ -6,6 +6,9 @@ use App\Models\OrganizacionCard;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
+use Intervention\Image\ImageManager; // Si usas Intervention V3 (Descomentar si da error la de arriba)
+use Intervention\Image\Drivers\Gd\Driver; // Si usas Intervention V3
 
 class OrganizacionCardController extends Controller
 {
@@ -55,74 +58,69 @@ class OrganizacionCardController extends Controller
         return view('gestion-contenido.organizacion-card.create');
     }
 
-    public function store(Request $request)
+   public function store(Request $request)
     {
-        // LOG 1: Ver qué llega exactamente
         Log::info('--- INICIO STORE ORGANIZACION ---');
-        Log::info('Datos recibidos:', $request->except('imagen'));
-
-        try {
-            // 1. Validación
+        
             $request->validate([
-                'nombres' => 'required|string|max:255',
-                'cargo'   => 'nullable|string|max:255',
-                'grupo'   => 'required|string',
-                // Validamos la imagen con soporte amplio
-                'imagen'  => 'nullable|file|mimes:jpeg,png,jpg,gif,svg,webp,avif|max:5120', 
-                'email'   => 'nullable|email',
+                'nombres'      => 'required|string|max:255',
+                'codigo'       => 'nullable|string|max:50|unique:organizacion_card,codigo',
+                'cargo'        => 'nullable|string|max:255',
+                'especialidad' => 'nullable|string|max:255', // NUEVO
+                'grupo'        => 'required|string',
+                'imagen'       => 'nullable|image|mimes:jpeg,png,jpg,webp|max:5120',
+                'cv'           => 'nullable|file|mimes:pdf|max:10240', // NUEVO (PDF hasta 10MB)
+                'email'        => 'nullable|email',
             ]);
 
-            // LOG 2: Validación pasó
-            Log::info('Validación exitosa.');
-
-            $ruta = null;
-            if ($request->hasFile('imagen')) {
-                $archivo = $request->file('imagen');
+            try {
+            $rutaImagen = null;
+            if ($request->hasFile('imagen') && $request->file('imagen')->isValid()) {
+                $imagen = $request->file('imagen');
                 
-                // Verificar si el archivo es válido antes de guardar
-                if ($archivo->isValid()) {
-                    $ruta = $archivo->store('organizacion', 'public');
-                    Log::info('Imagen guardada en: ' . $ruta);
-                } else {
-                    Log::error('El archivo de imagen se recibió pero NO es válido (Error PHP: ' . $archivo->getError() . ')');
-                }
-            } else {
-                Log::info('No se recibió archivo de imagen.');
+                // 1. Generar nombre único con extensión .webp
+                $nombreArchivo = Str::uuid() . '.webp';
+                $rutaDestino = 'organizacion/fotos/' . $nombreArchivo;
+
+                $manager = new ImageManager(new Driver());
+                $img = $manager->read($imagen)->toWebp(80);
+
+                Storage::disk('public')->put($rutaDestino, $img);
+                
+                // 4. Asignar la ruta para guardar en BD
+                $rutaImagen = $rutaDestino;
             }
 
-            // 2. Cálculo Automático del Orden
+            $rutaCv = null;
+            if ($request->hasFile('cv') && $request->file('cv')->isValid()) {
+                $rutaCv = $request->file('cv')->store('organizacion/cvs', 'public');
+            }
+
+            // 3. Cálculo de Orden
             $ultimoOrden = OrganizacionCard::where('grupo', $request->grupo)->max('orden');
             $nuevoOrden = $ultimoOrden ? ($ultimoOrden + 1) : 1;
-            
-            Log::info("Orden calculado: {$nuevoOrden} para el grupo: {$request->grupo}");
 
-            // 3. Crear Registro
-            $miembro = OrganizacionCard::create([
-                'nombres'     => $request->nombres,
-                'cargo'       => $request->cargo,
-                'grupo'       => $request->grupo,
-                'orden'       => $nuevoOrden,
-                'email'       => $request->email,
-                'telefono'    => $request->telefono,
-                'ruta_imagen' => $ruta,
-                'activo'      => true
+            // 4. Crear Registro
+            OrganizacionCard::create([
+                'nombres'      => $request->nombres,
+                'codigo'       => $request->codigo,
+                'cargo'        => $request->cargo,
+                'especialidad' => $request->especialidad, // NUEVO
+                'grupo'        => $request->grupo,
+                'orden'        => $nuevoOrden,
+                'email'        => $request->email,
+                'telefono'     => $request->telefono,
+                'ruta_imagen'  => $rutaImagen,
+                'ruta_cv'      => $rutaCv, // NUEVO
+                'activo'       => true
             ]);
 
-            Log::info('Registro creado en BD con ID: ' . $miembro->id);
-
             return redirect()->route('organizacion-gestion.index')
-                ->with('success', 'Miembro registrado correctamente al final de la lista.');
-
-        } catch (\Illuminate\Validation\ValidationException $e) {
-            // Si falla la validación, logueamos POR QUÉ falló
-            Log::error('Fallo de Validación:', $e->errors());
-            return back()->withErrors($e->errors())->withInput();
+                ->with('success', 'Miembro registrado correctamente.');
 
         } catch (\Exception $e) {
-            // Cualquier otro error (Base de datos, permisos, etc.)
             Log::error('ERROR CRÍTICO en Organizacion Store: ' . $e->getMessage());
-            return back()->withInput()
-                ->withErrors(['error' => 'Error del sistema: ' . $e->getMessage()]);
+            return back()->withInput()->withErrors(['error' => 'Error del sistema: ' . $e->getMessage()]);
         }
     }
 
@@ -137,26 +135,48 @@ class OrganizacionCardController extends Controller
         $miembro = OrganizacionCard::findOrFail($id);
 
         $request->validate([
-            'nombres' => 'required|string',
-            // CAMBIO: Ahora es nullable
-            'cargo'   => 'nullable|string|max:255', 
-            'grupo'   => 'required|string',
-           // 'orden'   => 'required|integer',
-            'imagen'  => 'nullable|file|mimes:jpeg,png,jpg,gif,svg,webp,avif|max:5120',
+            'nombres'      => 'required|string|max:255',
+            'codigo'       => 'nullable|string|max:50|unique:organizacion_card,codigo,' . $id,
+            'cargo'        => 'nullable|string|max:255',
+            'especialidad' => 'nullable|string|max:255',
+            'grupo'        => 'required|string',
+            'imagen'       => 'nullable|image|mimes:jpeg,png,jpg,webp|max:5120',
+            'cv'           => 'nullable|file|mimes:pdf|max:10240',
         ]);
 
-        $datos = $request->all();
+        $datos = $request->except(['imagen', 'cv']);
 
-        if ($request->hasFile('imagen')) {
-            if ($miembro->ruta_imagen) {
+        if ($request->hasFile('imagen') && $request->file('imagen')->isValid()) {
+            
+            if ($miembro->ruta_imagen && Storage::disk('public')->exists($miembro->ruta_imagen)) {
                 Storage::disk('public')->delete($miembro->ruta_imagen);
             }
-            $datos['ruta_imagen'] = $request->file('imagen')->store('organizacion', 'public');
+
+            $imagen = $request->file('imagen');
+            $nombreArchivo = Str::uuid() . '.webp';
+            $rutaDestino = 'organizacion/fotos/' . $nombreArchivo;
+
+            $manager = new ImageManager(new Driver());
+            $img = $manager->read($imagen)->toWebp(80);
+
+            Storage::disk('public')->put($rutaDestino, $img);
+
+            $datos['ruta_imagen'] = $rutaDestino;
+        }
+
+        if ($request->hasFile('cv') && $request->file('cv')->isValid()) {
+            
+            if ($miembro->ruta_cv && Storage::disk('public')->exists($miembro->ruta_cv)) {
+                Storage::disk('public')->delete($miembro->ruta_cv);
+            }
+
+            $datos['ruta_cv'] = $request->file('cv')->store('organizacion/cvs', 'public');
         }
 
         $miembro->update($datos);
 
-        return redirect()->route('organizacion-gestion.index')->with('success', 'Datos actualizados.');
+        return redirect()->route('organizacion-gestion.index')
+            ->with('success', 'Datos actualizados correctamente.');
     }
 
     public function destroy($id)
@@ -175,5 +195,11 @@ class OrganizacionCardController extends Controller
         $miembro->activo = !$miembro->activo;
         $miembro->save();
         return redirect()->route('organizacion-gestion.index')->with('success', 'Estado actualizado.');
+    }
+
+    public function show($id)
+    {
+        $miembro = OrganizacionCard::findOrFail($id);
+        return view('gestion-contenido.organizacion-card.show', compact('miembro'));
     }
 }
