@@ -16,7 +16,15 @@
                     <div class="col-md-6">
                         <div class="mb-3">
                             <label class="form-label fw-bold">Título del Documento <span class="text-danger">*</span></label>
-                            <input type="text" name="titulo" class="form-control" required value="{{ old('titulo') }}" placeholder="Ej: Bases del Concurso...">
+                            <input 
+                                type="text" 
+                                name="titulo" 
+                                class="form-control" 
+                                required 
+                                value="{{ old('titulo') }}" 
+                                placeholder="Ej: Bases del Concurso..."
+                                oninput="this.value = this.value.toUpperCase()"
+                            >
                         </div>
                         
                         <div class="row">
@@ -30,9 +38,11 @@
                                     <option value="">Seleccione...</option>
                                     <option value="institucion">Institución Arbitral</option>
                                     <option value="junta">Junta de Prevención (JRD)</option>
-                                    <option value="convocatorias">Convocatorias</option>
+                                    <!-- <option value="convocatorias">Convocatorias</option> -->
                                     <option value="certificaciones">Certificaciones</option>
                                     <option value="politicas">Políticas</option>
+                                    <option value="presentacion">Presentación del CARD</option>
+                                    <option value="organizacion">Organización del CARD</option>
                                 </select>
                             </div>
                         </div>
@@ -53,9 +63,9 @@
 
                     <div class="col-md-6">
                         <div class="mb-3">
-                            <label class="form-label fw-bold">Archivo (PDF, Word, Excel) <span class="text-danger">*</span></label>
-                            <input type="file" name="archivo" class="form-control" required accept=".pdf,.doc,.docx,.xls,.xlsx">
-                            <div class="form-text">Máximo 10MB.</div>
+                            <label class="form-label fw-bold">Archivo (PDF, Word, Excel, Imagen) <span class="text-danger">*</span></label>
+                            <input type="file" name="archivo" class="form-control" required accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png,.webp">
+                            <div class="form-text">Máximo 20MB.</div>
                         </div>
 
                         <div class="mb-3">
@@ -67,7 +77,7 @@
                 </div>
             </div>
             <div class="card-footer bg-white text-end py-3">
-                <button type="submit" class="btn btn-primary px-4">Guardar Documento</button>
+                <button type="submit" id="btnSubmit" class="btn btn-primary px-4">Guardar Documento</button>
             </div>
         </div>
     </form>
@@ -92,6 +102,30 @@
 
         selectSeccion.addEventListener('change', toggleCategoria);
         toggleCategoria(); // Ejecutar al inicio por si hay old values
+    });
+</script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const form = document.querySelector('form');
+        const btn = document.getElementById('btnSubmit');
+
+        if (form && btn) {
+            form.addEventListener('submit', function(e) {
+                // 1. Verificar validez del formulario (HTML5 validation)
+                // Si el navegador detecta campos vacíos requeridos, no bloqueamos el botón
+                if (!form.checkValidity()) {
+                    return;
+                }
+
+                // 2. Congelar el ancho del botón para que no se deforme al cambiar el texto
+                const width = btn.offsetWidth;
+                btn.style.width = width + 'px';
+
+                // 3. Deshabilitar y mostrar animación
+                btn.disabled = true;
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i> Procesando...';
+            });
+        }
     });
 </script>
 @endsection

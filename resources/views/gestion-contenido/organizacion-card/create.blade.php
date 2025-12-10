@@ -14,14 +14,26 @@
     <form action="{{ route('organizacion-gestion.store') }}" method="POST" enctype="multipart/form-data">
         @csrf
         <div class="row">
+            {{-- COLUMNA DATOS --}}
             <div class="col-md-8">
                 <div class="card border-0 shadow-sm mb-4">
                     <div class="card-body p-4">
                         
                         <div class="row mb-3">
-                            <div class="col-12">
+                            <div class="col-6">
                                 <label class="form-label fw-bold">Nombres y Apellidos <span class="text-danger">*</span></label>
-                                <input type="text" name="nombres" class="form-control" required value="{{ old('nombres') }}">
+                                <input 
+                                    type="text" 
+                                    name="nombres" 
+                                    class="form-control" 
+                                    required 
+                                    value="{{ old('nombres') }}"
+                                    oninput="this.value = this.value.replace(/[^A-Za-zñÑáéíóúÁÉÍÓÚ\s]/g, '').toUpperCase();"
+                                >
+                            </div>
+                             <div class="col-6">
+                                <label class="form-label fw-bold">Código</label>
+                                <input type="text" name="codigo" class="form-control" value="{{ old('codigo') }}">
                             </div>
                         </div>
                         
@@ -29,20 +41,30 @@
                             <div class="col-md-6">
                                 <label class="form-label fw-bold">Grupo / Sección <span class="text-danger">*</span></label>
                                 <select name="grupo" class="form-select" required>
-                                    <option value="" disabled selected>Seleccione...</option>
-                                    <option value="directivo">Órgano Directivo</option>
-                                    <option value="decisorio_presidente">Órgano Decisorio (Presidente)</option>
-                                    <option value="decisorio_miembros">Órgano Decisorio (Miembros)</option>
-                                    <option value="secretaria">Secretaría General</option>
-                                    <option value="secretarios_arbitrales">Secretarios Arbitrales</option>
-                                    <option value="apoyo">Personal de Apoyo</option>
-                                    <option value="administrativo">Soporte Administrativo</option>
+                                    <option value="" disabled {{ old('grupo') == '' ? 'selected' : '' }}>Seleccione...</option>
+                                    
+                                    <option value="directivo" {{ old('grupo') == 'directivo' ? 'selected' : '' }}>Órgano Directivo</option>
+                                    <option value="decisorio_presidente" {{ old('grupo') == 'decisorio_presidente' ? 'selected' : '' }}>Órgano Decisorio (Presidente)</option>
+                                    <option value="decisorio_miembros" {{ old('grupo') == 'decisorio_miembros' ? 'selected' : '' }}>Órgano Decisorio (Miembros)</option>
+                                    <option value="secretaria" {{ old('grupo') == 'secretaria' ? 'selected' : '' }}>Secretaría General</option>
+                                    <option value="secretarios_arbitrales" {{ old('grupo') == 'secretarios_arbitrales' ? 'selected' : '' }}>Secretarios Arbitrales</option>
+                                    <option value="apoyo" {{ old('grupo') == 'apoyo' ? 'selected' : '' }}>Personal de Apoyo</option>
+                                    <option value="administrativo" {{ old('grupo') == 'administrativo' ? 'selected' : '' }}>Soporte Administrativo</option>
+                                    <option value="arbitros-nomina" {{ old('grupo') == 'arbitros-nomina' ? 'selected' : '' }}>Nómina de Arbitros</option>
+                                    <option value="adjudicadores-nomina" {{ old('grupo') == 'adjudicadores-nomina' ? 'selected' : '' }}>Nómina de Adjudicadores</option>
                                 </select>
-                                <div class="form-text small">El sistema asignará el orden automáticamente al final.</div>
                             </div>
                             <div class="col-md-6">
-                                <label class="form-label fw-bold">Cargo Exacto (Opcional)</label>
-                                <input type="text" name="cargo" class="form-control" placeholder="Ej: Decano, Director..." value="{{ old('cargo') }}">
+                                <label class="form-label fw-bold">Cargo</label>
+                                <input type="text" name="cargo" class="form-control" placeholder="Ej: Decano..." value="{{ old('cargo') }}">
+                            </div>
+                        </div>
+
+                        {{-- NUEVO CAMPO: ESPECIALIDAD --}}
+                        <div class="row mb-3">
+                            <div class="col-12">
+                                <label class="form-label fw-bold">Especialidad / Profesión</label>
+                                <input type="text" name="especialidad" class="form-control" placeholder="Ej: Ingeniero Civil, Abogado..." value="{{ old('especialidad') }}">
                             </div>
                         </div>
 
@@ -56,10 +78,21 @@
                                 <input type="text" name="telefono" class="form-control" value="{{ old('telefono') }}">
                             </div>
                         </div>
+
+                        {{-- NUEVO CAMPO: CV --}}
+                        <div class="row mb-3">
+                            <div class="col-12">
+                                <label class="form-label fw-bold">Hoja de Vida (CV)</label>
+                                <input type="file" name="cv" class="form-control" accept=".pdf">
+                                <div class="form-text">Formato PDF. Máximo 10MB.</div>
+                            </div>
+                        </div>
+
                     </div>
                 </div>
             </div>
 
+            {{-- COLUMNA FOTO --}}
             <div class="col-md-4">
                 <div class="card border-0 shadow-sm mb-4">
                     <div class="card-header bg-white fw-bold">Foto del Miembro</div>
@@ -68,32 +101,18 @@
                         
                         <div class="bg-light rounded-circle d-flex align-items-center justify-content-center mx-auto overflow-hidden" style="width: 200px; height: 200px; border: 5px solid #fff; box-shadow: 0 0 10px rgba(0,0,0,0.1);">
                             <img id="previewImg" src="" 
-                                 style="width: 100%; height: 100%; object-fit: cover; display: none; cursor: pointer;"
-                                 data-bs-toggle="modal" data-bs-target="#imageModal" title="Clic para ampliar">
-                                 
+                                 style="width: 100%; height: 100%; object-fit: cover; display: none;">
                             <span id="textInfo" class="text-muted small">Sin Foto</span>
                         </div>
                     </div>
                 </div>
-                <button type="submit" class="btn btn-primary w-100 btn-lg">GUARDAR REGISTRO</button>
+                <button type="submit" id="btnSubmit" class="btn btn-primary w-100 btn-lg">GUARDAR REGISTRO</button>
             </div>
         </div>
     </form>
 </div>
 
-<div class="modal fade" id="imageModal" tabindex="-1" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content bg-transparent border-0">
-      <div class="text-end"><button type="button" class="btn-close btn-close-white bg-white rounded-circle p-2" data-bs-dismiss="modal"></button></div>
-      <div class="text-center">
-          <img src="" id="modalImagePreview" class="img-fluid rounded-circle border border-4 border-white shadow-lg" style="max-height: 500px; max-width: 500px; object-fit: cover;">
-      </div>
-    </div>
-  </div>
-</div>
-
 <script>
-    // Preview Logic
     document.getElementById('inputImg').addEventListener('change', function(e) {
         const file = e.target.files[0];
         if (file) {
@@ -107,14 +126,29 @@
             reader.readAsDataURL(file);
         }
     });
+</script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const form = document.querySelector('form');
+        const btn = document.getElementById('btnSubmit');
 
-    // Modal Logic (Pasa el src de la preview al modal)
-    const imageModal = document.getElementById('imageModal');
-    if (imageModal) {
-        imageModal.addEventListener('show.bs.modal', event => {
-            const src = document.getElementById('previewImg').src;
-            imageModal.querySelector('#modalImagePreview').src = src;
-        });
-    }
+        if (form && btn) {
+            form.addEventListener('submit', function(e) {
+                // 1. Verificar validez del formulario (HTML5 validation)
+                // Si el navegador detecta campos vacíos requeridos, no bloqueamos el botón
+                if (!form.checkValidity()) {
+                    return;
+                }
+
+                // 2. Congelar el ancho del botón para que no se deforme al cambiar el texto
+                const width = btn.offsetWidth;
+                btn.style.width = width + 'px';
+
+                // 3. Deshabilitar y mostrar animación
+                btn.disabled = true;
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i> Procesando...';
+            });
+        }
+    });
 </script>
 @endsection

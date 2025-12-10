@@ -1,6 +1,6 @@
 @extends('inicio')
 
-@section('title', 'Comunicados - CIP La Libertad')
+@section('title', 'Comunicados - CARD CD La Libertad')
 
 @section('styles')
 <style>

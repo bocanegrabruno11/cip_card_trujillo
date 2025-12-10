@@ -193,6 +193,22 @@
     }
     .nav-overlay.active { display: block; }
 
+    /* === AJUSTE PARA PANTALLAS MEDIANAS (TABLET HORIZONTAL / LAPTOP PEQUEÑA) === */
+    /* Cuando el ancho es menor a 1250px pero mayor a 1024px (que es cuando entra el móvil) */
+    @media (max-width: 1350px) and (min-width: 1025px) {
+        .logo-text {
+            font-size: 11px; /* Reduce el texto del logo */
+            max-width: 180px;
+        }
+        
+        .nav-menu > li > a {
+            font-size: 11px; /* Reduce fuente del menú */
+            padding: 0 8px;  /* Reduce espacio entre items */
+            text-align: center; /* Centra el texto si se parte en dos líneas */
+            line-height: 1.2;
+        }
+    }
+
     /* =========================================
        5. RESPONSIVIDAD (MEDIA QUERIES)
        ========================================= */

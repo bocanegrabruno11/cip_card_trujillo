@@ -41,6 +41,9 @@
                             <option value="secretarios_arbitrales" {{ request('grupo') == 'secretarios_arbitrales' ? 'selected' : '' }}>Secretarios Arbitrales</option>
                             <option value="apoyo" {{ request('grupo') == 'apoyo' ? 'selected' : '' }}>Personal de Apoyo</option>
                             <option value="administrativo" {{ request('grupo') == 'administrativo' ? 'selected' : '' }}>Soporte Administrativo</option>
+                            <option value="arbitros-nomina" {{ request('grupo') == 'arbitros-nomina' ? 'selected' : '' }}>Nómina de Arbitros</option>
+                            <option value="adjudicadores-nomina" {{ request('grupo') == 'adjudicadores-nomina' ? 'selected' : '' }}>Nómina de Adjudicadores</option>
+
                         </select>
                     </div>
 
@@ -83,6 +86,7 @@
                         <tr>
                             <th class="ps-4">Foto</th>
                             <th>Nombre</th>
+                            <th>Código</th>
                             <th>Cargo</th>
                             <th>Grupo</th>
                             <th class="text-center">Estado</th>
@@ -106,6 +110,7 @@
                                 @endif
                             </td>
                             <td class="fw-bold">{{ $item->nombres }}</td>
+                            <td>{{ $item->codigo ?? ' ' }}</td>
                             <td>{{ $item->cargo }}</td>
                             <td><span class="badge bg-light text-dark border">{{ $item->grupo }}</span></td>
                             

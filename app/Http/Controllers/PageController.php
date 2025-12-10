@@ -56,6 +56,12 @@ class PageController extends Controller
             ->latest() // Ordena por created_at desc
             ->first();
 
+        $documentoPresentacion = Documentacion::where('seccion', 'presentacion')
+            ->where('activo', true)
+            ->whereDate('fecha_publicacion', '<=', Carbon::today())
+            ->orderBy('fecha_publicacion', 'desc')
+            ->first();
+
         // 2. Inicializamos variables vacías por si no hay registros aún
         $imagenPrincipal = null;
         $galeria = collect([]); 
@@ -69,7 +75,7 @@ class PageController extends Controller
             $galeria = $ultimaPublicacion->detalles->where('grupo', 'galeria');
         }
 
-        return view('contenido.presentacion', compact('imagenPrincipal', 'galeria'));
+        return view('contenido.presentacion', compact('imagenPrincipal', 'galeria','documentoPresentacion'));
     }
 
     public function gestionContenido()
@@ -148,12 +154,18 @@ class PageController extends Controller
             ->where('activo', true)
             ->first();
 
+        $documentoResolucion = Documentacion::where('seccion', 'organizacion')
+        ->where('activo', true)
+        ->whereDate('fecha_publicacion', '<=', Carbon::today())
+        ->orderBy('fecha_publicacion', 'desc')
+        ->first();
         // Retornamos todas las colecciones a la vista
         return view('contenido.organizacion-card', compact(
             'directivos', 
             'decisorioPresidente', 
             'decisorioMiembros', 
-            'secretaria'
+            'secretaria',
+            'documentoResolucion'
         ));
     }
 
@@ -252,12 +264,16 @@ class PageController extends Controller
             ->whereDate('fecha_publicacion', '<=', Carbon::today())
             ->orderBy('fecha_publicacion', 'desc')
             ->get();
+        $arbitrosNomina = OrganizacionCard::where('grupo', 'arbitros-nomina')
+            ->where('activo', true)
+            ->orderBy('orden')
+            ->get();
 
         // 2. Los agrupamos por la columna 'categoria'
         // Esto crea un array asociativo donde la llave es 'normativa', 'tarifario', etc.
         $docsPorCategoria = $documentos->groupBy('categoria');
 
-        return view('contenido.servicios.institucion-arbitral', compact('docsPorCategoria'));
+        return view('contenido.servicios.institucion-arbitral', compact('docsPorCategoria','arbitrosNomina'));
     }
 
     public function juntaPrevencion()
@@ -271,7 +287,12 @@ class PageController extends Controller
 
         $docsPorCategoria = $documentos->groupBy('categoria');
 
-        return view('contenido.servicios.junta-prevencion', compact('docsPorCategoria'));
+        $adjudicadoresNomina = OrganizacionCard::where('grupo', 'adjudicadores-nomina')
+            ->where('activo', true)
+            ->orderBy('orden')
+            ->get();
+
+        return view('contenido.servicios.junta-prevencion', compact('docsPorCategoria','adjudicadoresNomina'));
     }
 
     public function convocatoria()
@@ -292,9 +313,9 @@ class PageController extends Controller
         $escalas = TarifaEscala::where('activo', true)->get();
 
         $data = [
-            'unico'    => $escalas->where('tipo', 'arbitro_unico')->values(),
-            'tribunal' => $escalas->where('tipo', 'tribunal_arbitral')->values(),
-            'gastos'   => $escalas->where('tipo', 'gastos_administrativos')->values(),
+            'unico'    => $escalas->where('tipo_calculadora', 'servicio_arbitral')->where('tipo', 'arbitro_unico')->values(),
+            'tribunal' => $escalas->where('tipo_calculadora', 'servicio_arbitral')->where('tipo', 'tribunal_arbitral')->values(),
+            'gastos'   => $escalas->where('tipo_calculadora', 'servicio_arbitral')->where('tipo', 'gastos_administrativos')->values(),
         ];
 
         $configIgv = TarifaConfiguracion::where('clave', 'igv')->first();
@@ -307,9 +328,9 @@ class PageController extends Controller
     {
         $escalas = TarifaEscala::where('activo', true)->get();
         $data = [
-            'unico'    => $escalas->where('tipo', 'arbitro_unico')->values(),
-            'tribunal' => $escalas->where('tipo', 'tribunal_arbitral')->values(),
-            'gastos'   => $escalas->where('tipo', 'gastos_administrativos')->values(),
+            'unico'    => $escalas->where('tipo_calculadora', 'servicio_arbitral')->where('tipo', 'arbitro_unico')->values(),
+            'tribunal' => $escalas->where('tipo_calculadora', 'servicio_arbitral')->where('tipo', 'tribunal_arbitral')->values(),
+            'gastos'   => $escalas->where('tipo_calculadora', 'servicio_arbitral')->where('tipo', 'gastos_administrativos')->values(),
         ];
 
         $config = TarifaConfiguracion::whereIn('clave', ['igv', 'porcentaje_indeterminado'])->pluck('valor', 'clave');
@@ -321,7 +342,19 @@ class PageController extends Controller
     }
 
     public function calcJunta() {
-        return view('contenido.calculadoras.junta');
+
+         $escalas = TarifaEscala::where('activo', true)->get();
+        $data = [
+            'unico'    => $escalas->where('tipo_calculadora', 'junta_prevencion')->where('tipo', 'arbitro_unico')->values(),
+            'tribunal' => $escalas->where('tipo_calculadora', 'junta_prevencion')->where('tipo', 'tribunal_arbitral')->values(),
+            'gastos'   => $escalas->where('tipo_calculadora', 'junta_prevencion')->where('tipo', 'gastos_administrativos')->values(),
+        ];
+
+        $config = TarifaConfiguracion::whereIn('clave', ['igv', 'porcentaje_indeterminado'])->pluck('valor', 'clave');
+        
+        $igv = floatval($config['igv'] ?? 18.00);
+        $porcentajeIndeterminado = floatval($config['porcentaje_indeterminado'] ?? 5.00); // El 5% del PDF
+        return view('contenido.calculadoras.junta', compact('data', 'igv', 'porcentajeIndeterminado'));
     }
 
     

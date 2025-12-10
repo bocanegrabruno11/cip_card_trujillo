@@ -13,8 +13,18 @@
     <div class="row justify-content-center">
         <div class="col-md-8">
             <div class="card border-0 shadow-sm">
-                <div class="card-header bg-dark text-white fw-bold">
-                    Escala {{ $tarifa->rango_letra }} - {{ $tarifa->tipo_legible }}
+                <div class="card-header bg-dark text-white">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span class="fw-bold">Escala {{ $tarifa->rango_letra }} - {{ $tarifa->tipo_legible }}</span>
+                        {{-- BADGE DEL TIPO DE CALCULADORA --}}
+                        @if($tarifa->tipo_calculadora == 'servicio_arbitral')
+                            <span class="badge bg-danger">Servicio Arbitral</span>
+                        @elseif($tarifa->tipo_calculadora == 'junta_prevencion')
+                            <span class="badge bg-info text-dark">Junta de Prevención</span>
+                        @else
+                            <span class="badge bg-secondary">Sin asignar</span>
+                        @endif
+                    </div>
                 </div>
                 <div class="card-body p-4">
                     <div class="row mb-3">

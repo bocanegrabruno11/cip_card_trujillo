@@ -17,7 +17,7 @@
                     <div class="col-md-6">
                         <div class="mb-3">
                             <label class="form-label fw-bold">Título</label>
-                            <input type="text" name="titulo" class="form-control" required value="{{ $documento->titulo }}">
+                            <input type="text" name="titulo" class="form-control" required value="{{ $documento->titulo }}" oninput="this.value = this.value.toUpperCase()">
                         </div>
                         
                         <div class="row">
@@ -30,9 +30,11 @@
                                 <select name="seccion" id="selectSeccion" class="form-select" required>
                                     <option value="institucion" {{ $documento->seccion == 'institucion' ? 'selected' : '' }}>Institución Arbitral</option>
                                     <option value="junta" {{ $documento->seccion == 'junta' ? 'selected' : '' }}>Junta de Prevención</option>
-                                    <option value="convocatorias" {{ $documento->seccion == 'convocatorias' ? 'selected' : '' }}>Convocatorias</option>
+                                    <!-- <option value="convocatorias" {{ $documento->seccion == 'convocatorias' ? 'selected' : '' }}>Convocatorias</option> -->
                                     <option value="certificaciones" {{ $documento->seccion == 'certificaciones' ? 'selected' : '' }}>Certificaciones</option>
                                     <option value="politicas" {{ $documento->seccion == 'politicas' ? 'selected' : '' }}>Políticas</option>
+                                    <option value="presentacion" {{ $documento->seccion == 'presentacion' ? 'selected' : '' }}>Presentación del CARD</option>
+                                    <option value="organizacion" {{ $documento->seccion == 'organizacion' ? 'selected' : '' }}>Organización del CARD</option>
                                 </select>
                             </div>
                         </div>
@@ -54,7 +56,7 @@
                     <div class="col-md-6">
                         <div class="mb-3">
                             <label class="form-label fw-bold">Reemplazar Archivo (Opcional)</label>
-                            <input type="file" name="archivo" class="form-control" accept=".pdf,.doc,.docx,.xls,.xlsx">
+                            <input type="file" name="archivo" class="form-control" accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png,.webp">
                             <div class="mt-2 small">
                                 Archivo actual: 
                                 <a href="{{ asset('storage/' . $documento->ruta_archivo) }}" target="_blank" class="text-danger fw-bold">
@@ -72,7 +74,7 @@
                 </div>
             </div>
             <div class="card-footer bg-white text-end py-3">
-                <button type="submit" class="btn btn-warning text-white px-4">Actualizar Documento</button>
+                <button type="submit" id="btnSubmit" class="btn btn-warning text-white px-4">Actualizar Documento</button>
             </div>
         </div>
     </form>
@@ -93,6 +95,30 @@
         }
         selectSeccion.addEventListener('change', toggleCategoria);
         toggleCategoria(); // Ejecutar al cargar para mostrar estado actual
+    });
+</script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const form = document.querySelector('form');
+        const btn = document.getElementById('btnSubmit');
+
+        if (form && btn) {
+            form.addEventListener('submit', function(e) {
+                // 1. Verificar validez del formulario (HTML5 validation)
+                // Si el navegador detecta campos vacíos requeridos, no bloqueamos el botón
+                if (!form.checkValidity()) {
+                    return;
+                }
+
+                // 2. Congelar el ancho del botón para que no se deforme al cambiar el texto
+                const width = btn.offsetWidth;
+                btn.style.width = width + 'px';
+
+                // 3. Deshabilitar y mostrar animación
+                btn.disabled = true;
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i> Procesando...';
+            });
+        }
     });
 </script>
 @endsection

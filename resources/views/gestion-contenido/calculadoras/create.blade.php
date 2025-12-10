@@ -19,7 +19,20 @@
         @csrf
         <div class="card border-0 shadow-sm">
             <div class="card-body p-4">
-                
+                <div class="row g-3 mb-4">
+                    <div class="col-12">
+                        <label class="form-label fw-bold text-uppercase text-muted small">Configuración Principal</label>
+                    </div>
+                    <div class="col-md-12">
+                        <label class="form-label fw-bold">Pertenece a la Calculadora: <span class="text-danger">*</span></label>
+                        <select name="tipo_calculadora" class="form-select @error('tipo_calculadora') is-invalid @enderror" required>
+                            <option value="">Seleccione el sistema...</option>
+                            <option value="servicio_arbitral" {{ old('tipo_calculadora') == 'servicio_arbitral' ? 'selected' : '' }}>Servicio Arbitral (Arbitraje)</option>
+                            <option value="junta_prevencion" {{ old('tipo_calculadora') == 'junta_prevencion' ? 'selected' : '' }}>Junta de Prevención (JRD)</option>
+                        </select>
+                        @error('tipo_calculadora') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                    </div>
+                </div>
                 <div class="row g-3 mb-4">
                     <div class="col-md-6">
                         <label class="form-label fw-bold">Tipo de Tabla <span class="text-danger">*</span></label>
@@ -34,7 +47,8 @@
                     
                     <div class="col-md-6">
                         <label class="form-label fw-bold">Letra del Rango <span class="text-danger">*</span></label>
-                        <input type="text" name="rango_letra" class="form-control @error('rango_letra') is-invalid @enderror" placeholder="Ej: A, B, C..." value="{{ old('rango_letra') }}" required maxlength="5">
+                        <input type="text" name="rango_letra" class="form-control @error('rango_letra') is-invalid @enderror" placeholder="Ej: A, B, C..." value="{{ old('rango_letra') }}" required maxlength="5"
+                        oninput="this.value = this.value.replace(/[^A-Za-zñÑ]/g, '').toUpperCase();">
                         @error('rango_letra') <div class="invalid-feedback">{{ $message }}</div> @enderror
                     </div>
                 </div>
@@ -96,9 +110,33 @@
 
             </div>
             <div class="card-footer bg-white text-end py-3">
-                <button type="submit" class="btn btn-primary px-4">Guardar Escala</button>
+                <button type="submit" id="btnSubmit" class="btn btn-primary px-4">Guardar Escala</button>
             </div>
         </div>
     </form>
 </div>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const form = document.querySelector('form');
+        const btn = document.getElementById('btnSubmit');
+
+        if (form && btn) {
+            form.addEventListener('submit', function(e) {
+                // 1. Verificar validez del formulario (HTML5 validation)
+                // Si el navegador detecta campos vacíos requeridos, no bloqueamos el botón
+                if (!form.checkValidity()) {
+                    return;
+                }
+
+                // 2. Congelar el ancho del botón para que no se deforme al cambiar el texto
+                const width = btn.offsetWidth;
+                btn.style.width = width + 'px';
+
+                // 3. Deshabilitar y mostrar animación
+                btn.disabled = true;
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i> Procesando...';
+            });
+        }
+    });
+</script>
 @endsection

@@ -4,8 +4,11 @@ namespace App\Http\Controllers;
 
 use App\Models\Documentacion;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
-
+use Illuminate\Support\Str;
+use Intervention\Image\ImageManager; // Si usas Intervention V3 (Descomentar si da error la de arriba)
+use Intervention\Image\Drivers\Gd\Driver; // Si usas Intervention V3
 class DocumentacionController extends Controller
 {
     public function index(Request $request)
@@ -49,22 +52,60 @@ class DocumentacionController extends Controller
         return view('gestion-contenido.documentacion.create');
     }
 
+    private function processAndStoreFile($file)
+    {
+        $extension = strtolower($file->getClientOriginalExtension());
+        $imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
+
+        // Verificamos si es una imagen compatible para conversión
+        if (in_array($extension, $imageExtensions)) {
+            try {
+                // 1. Iniciar el manejador de imágenes con driver GD
+                $manager = new ImageManager(new Driver());
+
+                // 2. Leer el archivo subido
+                $image = $manager->read($file->getPathname());
+
+                // 3. Convertir a WebP con calidad 80% (ajustable)
+                $encoded = $image->toWebp(80);
+
+                // 4. Generar nombre único y ruta
+                $filename = Str::uuid() . '.webp';
+                $path = 'documentacion/' . $filename;
+
+                // 5. Guardar la imagen convertida en el disco 'public'
+                Storage::disk('public')->put($path, $encoded);
+
+                return $path; // Retornamos la nueva ruta WebP
+
+            } catch (\Exception $e) {
+                Log::error("Error convirtiendo imagen a WebP, guardando original: " . $e->getMessage());
+                // Fallback: Si falla la conversión, guardar el archivo original normalmente
+                return $file->store('documentacion', 'public');
+            }
+        } 
+        else {
+            // NO es imagen (PDF, DOCX, XLSX...), guardar normalmente
+            return $file->store('documentacion', 'public');
+        }
+    }
+
     public function store(Request $request)
     {
         $request->validate([
             'titulo' => 'required|string|max:255',
             'fecha_publicacion' => 'required|date',
             'seccion' => 'required|string',
-            'archivo' => 'required|file|mimes:pdf,doc,docx,xls,xlsx|max:10240', // Max 10MB
+            // Validamos que acepte documentos E imágenes
+            'archivo' => 'required|file|mimes:pdf,doc,docx,xls,xlsx,jpg,jpeg,png,webp|max:20480', // Aumenté a 20MB por si acaso
         ]);
 
         $data = $request->except('archivo');
+        unset($data['ruta_miniatura']); // Aseguramos que este campo no moleste
 
-        // Manejo del Archivo
+        // Manejo del Archivo usando la función auxiliar
         if ($request->hasFile('archivo')) {
-            // Guardar en storage/app/public/documentacion/
-            $path = $request->file('archivo')->store('documentacion', 'public');
-            $data['ruta_archivo'] = $path;
+            $data['ruta_archivo'] = $this->processAndStoreFile($request->file('archivo'));
         }
 
         Documentacion::create($data);
@@ -86,18 +127,21 @@ class DocumentacionController extends Controller
             'titulo' => 'required|string|max:255',
             'fecha_publicacion' => 'required|date',
             'seccion' => 'required|string',
-            'archivo' => 'nullable|file|mimes:pdf,doc,docx,xls,xlsx|max:10240',
+            'archivo' => 'nullable|file|mimes:pdf,doc,docx,xls,xlsx,jpg,jpeg,png,webp|max:20480',
         ]);
 
         $data = $request->except('archivo');
+        unset($data['ruta_miniatura']);
 
-        // Si suben un nuevo archivo, borramos el anterior y guardamos el nuevo
+        // Si suben un nuevo archivo
         if ($request->hasFile('archivo')) {
+            // 1. Borrar el archivo anterior del storage
             if ($documento->ruta_archivo && Storage::disk('public')->exists($documento->ruta_archivo)) {
                 Storage::disk('public')->delete($documento->ruta_archivo);
             }
-            $path = $request->file('archivo')->store('documentacion', 'public');
-            $data['ruta_archivo'] = $path;
+            
+            // 2. Procesar y guardar el nuevo archivo (convirtiendo a WebP si es imagen)
+            $data['ruta_archivo'] = $this->processAndStoreFile($request->file('archivo'));
         }
 
         $documento->update($data);

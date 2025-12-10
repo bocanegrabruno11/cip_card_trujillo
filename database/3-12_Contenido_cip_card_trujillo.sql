@@ -766,4 +766,27 @@ COMMIT;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 
 
+CREATE TABLE persona (
+    id_persona INT AUTO_INCREMENT PRIMARY KEY,
+    dni VARCHAR(8) NOT NULL,
+    correo_contacto VARCHAR(150) NOT NULL,
+    direccion VARCHAR(200),
+    celular VARCHAR(15),
 
+    -- Campo para la relación con users
+    user_id BIGINT UNSIGNED NOT NULL,
+
+    CONSTRAINT fk_persona_user
+        FOREIGN KEY (user_id)
+        REFERENCES users(id)
+        ON UPDATE CASCADE
+        ON DELETE CASCADE
+);
+
+ALTER TABLE `organizacion_card`
+ADD COLUMN `especialidad` VARCHAR(255) NULL AFTER `cargo`,
+ADD COLUMN `ruta_cv` VARCHAR(255) NULL COMMENT 'Ruta del archivo PDF del CV' AFTER `ruta_imagen`;
+
+
+ALTER TABLE tarifas_escalas 
+ADD COLUMN tipo_calculadora VARCHAR(50) NULL AFTER tipo;

@@ -91,7 +91,7 @@
                         </div>
                     </div>
                 </div>
-                <button type="submit" class="btn btn-warning text-white w-100 btn-lg">ACTUALIZAR EVENTO</button>
+                <button type="submit" id="btnSubmit" class="btn btn-warning text-white w-100 btn-lg">ACTUALIZAR EVENTO</button>
             </div>
         </div>
     </form>
@@ -209,6 +209,30 @@ document.addEventListener('DOMContentLoaded', function() {
             document.getElementById('modalImg').src = src;
         });
     }
+    });
+</script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const form = document.querySelector('form');
+        const btn = document.getElementById('btnSubmit');
+
+        if (form && btn) {
+            form.addEventListener('submit', function(e) {
+                // 1. Verificar validez del formulario (HTML5 validation)
+                // Si el navegador detecta campos vacíos requeridos, no bloqueamos el botón
+                if (!form.checkValidity()) {
+                    return;
+                }
+
+                // 2. Congelar el ancho del botón para que no se deforme al cambiar el texto
+                const width = btn.offsetWidth;
+                btn.style.width = width + 'px';
+
+                // 3. Deshabilitar y mostrar animación
+                btn.disabled = true;
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i> Procesando...';
+            });
+        }
     });
 </script>
 @endsection
