@@ -392,7 +392,7 @@
                     @auth
                         {{-- Si SÍ está logueado -> Redirigir según Rol --}}
                         @if(Auth::user()->hasRole('admin'))
-                            <a href="{{ route('Admin/dashboard') }}" onclick="handleMenuClick(event, this)">MESA DE PARTES - VIRTUAL</a>
+                            <a href="{{ route('Admin.dashboard') }}" onclick="handleMenuClick(event, this)">MESA DE PARTES - VIRTUAL</a>
                         
                         @elseif(Auth::user()->hasRole('gestor_contenido'))
                             <a href="{{ route('gestion-contenido') }}" onclick="handleMenuClick(event, this)">MESA DE PARTES - VIRTUAL</a>

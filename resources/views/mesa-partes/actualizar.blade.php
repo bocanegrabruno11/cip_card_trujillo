@@ -101,6 +101,21 @@
             align-items: center;
             justify-content: center;
         }
+        
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1040;
+        }
+        
+        .sidebar-overlay.show {
+            display: block;
+        }
 
         /* Estilos del formulario */
         .form-container {
@@ -249,7 +264,10 @@
         }
 
         @media(max-width: 991px) {
-            .sidebar { transform: translateX(-100%); }
+            .sidebar { 
+                transform: translateX(-100%); 
+                z-index: 1050;
+            }
             .sidebar.show { transform: translateX(0); }
             .btn-close-sidebar { display: block; }
             .main-wrapper { margin-left: 0; }
@@ -279,42 +297,43 @@
 
 <body>
 
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+
     <nav class="sidebar" id="sidebar">
         <div class="sidebar-header">
             <button class="btn-close-sidebar" onclick="toggleSidebar()">
                 <i class="fa fa-times"></i>
             </button>
             <img src="{{ asset('img/logo.png') }}" alt="Logo">
+            <div class="text-white small mt-2">Mesa de Partes</div>
         </div>
 
         <ul class="sidebar-menu">
-             <li>
+            <li>
                 <a href="{{ route('dashboard') }}" class="menu-link">
-                    <i class="fa fa-sync"></i> Inicio
+                    <i class="fas fa-home"></i> Inicio
                 </a>
             </li>
             <li>
-                <a href="{{ route('persona.actualizar') }}" class="menu-link">
-                    <i class="fa fa-sync"></i> Actualizar Información
+                <a href="{{ route('persona.actualizar') }}" class="menu-link active">
+                    <i class="fas fa-user-edit"></i> Actualizar Información
                 </a>
             </li>
-
             <li>
                 <a href="{{ route('arbitraje') }}" class="menu-link">
-                    <i class="fa fa-scale-balanced"></i> Arbitraje
+                    <i class="fas fa-scale-balanced"></i> Arbitraje
                 </a>
             </li>
-
             <li>
                 <a href="{{ route('jrd') }}" class="menu-link">
-                    <i class="fa fa-gavel"></i> JRD
+                    <i class="fas fa-gavel"></i> JRD
                 </a>
             </li>
         </ul>
 
         <div class="user-footer">
-            <strong>{{ Auth::user()->name }}</strong><br>
-            <span>{{ Auth::user()->email }}</span>
+            <strong>{{ Auth::user()->name ?? 'Usuario' }}</strong><br>
+            <span>{{ Auth::user()->email ?? 'usuario@cip.org.pe' }}</span>
 
             <a href="{{ route('welcome') }}" class="btn-logout mt-2 d-block">
                 <i class="fas fa-sign-out-alt"></i> Regresar
@@ -323,13 +342,14 @@
     </nav>
 
     <div class="main-wrapper">
-        
         <header class="mobile-header">
-            <button class="btn btn-light" onclick="toggleSidebar()">
-                <i class="fa fa-bars"></i>
+            <button class="btn btn-light border shadow-sm" onclick="toggleSidebar()">
+                <i class="fas fa-bars text-dark"></i>
             </button>
-            <strong>Actualizar Información</strong>
-            <span></span>
+            <span class="fw-bold text-dark">Actualizar Información</span>
+            <a href="{{ route('welcome') }}" target="_blank" class="btn btn-sm btn-outline-danger">
+                <i class="fas fa-external-link-alt"></i>
+            </a>
         </header>
 
         <main class="main-content">
@@ -428,14 +448,23 @@
                 </form>
             </div>
         </main>
-
     </div>
 
     <script>
+        // Función para mostrar/ocultar el sidebar
         function toggleSidebar() {
-            document.getElementById('sidebar').classList.toggle('show');
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            sidebar.classList.toggle('show');
+            overlay.classList.toggle('show');
         }
 
+        // Cerrar sidebar al hacer clic en el overlay
+        document.getElementById('sidebarOverlay').addEventListener('click', function() {
+            toggleSidebar();
+        });
+
+        // Validación del formulario
         document.getElementById('personaForm').addEventListener('submit', function(e) {
             let isValid = true;
 

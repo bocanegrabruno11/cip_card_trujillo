@@ -97,7 +97,7 @@ Route::middleware('auth')->group(function () {
 Route::get('/admin/dashboard', function () {
     return view('Admin/dashboard');
 })->middleware(['auth','checkrole:admin'])
-  ->name('Admin/dashboard');
+  ->name('Admin.dashboard');
 
 require __DIR__.'/auth.php';
 
