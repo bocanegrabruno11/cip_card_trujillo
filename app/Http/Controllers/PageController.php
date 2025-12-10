@@ -313,9 +313,9 @@ class PageController extends Controller
         $escalas = TarifaEscala::where('activo', true)->get();
 
         $data = [
-            'unico'    => $escalas->where('tipo', 'arbitro_unico')->values(),
-            'tribunal' => $escalas->where('tipo', 'tribunal_arbitral')->values(),
-            'gastos'   => $escalas->where('tipo', 'gastos_administrativos')->values(),
+            'unico'    => $escalas->where('tipo_calculadora', 'servicio_arbitral')->where('tipo', 'arbitro_unico')->values(),
+            'tribunal' => $escalas->where('tipo_calculadora', 'servicio_arbitral')->where('tipo', 'tribunal_arbitral')->values(),
+            'gastos'   => $escalas->where('tipo_calculadora', 'servicio_arbitral')->where('tipo', 'gastos_administrativos')->values(),
         ];
 
         $configIgv = TarifaConfiguracion::where('clave', 'igv')->first();
@@ -328,9 +328,9 @@ class PageController extends Controller
     {
         $escalas = TarifaEscala::where('activo', true)->get();
         $data = [
-            'unico'    => $escalas->where('tipo', 'arbitro_unico')->values(),
-            'tribunal' => $escalas->where('tipo', 'tribunal_arbitral')->values(),
-            'gastos'   => $escalas->where('tipo', 'gastos_administrativos')->values(),
+            'unico'    => $escalas->where('tipo_calculadora', 'servicio_arbitral')->where('tipo', 'arbitro_unico')->values(),
+            'tribunal' => $escalas->where('tipo_calculadora', 'servicio_arbitral')->where('tipo', 'tribunal_arbitral')->values(),
+            'gastos'   => $escalas->where('tipo_calculadora', 'servicio_arbitral')->where('tipo', 'gastos_administrativos')->values(),
         ];
 
         $config = TarifaConfiguracion::whereIn('clave', ['igv', 'porcentaje_indeterminado'])->pluck('valor', 'clave');
@@ -342,7 +342,19 @@ class PageController extends Controller
     }
 
     public function calcJunta() {
-        return view('contenido.calculadoras.junta');
+
+         $escalas = TarifaEscala::where('activo', true)->get();
+        $data = [
+            'unico'    => $escalas->where('tipo_calculadora', 'junta_prevencion')->where('tipo', 'arbitro_unico')->values(),
+            'tribunal' => $escalas->where('tipo_calculadora', 'junta_prevencion')->where('tipo', 'tribunal_arbitral')->values(),
+            'gastos'   => $escalas->where('tipo_calculadora', 'junta_prevencion')->where('tipo', 'gastos_administrativos')->values(),
+        ];
+
+        $config = TarifaConfiguracion::whereIn('clave', ['igv', 'porcentaje_indeterminado'])->pluck('valor', 'clave');
+        
+        $igv = floatval($config['igv'] ?? 18.00);
+        $porcentajeIndeterminado = floatval($config['porcentaje_indeterminado'] ?? 5.00); // El 5% del PDF
+        return view('contenido.calculadoras.junta', compact('data', 'igv', 'porcentajeIndeterminado'));
     }
 
     

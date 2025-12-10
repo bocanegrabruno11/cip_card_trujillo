@@ -487,7 +487,7 @@
                             <div class="card-body p-4">
                                 <h5 class="fw-bold mb-1 text-dark">Calculadoras de la Junta de Resolución</h5>
                                 <p class="text-muted small mb-4">CD La Libertad</p>
-                                <button onclick="openCalculator('{{ route('calc.junta') }}')" class="btn-calc-red">CALCULADORA</button>
+                                <button onclick="openCalculator('{{ route('calc.junta') }}')" class="btn-calc-red">Calculadora Junta de Prevención y Resolución de Disputas</button>
                             </div>
                         </div>
                     </div>

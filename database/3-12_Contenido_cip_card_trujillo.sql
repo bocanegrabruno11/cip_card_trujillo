@@ -786,3 +786,7 @@ CREATE TABLE persona (
 ALTER TABLE `organizacion_card`
 ADD COLUMN `especialidad` VARCHAR(255) NULL AFTER `cargo`,
 ADD COLUMN `ruta_cv` VARCHAR(255) NULL COMMENT 'Ruta del archivo PDF del CV' AFTER `ruta_imagen`;
+
+
+ALTER TABLE tarifas_escalas 
+ADD COLUMN tipo_calculadora VARCHAR(50) NULL AFTER tipo;

@@ -77,7 +77,7 @@
                 </div>
             </div>
             <div class="card-footer bg-white text-end py-3">
-                <button type="submit" class="btn btn-primary px-4">Guardar Documento</button>
+                <button type="submit" id="btnSubmit" class="btn btn-primary px-4">Guardar Documento</button>
             </div>
         </div>
     </form>
@@ -102,6 +102,30 @@
 
         selectSeccion.addEventListener('change', toggleCategoria);
         toggleCategoria(); // Ejecutar al inicio por si hay old values
+    });
+</script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const form = document.querySelector('form');
+        const btn = document.getElementById('btnSubmit');
+
+        if (form && btn) {
+            form.addEventListener('submit', function(e) {
+                // 1. Verificar validez del formulario (HTML5 validation)
+                // Si el navegador detecta campos vacíos requeridos, no bloqueamos el botón
+                if (!form.checkValidity()) {
+                    return;
+                }
+
+                // 2. Congelar el ancho del botón para que no se deforme al cambiar el texto
+                const width = btn.offsetWidth;
+                btn.style.width = width + 'px';
+
+                // 3. Deshabilitar y mostrar animación
+                btn.disabled = true;
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i> Procesando...';
+            });
+        }
     });
 </script>
 @endsection

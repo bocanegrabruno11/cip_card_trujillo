@@ -13,6 +13,7 @@ class TarifaEscala extends Model
 
     protected $fillable = [
         'tipo',
+        'tipo_calculadora',
         'rango_letra',
         'monto_min',
         'monto_max',
