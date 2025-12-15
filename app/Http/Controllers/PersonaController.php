@@ -97,5 +97,45 @@ public function actualizar()
 
     return view('mesa-partes.actualizar', compact('persona')); // ← Cambia aquí
 }
-
+public function buscarPorUsuario(Request $request)
+{
+    try {
+        $userId = auth()->id();
+        
+        if (!$userId) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Usuario no autenticado'
+            ], 401);
+        }
+        
+        $persona = Persona::where('user_id', $userId)->first();
+        
+        if ($persona) {
+            return response()->json([
+                'success' => true,
+                'persona' => [
+                    'id_persona' => $persona->id_persona,
+                    'dni' => $persona->dni,
+                    'correo_contacto' => $persona->correo_contacto,
+                    'direccion' => $persona->direccion,
+                    'celular' => $persona->celular
+                ]
+            ]);
+        } else {
+            return response()->json([
+                'success' => false,
+                'message' => 'No tienes tu información actualizada',
+                'redirect_url' => route('persona.actualizar')
+            ], 404);
+        }
+        
+    } catch (\Exception $e) {
+        \Log::error('Error en buscarPorUsuario: ' . $e->getMessage());
+        return response()->json([
+            'success' => false,
+            'message' => 'Error al buscar información: ' . $e->getMessage()
+        ], 500);
+    }
+}
 }

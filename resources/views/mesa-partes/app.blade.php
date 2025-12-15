@@ -35,6 +35,7 @@
             z-index: 1050;
             box-shadow: 4px 0 10px rgba(0,0,0,0.1);
             transition: transform .3s ease-in-out;
+            overflow-y: auto;
         }
         .sidebar-header {
             padding: 20px;
@@ -65,6 +66,7 @@
             text-decoration: none;
             border-left: 4px solid transparent;
             transition: 0.3s;
+            cursor: pointer;
         }
         .menu-link i { width: 30px; }
         .menu-link:hover {
@@ -76,6 +78,83 @@
             border-left-color: white;
             color: #fff;
         }
+        
+        /* Estilos para el menú desplegable */
+        .menu-item-dropdown {
+            position: relative;
+        }
+        
+        .menu-link-dropdown {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 15px 25px;
+            color: rgba(255,255,255,0.8);
+            text-decoration: none;
+            border-left: 4px solid transparent;
+            transition: 0.3s;
+            cursor: pointer;
+        }
+        
+        .menu-link-dropdown:hover {
+            background: rgba(255,255,255,0.1);
+            color: #fff;
+        }
+        
+        .menu-link-dropdown.active {
+            background: rgba(255,255,255,0.15);
+            border-left-color: white;
+            color: #fff;
+        }
+        
+        .menu-link-dropdown .fa-chevron-down {
+            transition: transform 0.3s;
+            font-size: 12px;
+        }
+        
+        .menu-link-dropdown.expanded .fa-chevron-down {
+            transform: rotate(180deg);
+        }
+        
+        .submenu {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out;
+            background: rgba(0,0,0,0.2);
+        }
+        
+        .submenu.show {
+            max-height: 500px;
+        }
+        
+        .submenu-link {
+            display: flex;
+            align-items: center;
+            padding: 12px 25px 12px 55px;
+            color: rgba(255,255,255,0.7);
+            text-decoration: none;
+            transition: 0.3s;
+            font-size: 14px;
+        }
+        
+        .submenu-link:hover {
+            background: rgba(255,255,255,0.1);
+            color: #fff;
+            padding-left: 60px;
+        }
+        
+        .submenu-link.active {
+            background: rgba(255,255,255,0.15);
+            color: #fff;
+            font-weight: 600;
+        }
+        
+        .submenu-link i {
+            width: 20px;
+            margin-right: 10px;
+            font-size: 12px;
+        }
+        
         .user-footer {
             padding: 20px;
             font-size: 14px;
@@ -196,11 +275,29 @@
                     <i class="fas fa-user-edit"></i> Actualizar Información
                 </a>
             </li>
-            <li>
-                <a href="{{ route('arbitraje') }}" class="menu-link {{ request()->routeIs('arbitraje') ? 'active' : '' }}">
-                    <i class="fas fa-scale-balanced"></i> Arbitraje
-                </a>
+            
+            <!-- Menú Desplegable de Arbitraje -->
+            <li class="menu-item-dropdown">
+                <div class="menu-link-dropdown {{ request()->routeIs('arbitraje') || request()->routeIs('RegistrosArbitraje') ? 'active' : '' }}" onclick="toggleSubmenu(this)">
+                    <span>
+                        <i class="fas fa-scale-balanced"></i> Arbitraje
+                    </span>
+                    <i class="fas fa-chevron-down"></i>
+                </div>
+                <ul class="submenu {{ request()->routeIs('arbitraje') || request()->routeIs('RegistrosArbitraje') ? 'show' : '' }}">
+                    <li>
+                        <a href="{{ route('arbitraje') }}" class="submenu-link {{ request()->routeIs('arbitraje') ? 'active' : '' }}">
+                            <i class="fas fa-plus-circle"></i> Nuevo Arbitraje
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ route('RegistrosArbitraje') }}" class="submenu-link {{ request()->routeIs('RegistrosArbitraje') ? 'active' : '' }}">
+                            <i class="fas fa-list"></i> Registros de Arbitraje
+                        </a>
+                    </li>
+                </ul>
             </li>
+            
             <li>
                 <a href="{{ route('jrd') }}" class="menu-link {{ request()->routeIs('jrd') ? 'active' : '' }}">
                     <i class="fas fa-gavel"></i> JRD
@@ -276,9 +373,27 @@
             overlay.classList.toggle('show');
         }
 
+        // Función para toggle del submenu
+        function toggleSubmenu(element) {
+            const submenu = element.nextElementSibling;
+            element.classList.toggle('expanded');
+            submenu.classList.toggle('show');
+        }
+
         // Cerrar sidebar al hacer clic en el overlay
         document.getElementById('sidebarOverlay').addEventListener('click', function() {
             toggleSidebar();
+        });
+
+        // Expandir automáticamente el submenu si hay una ruta activa
+        document.addEventListener('DOMContentLoaded', function() {
+            const activeSubmenu = document.querySelector('.submenu.show');
+            if (activeSubmenu) {
+                const parentDropdown = activeSubmenu.previousElementSibling;
+                if (parentDropdown) {
+                    parentDropdown.classList.add('expanded');
+                }
+            }
         });
 
         // Inicializar Summernote si existe

@@ -12,9 +12,12 @@ use App\Http\Controllers\DocumentacionController;
 use App\Http\Controllers\TarifaConfiguracionController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PersonaController;
+use App\Http\Controllers\ArbitrajeRegistroController;
+use App\Http\Controllers\ArbitrajeController;
+use App\Http\Controllers\AdminArbitrajeController;
+
 
 Route::get('/', [PageController::class, 'welcome'])->name('welcome');
-
 Route::get('/mision-vision', [PageController::class, 'misionVision'])->name('mision-vision');
 Route::get('/presentacion', [PageController::class, 'presentacion'])->name('presentacion');
 Route::get('/comunicados', [PageController::class, 'comunicados'])->name('comunicados');
@@ -33,12 +36,20 @@ Route::get('/arbitral', [PageController::class, 'arbitral'])->name('arbitral');
 Route::get('/junta-res-disputas', [PageController::class, 'juntaResDisputas'])->name('junta-res-disputas');
 Route::get('/dispute-review', [PageController::class, 'disputeReview'])->name('dispute-review');
 Route::get('/dispute-avoidance-res', [PageController::class, 'disputeAvoidanceRes'])->name('dispute-avoidance-res');
-
 Route::get('/convocatoria', [PageController::class, 'convocatoria'])->name('convocatoria');
-
 Route::get('/calculadora/institucion/determinada', [PageController::class, 'calcInstDeterminada'])->name('calc.inst.det');
 Route::get('/calculadora/institucion/indeterminada', [PageController::class, 'calcInstIndeterminada'])->name('calc.inst.indet');
 Route::get('/calculadora/junta/calc', [PageController::class, 'calcJunta'])->name('calc.junta');
+
+
+// En web.php
+Route::get('/documentos/ver/{filename}', [DocumentoController::class, 'mostrar'])
+    ->name('documentos.mostrar');
+
+Route::get('/documentos/descargar/{filename}', [DocumentoController::class, 'descargar'])
+    ->name('documentos.descargar');
+
+
 
 Route::middleware(['auth', 'checkrole:gestor_contenido'])->group(function () {
     Route::get('/gestion-contenido', [PageController::class, 'gestionContenido'])->name('gestion-contenido');
@@ -60,7 +71,6 @@ Route::middleware(['auth', 'checkrole:gestor_contenido'])->group(function () {
 
 
 Route::middleware(['auth', 'checkrole:mesa_partes'])->prefix('mesa-partes')->group(function () {
-
     // Dashboard
     Route::get('/dashboard', function () {
         return view('mesa-partes.dashboard');
@@ -76,14 +86,31 @@ Route::middleware(['auth', 'checkrole:mesa_partes'])->prefix('mesa-partes')->gro
         return view('mesa-partes.arbitraje');
     })->name('arbitraje');
 
+        Route::get('/RegistrosArbitraje', function () {
+        return view('mesa-partes.RegistrosArbitraje');
+    })->name('RegistrosArbitraje');
+
     // JRD
     Route::get('/jrd', function () {
         return view('mesa-partes.jrd');
     })->name('jrd');
+
+// Ruta para procesar la actualización - DEBE SER PUT
+Route::put('mesa-partes/persona/update', [PersonaController::class, 'update'])
+    ->name('persona.update');  // Asegúrate que este nombre coincida
+    
 Route::get('/actualizar', [PersonaController::class, 'actualizar'])->name('persona.actualizar');
 Route::post('/persona/store', [PersonaController::class, 'store'])->name('persona.store');
-Route::post('/persona/update', [PersonaController::class, 'update'])->name('persona.update');
 
+Route::get('/persona/buscar', [PersonaController::class, 'buscarPorUsuario'])->name('persona.buscar');
+Route::post('/arbitraje/registrar', [ArbitrajeRegistroController::class, 'store'])
+    ->name('arbitraje.store');
+
+Route::get('/arbitraje/registros', [ArbitrajeController::class, 'registros'])
+    ->name('RegistrosArbitraje');
+
+Route::get('/arbitraje/obtener', [ArbitrajeController::class, 'obtenerArbitrajes'])
+    ->name('arbitrajes.obtener');
 });
 
 
@@ -94,10 +121,28 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
-Route::get('/admin/dashboard', function () {
-    return view('Admin/dashboard');
-})->middleware(['auth','checkrole:admin'])
-  ->name('Admin.dashboard');
+Route::middleware(['auth', 'checkrole:admin'])->group(function () {
+
+    Route::get('/admin/dashboard', function () {
+        return view('Admin.dashboard');
+    })->name('Admin.dashboard');
+
+    Route::get('/admin/arbitraje', function () {
+        return view('Admin.Arbitraje');
+    })->name('Admin.Arbitraje');
+    
+    // Vista principal de arbitrajes
+    Route::get('/arbitrajes', [AdminArbitrajeController::class, 'index'])
+        ->name('admin.arbitrajes.index');
+    
+    // API para obtener arbitrajes
+    Route::get('/arbitrajes/obtener', [AdminArbitrajeController::class, 'obtenerTodos'])
+        ->name('admin.arbitrajes.obtener');
+    
+    // Vista detalle de un arbitraje
+    Route::get('/arbitrajes/{id}/detalle', [AdminArbitrajeController::class, 'detalle'])
+        ->name('admin.arbitrajes.detalle');
+});
 
 require __DIR__.'/auth.php';
 

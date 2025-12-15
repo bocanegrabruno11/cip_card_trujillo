@@ -165,7 +165,11 @@
                     <i class="fas fa-home"></i> Dashboard
                 </a>
             </li>
-            
+            <li>
+                <a href="{{ route('Admin.Arbitraje') }}" class="menu-link {{ request()->routeIs('Arbitraje') ? 'active' : '' }}">
+                    <i class="fas fa-home"></i> Ver Arbitrajes
+                </a>
+            </li>
         </ul>
 
         <div class="user-footer">
