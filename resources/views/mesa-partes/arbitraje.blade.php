@@ -95,17 +95,17 @@
 
         <!-- DATOS DEL ARBITRAJE -->
         <div class="mb-3">
-            <label>Materia</label>
+            <label>Materia <span class="text-danger">*</span></label>
             <input type="text" class="form-control" name="nombre_materia" required>
         </div>
 
         <div class="mb-3">
-            <label>Descripción</label>
-            <textarea class="form-control" name="descripcion" required></textarea>
+            <label>Descripción <span class="text-danger">*</span></label>
+            <textarea class="form-control" name="descripcion" rows="3" required></textarea>
         </div>
 
         <!-- PERSONAS -->
-        <h5>Personas</h5>
+        <h5 class="mt-4 mb-3">Personas Involucradas</h5>
 
         <!-- DEMANDANTE (AUTOMÁTICO) -->
         <div class="mb-2">
@@ -117,17 +117,51 @@
         <div id="demandados-container"></div>
 
         <button type="button" class="btn btn-secondary mb-3" onclick="agregarDemandado()">
-            Agregar Demandado
+            <i class="fas fa-user-plus me-1"></i> Agregar Demandado
         </button>
 
-        <!-- DOCUMENTO -->
-        <div class="mb-3">
-            <label>Voucher (JPG)</label>
-            <input type="file" class="form-control" id="voucher" accept=".jpg,.jpeg" required>
+        <!-- DOCUMENTACIÓN -->
+        <h5 class="mt-4 mb-3">Documentación</h5>
+
+        <!-- Voucher (archivo) -->
+        <div class="mb-4">
+            <label for="voucher" class="form-label">Voucher de Pago <span class="text-danger">*</span></label>
+            <div class="file-upload-area p-3 border rounded" onclick="document.getElementById('voucher').click()" style="cursor: pointer;">
+                <div class="text-center">
+                    <i class="fas fa-cloud-upload-alt fa-2x text-muted mb-2"></i>
+                    <p class="mb-1">Haz clic para subir el voucher</p>
+                    <p class="text-muted small mb-2">Formatos aceptados: JPG, JPEG (Máx. 5MB)</p>
+                    <div id="voucherFileName" class="text-primary fw-bold">Ningún archivo seleccionado</div>
+                </div>
+            </div>
+            <input type="file" class="form-control d-none" id="voucher" name="voucher" accept=".jpg,.jpeg" required>
         </div>
 
-        <button type="submit" class="btn btn-primary">
-            Registrar Arbitraje
+        <!-- Link de Google Drive (Opcional) -->
+        <div class="mb-4">
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="drive_link" class="form-label">Enlace de Google Drive (Opcional)</label>
+                    <input type="url" class="form-control" id="drive_link" name="drive_link" placeholder="https://drive.google.com/...">
+                    <small class="text-muted">Enlace a documento adicional en Drive</small>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="nombre_documento_link" class="form-label">Nombre del Documento en Drive</label>
+                    <input type="text" class="form-control" id="nombre_documento_link" name="nombre_documento_link" placeholder="Ej: Contrato firmado, Acuerdo, etc.">
+                    <small class="text-muted">Nombre que identificará el documento</small>
+                </div>
+            </div>
+        </div>
+
+        <div class="alert alert-info">
+            <small>
+                <i class="fas fa-info-circle me-1"></i>
+                <strong>Nota:</strong> El voucher de pago es obligatorio. El enlace de Google Drive es opcional pero si lo proporcionas, debes darle un nombre descriptivo.
+            </small>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-lg">
+            <i class="fas fa-save me-2"></i> Registrar Arbitraje
         </button>
     </form>
 
@@ -223,6 +257,18 @@ document.addEventListener('DOMContentLoaded', () => {
             toggleSpinner(false);
             showModal("Se requiere actualizar sus datos para poder iniciar un proceso.", "{{ route('persona.actualizar') }}");
         });
+
+    // Mostrar nombre del voucher seleccionado
+    document.getElementById('voucher').addEventListener('change', function(e) {
+        const fileName = e.target.files[0] ? e.target.files[0].name : 'Ningún archivo seleccionado';
+        document.getElementById('voucherFileName').textContent = fileName;
+        
+        if (e.target.files[0] && e.target.files[0].size > 5 * 1024 * 1024) {
+            alert('El archivo es demasiado grande. El tamaño máximo es 5MB.');
+            e.target.value = '';
+            document.getElementById('voucherFileName').textContent = 'Ningún archivo seleccionado';
+        }
+    });
 });
 
 // AGREGAR DEMANDADO
@@ -242,8 +288,8 @@ function agregarDemandado() {
                    maxlength="8"
                    data-id="${contadorDemandados}"
                    oninput="validarDNI(this)">
-            <button type="button" class="btn btn-danger" onclick="eliminarDemandado(${contadorDemandados})">
-                Eliminar
+            <button type="button" class="btn btn-outline-danger" onclick="eliminarDemandado(${contadorDemandados})">
+                <i class="fas fa-trash"></i>
             </button>
         </div>
         <small class="text-danger" id="error-${contadorDemandados}" style="display: none;"></small>
@@ -328,6 +374,20 @@ document.getElementById('arbitrajeForm').addEventListener('submit', function(e) 
         return;
     }
 
+    // Validar link de Drive si se proporciona
+    const driveLink = document.getElementById('drive_link').value;
+    const driveName = document.getElementById('nombre_documento_link').value;
+    
+    if (driveLink && !driveLink.includes('drive.google.com')) {
+        showError('Por favor, ingresa un enlace válido de Google Drive.');
+        return;
+    }
+    
+    if ((driveLink && !driveName.trim()) || (!driveLink && driveName.trim())) {
+        showError('Si ingresas un enlace de Drive, debes ponerle un nombre, y viceversa.');
+        return;
+    }
+
     toggleSpinner(true);
 
     const formData = new FormData();
@@ -345,8 +405,14 @@ document.getElementById('arbitrajeForm').addEventListener('submit', function(e) 
         formData.append(`personas[${index}][tipo]`, persona.tipo);
     });
 
-    // DOCUMENTO
+    // DOCUMENTO - Voucher
     formData.append('voucher', file);
+
+    // DOCUMENTO - Link de Drive (si existe)
+    if (driveLink) {
+        formData.append('drive_link', driveLink);
+        formData.append('nombre_documento_link', driveName);
+    }
 
     fetch('{{ route("arbitraje.store") }}', {
         method: 'POST',
@@ -380,6 +446,35 @@ document.getElementById('arbitrajeForm').addEventListener('submit', function(e) 
 <style>
 .is-invalid {
     border-color: #dc3545 !important;
+}
+
+.file-upload-area {
+    border: 2px dashed #dee2e6 !important;
+    background-color: #f8f9fa;
+    transition: all 0.3s;
+}
+
+.file-upload-area:hover {
+    border-color: #0d6efd !important;
+    background-color: #e9ecef;
+}
+
+.demandado-item {
+    animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.btn-outline-danger:hover {
+    transform: scale(1.1);
+    transition: transform 0.2s;
+}
+
+.form-label span {
+    color: #dc3545;
 }
 </style>
 @endpush
