@@ -15,8 +15,9 @@ use App\Http\Controllers\PersonaController;
 use App\Http\Controllers\ArbitrajeRegistroController;
 use App\Http\Controllers\ArbitrajeController;
 use App\Http\Controllers\AdminArbitrajeController;
+use App\Http\Controllers\RepoSolicitudController;
 
-
+Route::post('/solicitudes-repo', [RepoSolicitudController::class, 'store'])->name('solicitudes.store');
 Route::get('/', [PageController::class, 'welcome'])->name('welcome');
 Route::get('/mision-vision', [PageController::class, 'misionVision'])->name('mision-vision');
 Route::get('/presentacion', [PageController::class, 'presentacion'])->name('presentacion');
@@ -142,6 +143,13 @@ Route::middleware(['auth', 'checkrole:admin'])->group(function () {
     // Vista detalle de un arbitraje
     Route::get('/arbitrajes/{id}/detalle', [AdminArbitrajeController::class, 'detalle'])
         ->name('admin.arbitrajes.detalle');
+
+    Route::prefix('admin/gestion-permisos')->name('admin.solicitudes.')->group(function () {
+        Route::get('/', [RepoSolicitudController::class, 'index'])->name('index');
+        Route::put('/{id}', [RepoSolicitudController::class, 'updateState'])->name('update');
+        Route::delete('/{id}', [RepoSolicitudController::class, 'destroy'])->name('destroy');
+        Route::get('/{id}', [RepoSolicitudController::class, 'show'])->name('show');
+    });
 });
 
 require __DIR__.'/auth.php';

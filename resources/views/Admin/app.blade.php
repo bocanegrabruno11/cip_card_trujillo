@@ -170,6 +170,11 @@
                     <i class="fas fa-home"></i> Ver Arbitrajes
                 </a>
             </li>
+            <li>
+                <a href="{{ route('admin.solicitudes.index') }}" class="menu-link {{ request()->routeIs('admin.solicitudes.index') ? 'active' : '' }}">
+                    <i class="fas fa-file "></i> Permisos de Repositorio
+                </a>
+            </li>
         </ul>
 
         <div class="user-footer">

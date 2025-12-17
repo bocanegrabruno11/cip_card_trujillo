@@ -404,6 +404,151 @@
             padding: 0 25px; /* Más espacio para contenido */
         }
     }
+    .repo-modal-overlay {
+        display: none; /* Oculto por defecto */
+        position: fixed;
+        top: 0; left: 0;
+        width: 100%; height: 100%;
+        background-color: rgba(0, 0, 0, 0.6); /* Fondo oscuro semitransparente */
+        backdrop-filter: blur(3px);
+        z-index: 20000; /* Por encima de todo */
+        justify-content: center;
+        align-items: center;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+    .repo-modal-overlay.show {
+        display: flex;
+        opacity: 1;
+    }
+
+    .repo-modal-box {
+        background: #fff;
+        width: 90%;
+        max-width: 480px; /* Ancho ideal para formularios */
+        border-radius: 12px;
+        padding: 35px 30px;
+        box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+        position: relative;
+        transform: scale(0.95);
+        transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    .repo-modal-overlay.show .repo-modal-box {
+        transform: scale(1);
+    }
+
+    /* Botón Cerrar (X) Flotante */
+    .repo-close-btn {
+        position: absolute;
+        top: -15px;
+        right: -15px;
+        width: 36px;
+        height: 36px;
+        background: #fff;
+        border: 1px solid #ddd;
+        border-radius: 50%;
+        font-size: 20px;
+        line-height: 1;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        transition: all 0.2s;
+        color: #555;
+    }
+    .repo-close-btn:hover {
+        background: #AD2B2E;
+        color: white;
+        border-color: #AD2B2E;
+        transform: rotate(90deg);
+    }
+
+    /* Tipografía */
+    .repo-title {
+        text-align: center;
+        font-size: 22px;
+        font-weight: 800;
+        color: #333;
+        margin: 0 0 10px 0;
+    }
+    .repo-subtitle {
+        text-align: center;
+        font-size: 13px;
+        color: #666;
+        margin-bottom: 25px;
+        line-height: 1.4;
+    }
+
+    /* Formulario */
+    .repo-form-group {
+        margin-bottom: 18px;
+    }
+    .repo-form-group label {
+        display: block;
+        font-size: 12px;
+        font-weight: 700;
+        color: #444;
+        text-transform: uppercase;
+        margin-bottom: 6px;
+        letter-spacing: 0.5px;
+    }
+    .repo-form-group input[type="text"],
+    .repo-form-group input[type="email"],
+    .repo-form-group input[type="file"] {
+        width: 100%;
+        padding: 10px 12px;
+        border: 1px solid #ccc;
+        border-radius: 6px;
+        font-size: 14px;
+        transition: border-color 0.2s;
+    }
+    .repo-form-group input:focus {
+        border-color: #AD2B2E;
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(173, 43, 46, 0.1);
+    }
+    
+    /* Input de solo lectura (gris) */
+    .readonly-input {
+        background-color: #f2f2f2;
+        color: #666;
+        cursor: not-allowed;
+    }
+
+    .repo-help-text {
+        font-size: 11px;
+        color: #888;
+        margin-top: 4px;
+    }
+
+    /* Botón Submit Rojo */
+    .repo-submit-btn {
+        width: 100%;
+        background-color: #AD2B2E;
+        color: white;
+        border: none;
+        padding: 14px;
+        border-radius: 6px;
+        font-size: 14px;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        cursor: pointer;
+        transition: background 0.3s, transform 0.2s;
+        margin-top: 10px;
+        box-shadow: 0 4px 6px rgba(173, 43, 46, 0.2);
+    }
+    .repo-submit-btn:hover {
+        background-color: #8f2225;
+        transform: translateY(-2px);
+    }
+    .repo-submit-btn:disabled {
+        background-color: #ccc;
+        cursor: not-allowed;
+        transform: none;
+        box-shadow: none;
+    }
 </style>
 @endsection
 
@@ -605,9 +750,23 @@
 
             {{-- 8. REPOSITORIO --}}
             <div id="repositorio" class="tab-pane">
-                <div class="normativa-section-title">REPOSITORIO</div>
-                <div style="text-align: center; padding: 30px 0;">
-                    <a href="https://drive.google.com/drive/folders/1pql46UGfcFt7Z5lWvqCLIu5tzIVwN3cW?usp=drive_link" target="_blank" class="doc-btn" style="justify-content: center; max-width: 400px; margin: 0 auto;">ACCEDER AL REPOSITORIO</a>
+                <div class="normativa-section-title">REPOSITORIO DE LAUDOS</div>
+                
+                <div style="text-align: center; padding: 40px 20px; max-width: 700px; margin: 0 auto;">
+                    <p class="text-muted mb-4" style="line-height: 1.6;">
+                        El repositorio de laudos arbitrales es un espacio de acceso restringido. 
+                        Si usted es parte de un proceso o un usuario autorizado, verifique su acceso a continuación.
+                        De lo contrario, deberá solicitar el permiso completando el formulario.
+                    </p>
+
+                    {{-- Botón con lógica JS --}}
+                    <button type="button" onclick="handleRepoAccess()" class="doc-btn" style="justify-content: center; max-width: 400px; margin: 0 auto; padding: 15px 30px; font-size: 15px;">
+                        <i class="fab fa-google-drive"></i> ACCEDER AL REPOSITORIO
+                    </button>
+
+                    <p class="small text-muted mt-3">
+                        <i class="fas fa-lock me-1"></i> Acceso gestionado por el administrador del sistema.
+                    </p>
                 </div>
             </div>
 
@@ -673,11 +832,169 @@
         </div>
     </div>
 </div>
+{{-- MODAL SOLICITUD ACCESO REPOSITORIO (DISEÑO LIMPIO) --}}
+{{-- MODAL SOLICITUD ACCESO REPOSITORIO --}}
+<div id="repoModal" class="repo-modal-overlay">
+    <div class="repo-modal-box">
+        <button class="repo-close-btn" onclick="closeRepoModal()">&times;</button>
+        
+        <h3 class="repo-title">Solicitud de Acceso</h3>
+        <p class="repo-subtitle">
+            Complete sus datos para solicitar permiso a la carpeta de Laudos.
+        </p>
 
+        {{-- ZONA DE ALERTAS --}}
+        @if(session('success'))
+            <div class="alert alert-success text-center mb-3 p-2 small">
+                <i class="fas fa-check-circle"></i> {{ session('success') }}
+            </div>
+        @endif
+
+        @if(session('warning'))
+            <div class="alert alert-warning text-center mb-3 p-2 small">
+                <i class="fas fa-exclamation-triangle"></i> {{ session('warning') }}
+            </div>
+        @endif
+
+        @if(session('error'))
+            <div class="alert alert-danger text-center mb-3 p-2 small">
+                <i class="fas fa-times-circle"></i> {{ session('error') }}
+            </div>
+        @endif
+
+        {{-- Errores de validación de Laravel --}}
+        @if ($errors->any())
+            <div class="alert alert-danger p-2 small mb-3">
+                <ul class="mb-0 ps-3">
+                    @foreach ($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif
+
+        <form action="{{ route('solicitudes.store') }}" method="POST" enctype="multipart/form-data" id="formRepo">
+            @csrf
+            
+            {{-- Nombres --}}
+            <div class="repo-form-group">
+                <label>Nombres Completos</label>
+                <input type="text" name="nombres" required 
+                       {{-- Usamos old() para no perder el dato si hay error --}}
+                       value="{{ Auth::check() ? Auth::user()->name : old('nombres') }}" 
+                       {{ Auth::check() ? 'readonly' : '' }}
+                       class="{{ Auth::check() ? 'readonly-input' : '' }}"
+                       oninput="this.value = this.value.replace(/[^A-Za-zñÑáéíóúÁÉÍÓÚ\s]/g, '').toUpperCase();">
+            </div>
+
+            {{-- Correo --}}
+            <div class="repo-form-group">
+                <label>Correo Electrónico (Gmail)</label>
+                <input type="email" name="email" required 
+                       value="{{ Auth::check() ? Auth::user()->email : old('email') }}" 
+                       {{ Auth::check() ? 'readonly' : '' }}
+                       class="{{ Auth::check() ? 'readonly-input' : '' }}">
+                <div class="repo-help-text">Se dará acceso a este correo en Drive.</div>
+            </div>
+
+            {{-- DNI --}}
+            <div class="repo-form-group">
+                <label>Número de DNI</label>
+                <input type="text" name="dni" required maxlength="8" pattern="[0-9]{8}" placeholder="8 dígitos" 
+                       value="{{ old('dni') }}"
+                       oninput="this.value = this.value.replace(/[^0-9]/g, '');">
+            </div>
+
+            {{-- Foto --}}
+            <div class="repo-form-group">
+                <label>Foto del DNI (Frontal)</label>
+                <input type="file" name="foto_dni" accept="image/*" required class="file-input">
+            </div>
+
+            <button type="submit" id="btnRepoSubmit" class="repo-submit-btn">
+                ENVIAR SOLICITUD
+            </button>
+        </form>
+    </div>
+</div>
+@if(session('warning') || session('success') || session('error') || $errors->any())
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        // Si hay una sesión con mensaje o errores, abrimos el modal automáticamente
+        // para que el usuario vea el feedback
+        openRepoModal();
+    });
+</script>
+@endif
 @endsection
 
 @section('scripts')
 <script>
+    const DRIVE_LINK = "https://drive.google.com/drive/folders/1pql46UGfcFt7Z5lWvqCLIu5tzIVwN3cW?usp=drive_link";
+    
+    // Estado de la sesión y permisos (Pasados desde Laravel)
+    const IS_LOGGED_IN = @json(Auth::check());
+    // Si la variable no existe (fallback), asumimos false
+    const HAS_PERMISSION = @json($tienePermisoRepo ?? false);
+
+    // --- LÓGICA DE ACCESO AL REPOSITORIO ---
+    function handleRepoAccess() {
+        if (IS_LOGGED_IN) {
+            if (HAS_PERMISSION) {
+                // Caso 1: Logueado y Con Permiso -> Abrir Drive
+                window.open(DRIVE_LINK, '_blank');
+            } else {
+                // Caso 2: Logueado pero SIN Permiso -> Mostrar Formulario
+                openRepoModal();
+            }
+        } else {
+            // Caso 3: No Logueado -> Mostrar Formulario (login/registro implícito o solicitud manual)
+            openRepoModal();
+        }
+    }
+
+    // --- CONTROL DEL MODAL REPOSITORIO ---
+    function openRepoModal() {
+        const modal = document.getElementById('repoModal');
+        modal.style.display = 'flex'; // Necesario para que el flex funcione
+        // Pequeño delay para permitir que el navegador renderice antes de la transición de opacidad
+        requestAnimationFrame(() => {
+            modal.classList.add('show');
+        });
+    }
+
+    function closeRepoModal() {
+        const modal = document.getElementById('repoModal');
+        modal.classList.remove('show');
+        setTimeout(() => { 
+            modal.style.display = 'none'; 
+        }, 300); // Esperar a que termine la transición CSS (0.3s)
+    }   
+    
+    // Cerrar modal al hacer clic fuera (igual que el otro modal)
+    window.addEventListener('click', function(event) {
+        const repoModal = document.getElementById('repoModal');
+        if (event.target == repoModal) {
+            closeRepoModal();
+        }
+    });
+
+    // --- ANIMACIÓN DE CARGA EN EL BOTÓN DEL FORMULARIO ---
+    document.addEventListener('DOMContentLoaded', function() {
+        const formRepo = document.getElementById('formRepo');
+        const btnRepo = document.getElementById('btnRepoSubmit');
+
+        if(formRepo && btnRepo) {
+            formRepo.addEventListener('submit', function() {
+                if(formRepo.checkValidity()) {
+                    const width = btnRepo.offsetWidth;
+                    btnRepo.style.width = width + 'px';
+                    btnRepo.disabled = true;
+                    btnRepo.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i> ENVIANDO...';
+                }
+            });
+        }
+    });
     // --- LÓGICA GLOBAL ---
     function openCalculator(url) {
         window.open(url, 'CalculadoraCIP', 'width=550,height=750,scrollbars=yes,resizable=yes');
