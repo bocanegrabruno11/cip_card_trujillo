@@ -167,7 +167,12 @@
             </li>
             <li>
                 <a href="{{ route('Admin.Arbitraje') }}" class="menu-link {{ request()->routeIs('Arbitraje') ? 'active' : '' }}">
-                    <i class="fas fa-home"></i> Ver Arbitrajes
+                    <i class="fas fa-gavel"></i> Ver Arbitrajes
+                </a>
+            </li>
+            <li>
+                <a href="{{ route('Admin.Jrd') }}" class="menu-link {{ request()->routeIs('Jrd') ? 'active' : '' }}">
+                    <i class="fas fa-users-cog"></i> Ver JRD
                 </a>
             </li>
         </ul>

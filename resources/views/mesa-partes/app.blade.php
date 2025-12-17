@@ -298,7 +298,27 @@
                 </ul>
             </li>
             
-
+  <!-- Menú Desplegable de JRD -->
+<li class="menu-item-dropdown">
+    <div class="menu-link-dropdown {{ request()->routeIs('jrd') || request()->routeIs('registros.jrd') ? 'active' : '' }}" onclick="toggleSubmenu(this)">
+        <span>
+            <i class="fas fa-gavel"></i> JRD
+        </span>
+        <i class="fas fa-chevron-down"></i>
+    </div>
+    <ul class="submenu {{ request()->routeIs('jrd') || request()->routeIs('registros.jrd') ? 'show' : '' }}">
+        <li>
+            <a href="{{ route('jrd') }}" class="submenu-link {{ request()->routeIs('jrd') ? 'active' : '' }}">
+                <i class="fas fa-plus-circle"></i> Nuevo JRD
+            </a>
+        </li>
+        <li>
+            <a href="{{ route('registros.jrd') }}" class="submenu-link {{ request()->routeIs('registros.jrd') ? 'active' : '' }}">
+                <i class="fas fa-list"></i> Registros de JRD
+            </a>
+        </li>
+    </ul>
+</li>
             <!-- Agrega más items según necesites -->
             @yield('sidebar-menu')
         </ul>
