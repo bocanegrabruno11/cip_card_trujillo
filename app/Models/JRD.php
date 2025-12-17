@@ -8,6 +8,8 @@ class Jrd extends Model
 {
     protected $table = 'jrd';
     protected $primaryKey = 'id_jrd';
+        public $timestamps = false;
+
     protected $fillable = [
         'user_id',
         'fecha_inicio',

@@ -15,7 +15,19 @@ use App\Http\Controllers\PersonaController;
 use App\Http\Controllers\ArbitrajeRegistroController;
 use App\Http\Controllers\ArbitrajeController;
 use App\Http\Controllers\AdminArbitrajeController;
+<<<<<<< HEAD
+use App\Http\Controllers\ProcesoArbitrajeController;
+use App\Http\Controllers\ProcesoArbitrajeDocumentoController;
+use App\Http\Controllers\JrdRegistroController;
+ use App\Http\Controllers\JrdController;
+ use App\Http\Controllers\AdminJrdController;
+ use App\Http\Controllers\JrdDocumentoController;
+  use App\Http\Controllers\JrdProcesoController;
+use App\Http\Controllers\DashboardController;
+
+=======
 use App\Http\Controllers\RepoSolicitudController;
+>>>>>>> 73ac1f001bb842e2ebc6e21ea2ec129199346efd
 
 Route::post('/solicitudes-repo', [RepoSolicitudController::class, 'store'])->name('solicitudes.store');
 Route::get('/', [PageController::class, 'welcome'])->name('welcome');
@@ -73,9 +85,8 @@ Route::middleware(['auth', 'checkrole:gestor_contenido'])->group(function () {
 
 Route::middleware(['auth', 'checkrole:mesa_partes'])->prefix('mesa-partes')->group(function () {
     // Dashboard
-    Route::get('/dashboard', function () {
-        return view('mesa-partes.dashboard');
-    })->name('dashboard');
+        Route::get('/dashboard', [DashboardController::class, 'index'])
+            ->name('dashboard');
 
     // Actualizar Información
     Route::get('/actualizar', function () {
@@ -112,6 +123,19 @@ Route::get('/arbitraje/registros', [ArbitrajeController::class, 'registros'])
 
 Route::get('/arbitraje/obtener', [ArbitrajeController::class, 'obtenerArbitrajes'])
     ->name('arbitrajes.obtener');
+
+Route::get('/jrd', function () {
+    return view('mesa-partes.jrd');
+})->name('jrd'); // Cambia 'jrd.create' por 'jrd'
+
+Route::get('/registros-jrd', function () {
+    return view('mesa-partes.RegistrosJRD');
+})->name('registros.jrd'); // Cambia 'jrd.index' por 'registros.jrd'
+Route::get('/jrd/registrar', [JrdRegistroController::class, 'create'])->name('jrd.create');
+Route::post('/jrd', [JrdRegistroController::class, 'store'])->name('jrd.store');
+
+    Route::get('/jrd/obtener', [JrdController::class, 'obtenerJrd'])->name('jrd.obtener');
+    Route::get('/jrd/mis-jrd', [JrdController::class, 'misJrd'])->name('jrd.mis');
 });
 
 
@@ -144,12 +168,45 @@ Route::middleware(['auth', 'checkrole:admin'])->group(function () {
     Route::get('/arbitrajes/{id}/detalle', [AdminArbitrajeController::class, 'detalle'])
         ->name('admin.arbitrajes.detalle');
 
+<<<<<<< HEAD
+    Route::post('/arbitrajes/{id}/rechazar', [AdminArbitrajeController::class, 'rechazar'])
+        ->name('admin.arbitrajes.rechazar');
+    Route::post('/arbitrajes/{id}/aceptar', [AdminArbitrajeController::class, 'aceptar'])
+    ->name('admin.arbitrajes.aceptar');
+    Route::post('/arbitraje/{id_arbitraje}/documentos',[ProcesoArbitrajeDocumentoController::class, 'store'])->name('arbitraje.documentos.store');
+    Route::post(
+        '/arbitraje/{id_arbitraje}/siguiente-proceso',
+        [ProcesoArbitrajeController::class, 'pasarSiguienteProceso']
+    )->name('arbitraje.siguiente.proceso');
+   
+    Route::get('/admin/Jrd', function () {
+        return view('Admin.Jrd');
+    })->name('Admin.Jrd');
+    
+ // Rutas para JRD
+Route::get('/jrd', [AdminJrdController::class, 'index'])->name('admin.jrd');
+Route::get('/jrd/obtener', [AdminJrdController::class, 'obtenerJrd'])->name('admin.jrd.obtener');
+Route::get('/jrd/detalle/{id}', [AdminJrdController::class, 'detalle'])->name('admin.jrd.detalle'); // Agregar el prefijo admin
+Route::put('/jrd/{id}/estado', [AdminJrdController::class, 'actualizarEstado'])->name('admin.jrd.estado');
+Route::post('/jrd/{id}/proceso', [AdminJrdController::class, 'agregarProceso'])->name('admin.jrd.proceso.agregar');
+
+    // Rutas admin para documentos JRD
+    Route::post('/jrd/{id_jrd}/documento', [JrdDocumentoController::class, 'store'])->name('jrd.documento.store');
+    Route::post('/jrd/{id_jrd}/documento/drive', [JrdDocumentoController::class, 'storeDrive'])->name('jrd.documento.drive');
+    Route::delete('/jrd/{id_jrd}/documento/{id_documento}', [JrdDocumentoController::class, 'destroy'])->name('jrd.documento.destroy');
+    
+    // Rutas admin para procesos JRD
+    Route::post('/jrd/{id_jrd}/proceso/siguiente', [JrdProcesoController::class, 'pasarSiguienteProceso'])->name('jrd.proceso.siguiente');
+    Route::post('/jrd/{id_jrd}/proceso', [JrdProcesoController::class, 'crearProceso'])->name('jrd.proceso.crear');
+    Route::put('/jrd/{id_jrd}/proceso/{id_proceso}', [JrdProcesoController::class, 'actualizarEstadoProceso'])->name('jrd.proceso.actualizar');
+=======
     Route::prefix('admin/gestion-permisos')->name('admin.solicitudes.')->group(function () {
         Route::get('/', [RepoSolicitudController::class, 'index'])->name('index');
         Route::put('/{id}', [RepoSolicitudController::class, 'updateState'])->name('update');
         Route::delete('/{id}', [RepoSolicitudController::class, 'destroy'])->name('destroy');
         Route::get('/{id}', [RepoSolicitudController::class, 'show'])->name('show');
     });
+>>>>>>> 73ac1f001bb842e2ebc6e21ea2ec129199346efd
 });
 
 require __DIR__.'/auth.php';

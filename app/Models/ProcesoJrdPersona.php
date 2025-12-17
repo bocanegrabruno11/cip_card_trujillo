@@ -8,6 +8,7 @@ class ProcesoJrdPersona extends Model
 {
     protected $table = 'procesos_jrd_personas';
     protected $primaryKey = 'id_proceso_jrd_persona';
+    public $timestamps = false;
     protected $fillable = [
         'jrd_id',
         'dni',

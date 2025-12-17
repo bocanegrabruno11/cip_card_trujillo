@@ -8,6 +8,8 @@ class ProcesoJrdDocumento extends Model
 {
     protected $table = 'procesos_jrd_documentos';
     protected $primaryKey = 'id_proceso_jrd_documento';
+        public $timestamps = false;
+
     protected $fillable = [
         'proceso_jrd_id',
         'fecha_subida',

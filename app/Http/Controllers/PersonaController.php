@@ -20,15 +20,25 @@ class PersonaController extends Controller
         return view('persona.create');
     }
 
-    // Guardar registro
 public function store(Request $request)
 {
-    $request->validate([
-        'dni' => 'required|digits:8|unique:persona,dni', // ← Agrega unique
-        'correo_contacto' => 'required|email',
-        'direccion' => 'nullable|string|max:200',
-        'celular' => 'nullable|digits:9',
-    ]);
+    $request->validate(
+        [
+            'dni' => 'required|digits:8|unique:persona,dni',
+            'correo_contacto' => 'required|email',
+            'direccion' => 'nullable|string|max:200',
+            'celular' => 'nullable|digits:9',
+        ],
+        [
+            'dni.required' => 'El DNI es obligatorio.',
+            'dni.digits' => 'El DNI debe tener exactamente 8 dígitos.',
+            'dni.unique' => 'El DNI ingresado ya se encuentra registrado.',
+            'correo_contacto.required' => 'El correo de contacto es obligatorio.',
+            'correo_contacto.email' => 'Debe ingresar un correo válido.',
+            'direccion.max' => 'La dirección no debe superar los 200 caracteres.',
+            'celular.digits' => 'El número de celular debe tener 9 dígitos.',
+        ]
+    );
 
     Persona::create([
         'dni' => $request->dni,
@@ -40,6 +50,7 @@ public function store(Request $request)
 
     return redirect()->back()->with('success', 'Información guardada correctamente.');
 }
+
 
 
     // Mostrar detalle
@@ -62,22 +73,38 @@ public function update(Request $request)
 {
     $persona = Persona::where('user_id', auth()->id())->firstOrFail();
 
-    $validated = $request->validate([
-        'dni' => [
-            'required',
-            'numeric',
-            'digits:8',
-            Rule::unique('persona', 'dni')->ignore($persona->id_persona, 'id_persona')
+    $validated = $request->validate(
+        [
+            'dni' => [
+                'required',
+                'numeric',
+                'digits:8',
+                Rule::unique('persona', 'dni')->ignore($persona->id_persona, 'id_persona')
+            ],
+            'correo_contacto' => 'required|email',
+            'direccion' => 'required|string|max:200',
+            'celular' => 'required|numeric|digits:9'
         ],
-        'correo_contacto' => 'required|email',
-        'direccion' => 'required|string|max:200',
-        'celular' => 'required|numeric|digits:9'
-    ]);
+        [
+            'dni.required' => 'El DNI es obligatorio.',
+            'dni.numeric' => 'El DNI solo debe contener números.',
+            'dni.digits' => 'El DNI debe tener exactamente 8 dígitos.',
+            'dni.unique' => 'Este DNI ya está registrado por otro usuario.',
+            'correo_contacto.required' => 'El correo de contacto es obligatorio.',
+            'correo_contacto.email' => 'Debe ingresar un correo electrónico válido.',
+            'direccion.required' => 'La dirección es obligatoria.',
+            'direccion.max' => 'La dirección no debe superar los 200 caracteres.',
+            'celular.required' => 'El celular es obligatorio.',
+            'celular.numeric' => 'El celular solo debe contener números.',
+            'celular.digits' => 'El celular debe tener exactamente 9 dígitos.',
+        ]
+    );
 
     $persona->update($validated);
 
     return back()->with('success', 'Información actualizada correctamente');
 }
+
 
     // Eliminar registro
     public function destroy($id)
