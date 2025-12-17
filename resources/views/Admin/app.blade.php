@@ -175,6 +175,11 @@
                     <i class="fas fa-users-cog"></i> Ver JRD
                 </a>
             </li>
+            <li>
+                <a href="{{ route('admin.solicitudes.index') }}" class="menu-link {{ request()->routeIs('admin.solicitudes.index') ? 'active' : '' }}">
+                    <i class="fas fa-file "></i> Permisos de Repositorio
+                </a>
+            </li>
         </ul>
 
         <div class="user-footer">

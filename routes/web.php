@@ -15,6 +15,7 @@ use App\Http\Controllers\PersonaController;
 use App\Http\Controllers\ArbitrajeRegistroController;
 use App\Http\Controllers\ArbitrajeController;
 use App\Http\Controllers\AdminArbitrajeController;
+<<<<<<< HEAD
 use App\Http\Controllers\ProcesoArbitrajeController;
 use App\Http\Controllers\ProcesoArbitrajeDocumentoController;
 use App\Http\Controllers\JrdRegistroController;
@@ -24,7 +25,11 @@ use App\Http\Controllers\JrdRegistroController;
   use App\Http\Controllers\JrdProcesoController;
 use App\Http\Controllers\DashboardController;
 
+=======
+use App\Http\Controllers\RepoSolicitudController;
+>>>>>>> 73ac1f001bb842e2ebc6e21ea2ec129199346efd
 
+Route::post('/solicitudes-repo', [RepoSolicitudController::class, 'store'])->name('solicitudes.store');
 Route::get('/', [PageController::class, 'welcome'])->name('welcome');
 Route::get('/mision-vision', [PageController::class, 'misionVision'])->name('mision-vision');
 Route::get('/presentacion', [PageController::class, 'presentacion'])->name('presentacion');
@@ -163,6 +168,7 @@ Route::middleware(['auth', 'checkrole:admin'])->group(function () {
     Route::get('/arbitrajes/{id}/detalle', [AdminArbitrajeController::class, 'detalle'])
         ->name('admin.arbitrajes.detalle');
 
+<<<<<<< HEAD
     Route::post('/arbitrajes/{id}/rechazar', [AdminArbitrajeController::class, 'rechazar'])
         ->name('admin.arbitrajes.rechazar');
     Route::post('/arbitrajes/{id}/aceptar', [AdminArbitrajeController::class, 'aceptar'])
@@ -193,6 +199,14 @@ Route::post('/jrd/{id}/proceso', [AdminJrdController::class, 'agregarProceso'])-
     Route::post('/jrd/{id_jrd}/proceso/siguiente', [JrdProcesoController::class, 'pasarSiguienteProceso'])->name('jrd.proceso.siguiente');
     Route::post('/jrd/{id_jrd}/proceso', [JrdProcesoController::class, 'crearProceso'])->name('jrd.proceso.crear');
     Route::put('/jrd/{id_jrd}/proceso/{id_proceso}', [JrdProcesoController::class, 'actualizarEstadoProceso'])->name('jrd.proceso.actualizar');
+=======
+    Route::prefix('admin/gestion-permisos')->name('admin.solicitudes.')->group(function () {
+        Route::get('/', [RepoSolicitudController::class, 'index'])->name('index');
+        Route::put('/{id}', [RepoSolicitudController::class, 'updateState'])->name('update');
+        Route::delete('/{id}', [RepoSolicitudController::class, 'destroy'])->name('destroy');
+        Route::get('/{id}', [RepoSolicitudController::class, 'show'])->name('show');
+    });
+>>>>>>> 73ac1f001bb842e2ebc6e21ea2ec129199346efd
 });
 
 require __DIR__.'/auth.php';

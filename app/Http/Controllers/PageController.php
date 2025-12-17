@@ -7,10 +7,12 @@ use App\Models\Documentacion;
 use App\Models\Evento;
 use App\Models\OrganizacionCard;
 use App\Models\Publicacion;
+use App\Models\SolicitudRepositorio;
 use App\Models\TarifaConfiguracion;
 use App\Models\TarifaEscala;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class PageController extends Controller
 {
@@ -269,11 +271,17 @@ class PageController extends Controller
             ->orderBy('orden')
             ->get();
 
-        // 2. Los agrupamos por la columna 'categoria'
-        // Esto crea un array asociativo donde la llave es 'normativa', 'tarifario', etc.
+        
         $docsPorCategoria = $documentos->groupBy('categoria');
+        $tienePermisoRepo = false;
+        if (Auth::check()) {
+            // Verifica si existe una solicitud APROBADA para el email del usuario actual
+            $tienePermisoRepo = SolicitudRepositorio::where('email', Auth::user()->email)
+                                ->where('estado', 'aprobado')
+                                ->exists();
+        }
 
-        return view('contenido.servicios.institucion-arbitral', compact('docsPorCategoria','arbitrosNomina'));
+        return view('contenido.servicios.institucion-arbitral', compact('docsPorCategoria','arbitrosNomina','tienePermisoRepo'));
     }
 
     public function juntaPrevencion()
