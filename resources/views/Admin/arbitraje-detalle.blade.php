@@ -3,8 +3,12 @@
 @section('title', 'Detalle de Arbitraje #' . $arbitraje->id_arbitraje)
 @section('page-title', 'Detalle de Arbitraje')
 
-@section('content')
+{{-- AÑADE ESTA SECCIÓN PARA EL CSRF TOKEN --}}
+@push('head')
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+@endpush
 
+@section('content')
 <div class="container-fluid">
     
     <!-- Botón de regreso -->
@@ -172,6 +176,7 @@
                                                 'iniciado' => 'bg-info',
                                                 'en progreso' => 'bg-primary',
                                                 'completado' => 'bg-success',
+                                                'finalizado' => 'bg-success',
                                                 'rechazado' => 'bg-danger',
                                                 default => 'bg-secondary'
                                             };
@@ -191,16 +196,94 @@
                                         <i class="fas fa-align-left me-2"></i>Descripción
                                     </h6>
                                     <p class="text-muted">{{ $proceso->descripcion }}</p>
-
-                                    <!-- Documentos -->
-                                    @if($proceso->documentos && $proceso->documentos->count() > 0)
+                                    
+                                    <!-- SECCIÓN DE ADMIN: Subir documentos y finalizar proceso -->
+                                    @if($proceso->nombre !== 'Validacion de Voucher' && $proceso->estado !== 'Finalizado')
                                         <hr>
+                                        <h6 class="mb-3 text-danger">
+                                            <i class="fas fa-cog me-2"></i>Acciones de Administración
+                                        </h6>
+                                        
+                                        <!-- Formulario para subir documentos -->
+                                        <div class="card border-primary mb-4">
+                                            <div class="card-header bg-primary text-white">
+                                                <h6 class="mb-0">
+                                                    <i class="fas fa-upload me-2"></i>Subir Documentos a este Proceso
+                                                </h6>
+                                            </div>
+                                            <div class="card-body">
+                                                <form action="{{ route('arbitraje.documentos.store', $arbitraje->id_arbitraje) }}" 
+                                                      method="POST" 
+                                                      enctype="multipart/form-data"
+                                                      class="row g-3 align-items-end">
+                                                    @csrf
+                                                    <input type="hidden" name="proceso_id" value="{{ $proceso->id_proceso_arbitraje }}">
+                                                    
+                                                    <div class="col-md-8">
+                                                        <label for="archivo{{ $proceso->id_proceso_arbitraje }}" class="form-label">
+                                                            Seleccionar archivo (PDF, JPG, PNG, JPEG) - Máx. 20MB
+                                                        </label>
+                                                        <input type="file" 
+                                                               class="form-control" 
+                                                               id="archivo{{ $proceso->id_proceso_arbitraje }}" 
+                                                               name="archivo" 
+                                                               accept=".pdf,.jpg,.jpeg,.png" 
+                                                               required>
+                                                        <div class="form-text">
+                                                            Formatos permitidos: PDF, JPG, JPEG, PNG. Tamaño máximo: 20MB
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-4">
+                                                        <button type="submit" class="btn btn-primary w-100">
+                                                            <i class="fas fa-upload me-2"></i>Subir Documento
+                                                        </button>
+                                                    </div>
+                                                </form>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Botón para finalizar proceso -->
+                                        <div class="card border-warning">
+                                            <div class="card-header bg-warning text-dark">
+                                                <h6 class="mb-0">
+                                                    <i class="fas fa-flag-checkered me-2"></i>Finalizar Este Proceso
+                                                </h6>
+                                            </div>
+                                            <div class="card-body">
+                                                <p class="mb-3">
+                                                    <i class="fas fa-info-circle text-warning me-2"></i>
+                                                    Al finalizar este proceso, se creará automáticamente el siguiente proceso en el flujo del arbitraje.
+                                                </p>
+                                                    <form id="formFinalizarProceso{{ $proceso->id_proceso_arbitraje }}" 
+                                                        action="{{ route('arbitraje.siguiente.proceso', $arbitraje->id_arbitraje) }}" 
+                                                        method="POST" 
+                                                        class="d-inline">
+                                                        @csrf
+                                                        <input type="hidden" name="proceso_actual_id" value="{{ $proceso->id_proceso_arbitraje }}">
+                                                        <button type="button" 
+                                                                class="btn btn-warning btn-finalizar-proceso"
+                                                                data-proceso-nombre="{{ $proceso->nombre }}"
+                                                                data-proceso-id="{{ $proceso->id_proceso_arbitraje }}"
+                                                                data-form-id="formFinalizarProceso{{ $proceso->id_proceso_arbitraje }}">
+                                                            <i class="fas fa-check-circle me-2"></i>Finalizar Proceso
+                                                        </button>
+                                                    </form>
+                                            </div>
+                                        </div>
+                                        <hr>
+                                    @endif
+
+                                    <!-- Documentos existentes -->
+                                    @if($proceso->documentos && $proceso->documentos->count() > 0)
                                         <h6 class="mb-3">
                                             <i class="fas fa-paperclip me-2"></i>
                                             Documentos Adjuntos ({{ $proceso->documentos->count() }})
                                         </h6>
                                         <div class="list-group">
                                             @foreach($proceso->documentos as $documento)
+                                                @php
+                                                    $esVisualizable = in_array(strtolower($documento->tipo_documento), ['pdf', 'imagen']);
+                                                @endphp
                                                 <div class="list-group-item">
                                                     <div class="row align-items-center">
                                                         <div class="col-md-1 text-center">
@@ -209,7 +292,7 @@
                                                             @elseif($documento->tipo_documento === 'imagen')
                                                                 <i class="fas fa-file-image fa-2x text-primary"></i>
                                                             @else
-                                                                <i class="fas fa-file fa-2x text-secondary"></i>
+                                                                <i class="fas fa-external-link-alt fa-2x text-warning"></i>
                                                             @endif
                                                         </div>
                                                         <div class="col-md-7">
@@ -221,38 +304,75 @@
                                                             </small>
                                                             <br>
                                                             <small>
-                                                                <span class="badge bg-secondary">
+                                                                <span class="badge {{ $esVisualizable ? 'bg-secondary' : 'bg-warning text-dark' }}">
                                                                     {{ strtoupper($documento->tipo_documento) }}
                                                                 </span>
+                                                                @if(!$esVisualizable)
+                                                                    <span class="badge bg-info ms-1">
+                                                                        <i class="fas fa-link me-1"></i>Enlace
+                                                                    </span>
+                                                                @endif
                                                             </small>
                                                         </div>
                                                         <div class="col-md-4 text-end">
-                                                            <!-- Botón de ojo para abrir modal -->
-                                                            <button type="button" 
-                                                                    class="btn btn-sm btn-outline-danger me-2"
-                                                                    data-bs-toggle="modal" 
-                                                                    data-bs-target="#modalDocumento"
-                                                                    data-documento-id="{{ $documento->id_documento }}"
-                                                                    data-documento-nombre="{{ $documento->nombre_original }}"
-                                                                    data-documento-tipo="{{ $documento->tipo_documento }}"
-                                                                    data-documento-ruta="{{ $documento->ruta_archivo }}">
-                                                                <i class="fas fa-eye me-1"></i>Ver
-                                                            </button>
-                                                            <a href="{{ $documento->ruta_archivo }}" 
-                                                               download 
-                                                               class="btn btn-sm btn-danger">
-                                                                <i class="fas fa-download me-1"></i>Descargar
-                                                            </a>
+                                                            @if($esVisualizable)
+                                                                {{-- PRIMER PROCESO (Validacion de Voucher) - Botón Ver con Modal --}}
+                                                                @if($proceso->nombre === 'Validacion de Voucher')
+                                                                    <button type="button" 
+                                                                            class="btn btn-sm btn-outline-danger me-2"
+                                                                            data-bs-toggle="modal" 
+                                                                            data-bs-target="#modalDocumento"
+                                                                            data-documento-id="{{ $documento->id_documento }}"
+                                                                            data-documento-nombre="{{ $documento->nombre_original }}"
+                                                                            data-documento-tipo="{{ $documento->tipo_documento }}"
+                                                                            data-documento-ruta="{{ $documento->ruta_archivo }}"
+                                                                            data-documento-fecha="{{ $documento->fecha_subida ? $documento->fecha_subida->format('d/m/Y H:i') : 'N/A' }}">
+                                                                        <i class="fas fa-eye me-1"></i>Ver
+                                                                    </button>
+                                                                    <a href="{{ asset('storage/' . $documento->ruta_archivo) }}" 
+                                                                       download="{{ $documento->nombre_original }}" 
+                                                                       class="btn btn-sm btn-danger">
+                                                                        <i class="fas fa-download me-1"></i>Descargar
+                                                                    </a>
+                                                                {{-- DEMÁS PROCESOS - Solo botón para abrir en nueva pestaña --}}
+                                                                @else
+                                                                    @if($documento->tipo_documento === 'pdf' || $documento->tipo_documento === 'imagen')
+                                                                        <a href="{{ asset($documento->ruta_archivo) }}" 
+                                                                           target="_blank" 
+                                                                           class="btn btn-sm btn-outline-primary me-2"
+                                                                           title="Abrir documento en nueva pestaña">
+                                                                            <i class="fas fa-external-link-alt me-1"></i>Abrir
+                                                                        </a>
+                                                                    @else
+                                                                        <a href="{{ $documento->ruta_archivo }}" 
+                                                                           target="_blank" 
+                                                                           class="btn btn-sm btn-outline-warning me-2"
+                                                                           title="Abrir enlace en nueva pestaña">
+                                                                            <i class="fas fa-external-link-alt me-1"></i>Abrir
+                                                                        </a>
+                                                                    @endif
+                                                                @endif
+                                                            @else
+                                                                {{-- Documentos que son solo enlaces --}}
+                                                                <a href="{{ $documento->ruta_archivo }}" 
+                                                                   target="_blank" 
+                                                                   class="btn btn-sm btn-outline-warning me-2"
+                                                                   title="Abrir enlace en nueva pestaña">
+                                                                    <i class="fas fa-external-link-alt me-1"></i>Abrir
+                                                                </a>
+                                                            @endif
                                                         </div>
                                                     </div>
                                                 </div>
                                             @endforeach
                                         </div>
                                     @else
-                                        <hr>
-                                        <p class="text-muted text-center py-2">
-                                            <i class="fas fa-info-circle me-2"></i>No hay documentos adjuntos en este proceso
-                                        </p>
+                                        @if($proceso->nombre === 'Validacion de Voucher' || $proceso->estado === 'Finalizado')
+                                            <hr>
+                                            <p class="text-muted text-center py-2">
+                                                <i class="fas fa-info-circle me-2"></i>No hay documentos adjuntos en este proceso
+                                            </p>
+                                        @endif
                                     @endif
                                 </div>
                             </div>
@@ -285,7 +405,7 @@
                     <div class="col-md-8">
                         <div class="card border-0 shadow-sm">
                             <div class="card-body p-0">
-                                <!-- Vista previa de imagen con controles mejorados -->
+                                <!-- Vista previa de imagen -->
                                 <div id="imagenPreview" class="d-none">
                                     <div class="image-viewer-wrapper">
                                         <div class="image-container" id="imageContainer">
@@ -318,37 +438,6 @@
                                 <div id="pdfPreview" class="d-none">
                                     <div class="pdf-viewer-wrapper">
                                         <iframe id="pdfIframe" src="" width="100%" height="500px" class="border rounded"></iframe>
-                                        <div class="pdf-controls d-flex justify-content-between align-items-center mt-2">
-                                            <div class="btn-group">
-                                                <button type="button" class="btn btn-sm btn-outline-danger" id="prevPage">
-                                                    <i class="fas fa-chevron-left"></i> Anterior
-                                                </button>
-                                                <button type="button" class="btn btn-sm btn-outline-danger" id="nextPage">
-                                                    Siguiente <i class="fas fa-chevron-right"></i>
-                                                </button>
-                                            </div>
-                                            <span class="badge bg-danger" id="pageInfo">Página 1</span>
-                                        </div>
-                                    </div>
-                                </div>
-                                
-                                <!-- Vista para otros tipos de documentos -->
-                                <div id="otrosPreview" class="d-none">
-                                    <div class="d-flex flex-column align-items-center justify-content-center py-5">
-                                        <div class="file-icon mb-3">
-                                            <i class="fas fa-file fa-5x text-muted"></i>
-                                        </div>
-                                        <div class="text-center">
-                                            <h5 id="nombreDocumento" class="mb-2">Documento no visualizable</h5>
-                                            <p class="text-muted">
-                                                Este tipo de documento no puede ser visualizado directamente en el navegador.
-                                            </p>
-                                            <div class="mt-3">
-                                                <a href="#" id="descargarDocumento" class="btn btn-danger">
-                                                    <i class="fas fa-download me-2"></i>Descargar para ver
-                                                </a>
-                                            </div>
-                                        </div>
                                     </div>
                                 </div>
                                 
@@ -414,12 +503,12 @@
                 <div class="row w-100">
                     <div class="col-md-4">
                         <button type="button" class="btn btn-success w-100" id="btnAceptar">
-                            <i class="fas fa-check-circle me-2"></i>Aceptar Documento
+                            <i class="fas fa-check-circle me-2"></i>Aceptar Voucher
                         </button>
                     </div>
                     <div class="col-md-4">
-                        <button type="button" class="btn btn-danger w-100" id="btnRechazar">
-                            <i class="fas fa-times-circle me-2"></i>Rechazar Documento
+                        <button type="button" class="btn btn-danger w-100" id="btnRechazarArbitraje">
+                            <i class="fas fa-times-circle me-2"></i>Rechazar Voucher
                         </button>
                     </div>
                     <div class="col-md-4">
@@ -433,18 +522,34 @@
     </div>
 </div>
 
+<!-- Toast para notificaciones -->
+<div class="position-fixed bottom-0 end-0 p-3" style="z-index: 1050">
+    <div id="toastCopiado" class="toast align-items-center text-bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="d-flex">
+            <div class="toast-body">
+                <i class="fas fa-check-circle me-2"></i>
+                <span id="toastMessage">Enlace copiado al portapapeles</span>
+            </div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+    </div>
+</div>
+
 @endsection
 
 @push('scripts')
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const modalDocumento = document.getElementById('modalDocumento');
     const modal = new bootstrap.Modal(modalDocumento);
-    
+    const btnRechazarArbitraje = document.getElementById('btnRechazarArbitraje');
+    const btnAceptar = document.getElementById('btnAceptar');
+
     // Elementos del modal
     const imagenPreview = document.getElementById('imagenPreview');
     const pdfPreview = document.getElementById('pdfPreview');
-    const otrosPreview = document.getElementById('otrosPreview');
     const loadingPreview = document.getElementById('loadingPreview');
     const imagenDocumento = document.getElementById('imagenDocumento');
     const imageContainer = document.getElementById('imageContainer');
@@ -458,27 +563,21 @@ document.addEventListener('DOMContentLoaded', function() {
     const resetImageBtn = document.getElementById('resetImage');
     const zoomLevel = document.getElementById('zoomLevel');
     
-    // Controles de PDF
-    const prevPageBtn = document.getElementById('prevPage');
-    const nextPageBtn = document.getElementById('nextPage');
-    const pageInfo = document.getElementById('pageInfo');
-    
     // Información del documento
     const infoNombre = document.getElementById('infoNombre');
     const infoTipo = document.getElementById('infoTipo');
     const infoFecha = document.getElementById('infoFecha');
-    const descargarDocumento = document.getElementById('descargarDocumento');
     const btnDescargarModal = document.getElementById('btnDescargarModal');
     
-    // Botones de acción
-    const btnAceptar = document.getElementById('btnAceptar');
-    const btnRechazar = document.getElementById('btnRechazar');
+    // Toast
+    const toastCopiado = document.getElementById('toastCopiado');
+    const toastMessage = document.getElementById('toastMessage');
+    const toast = new bootstrap.Toast(toastCopiado);
     
-    // Variables de estado para imágenes
+    // Variables de estado
     let documentoActual = null;
     let currentZoom = 1;
     let currentRotation = 0;
-    let currentPage = 1;
     let isDragging = false;
     let startX, startY, scrollLeft, scrollTop;
     
@@ -490,90 +589,67 @@ document.addEventListener('DOMContentLoaded', function() {
             nombre: button.getAttribute('data-documento-nombre'),
             tipo: button.getAttribute('data-documento-tipo'),
             ruta: button.getAttribute('data-documento-ruta'),
-            fecha: '15/12/2025 10:30'
+            fecha: button.getAttribute('data-documento-fecha')
         };
         
-        // Mostrar loading
         showLoading();
-        
-        // Cargar información del documento
         loadDocumentInfo(documentoActual);
         
-        // Mostrar la vista previa adecuada después de un pequeño delay
+        // Asegurar que la ruta sea correcta (con storage/ si es necesario)
+        let rutaCompleta = documentoActual.ruta;
+        if (!rutaCompleta.startsWith('http')) {
+            rutaCompleta = rutaCompleta;
+        }
+        documentoActual.ruta = rutaCompleta;
+        
         setTimeout(() => {
             mostrarVistaPrevia(documentoActual);
         }, 500);
     });
     
-    // Función para mostrar loading
     function showLoading() {
         imagenPreview.classList.add('d-none');
         pdfPreview.classList.add('d-none');
-        otrosPreview.classList.add('d-none');
         loadingPreview.classList.remove('d-none');
     }
     
-    // Función para cargar información del documento
     function loadDocumentInfo(doc) {
         infoNombre.textContent = doc.nombre;
         infoTipo.textContent = doc.tipo.toUpperCase();
         infoFecha.textContent = doc.fecha;
         
-        // Configurar enlaces de descarga
-        if (descargarDocumento) {
-            descargarDocumento.href = doc.ruta;
-        }
         if (btnDescargarModal) {
             btnDescargarModal.href = doc.ruta;
+            btnDescargarModal.download = doc.nombre;
         }
     }
     
-    // Función para mostrar la vista previa adecuada
     function mostrarVistaPrevia(doc) {
         loadingPreview.classList.add('d-none');
         
-        // Extraer extensión del archivo
         const extension = doc.nombre.split('.').pop().toLowerCase();
         const esImagen = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp'].includes(extension);
         const esPDF = extension === 'pdf';
         
         if (esImagen) {
-            // Configurar visor de imagen
             imagenPreview.classList.remove('d-none');
             pdfPreview.classList.add('d-none');
-            otrosPreview.classList.add('d-none');
-            
-            // Cargar imagen
             imagenDocumento.src = doc.ruta;
-            
-            // Resetear controles
             resetImageControls();
-            
-            // Configurar arrastre para desplazarse
             setupImageDrag();
-            
         } else if (esPDF) {
-            // Configurar visor de PDF
             imagenPreview.classList.add('d-none');
             pdfPreview.classList.remove('d-none');
-            otrosPreview.classList.add('d-none');
-            
-            // Cargar PDF
             pdfIframe.src = doc.ruta;
-            
         } else {
-            // Documento no visualizable
-            imagenPreview.classList.add('d-none');
-            pdfPreview.classList.add('d-none');
-            otrosPreview.classList.remove('d-none');
+            console.error('Tipo de documento no soportado');
+            modal.hide();
         }
     }
     
-    // Configurar arrastre para desplazarse en la imagen
     function setupImageDrag() {
         const imageWrapper = imageContainer.querySelector('.image-wrapper');
         
-        // Solo habilitar arrastre si hay zoom
         imageWrapper.addEventListener('mousedown', startDrag);
         imageWrapper.addEventListener('touchstart', startDragTouch);
         
@@ -636,14 +712,12 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
     
-    // Funciones para controles de imagen
     function resetImageControls() {
         currentZoom = 1;
         currentRotation = 0;
         imagenDocumento.style.transform = `scale(${currentZoom}) rotate(${currentRotation}deg)`;
         zoomLevel.textContent = `${Math.round(currentZoom * 100)}%`;
         
-        // Restablecer el desplazamiento del contenedor
         const imageWrapper = imageContainer.querySelector('.image-wrapper');
         if (imageWrapper) {
             imageWrapper.scrollLeft = imageWrapper.scrollWidth / 2 - imageWrapper.clientWidth / 2;
@@ -651,7 +725,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
     
-    // Event listeners para controles de imagen
     zoomInBtn.addEventListener('click', function() {
         if (currentZoom < 3) {
             currentZoom += 0.1;
@@ -682,7 +755,6 @@ document.addEventListener('DOMContentLoaded', function() {
         imagenDocumento.style.transform = `scale(${currentZoom}) rotate(${currentRotation}deg)`;
         zoomLevel.textContent = `${Math.round(currentZoom * 100)}%`;
         
-        // Habilitar/deshabilitar el arrastre según el nivel de zoom
         const imageWrapper = imageContainer.querySelector('.image-wrapper');
         if (imageWrapper) {
             if (currentZoom > 1) {
@@ -695,71 +767,409 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
     
-    // Event listeners para PDF (funcionalidad básica)
-    prevPageBtn.addEventListener('click', function() {
-        if (currentPage > 1) {
-            currentPage--;
-            updatePageInfo();
-        }
-    });
-    
-    nextPageBtn.addEventListener('click', function() {
-        currentPage++;
-        updatePageInfo();
-    });
-    
-    function updatePageInfo() {
-        pageInfo.textContent = `Página ${currentPage}`;
-    }
-    
-    // Acciones principales
-    btnAceptar.addEventListener('click', function() {
-        if (documentoActual) {
+    // Acción Aceptar
+    btnAceptar.addEventListener('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        
+        // Obtener el ID del arbitraje
+        const pathArray = window.location.pathname.split('/');
+        const arbitrajeId = pathArray[pathArray.length - 2];
+        
+        console.log('ID del arbitraje para aceptar:', arbitrajeId);
+        
+        // Validar ID
+        if (!arbitrajeId || isNaN(arbitrajeId)) {
             Swal.fire({
-                title: '¿Aceptar documento?',
-                text: `¿Estás seguro de aceptar el documento "${documentoActual.nombre}"?`,
+                title: 'Error',
+                text: 'ID de arbitraje inválido',
+                icon: 'error'
+            });
+            return;
+        }
+        
+        // Obtener token CSRF
+        let csrfToken = '';
+        const metaTag = document.querySelector('meta[name="csrf-token"]');
+        if (metaTag) {
+            csrfToken = metaTag.getAttribute('content');
+        }
+        
+        console.log('Token CSRF para aceptar:', csrfToken ? 'Encontrado' : 'No encontrado');
+        
+        if (!csrfToken) {
+            Swal.fire({
+                title: 'Error',
+                text: 'No se pudo obtener el token de seguridad.',
+                icon: 'error'
+            });
+            return;
+        }
+        
+        // Cerrar el modal primero
+        modal.hide();
+        
+        // Esperar un momento para que se cierre el modal
+        setTimeout(() => {
+            Swal.fire({
+                title: '¿Aceptar voucher y pasar a selección de árbitro?',
+                text: 'El arbitraje continuará con el proceso de selección de árbitro.',
                 icon: 'question',
+                html: `
+                    <div class="text-start mt-3">
+                        <label for="swal-input-comentario" class="form-label fw-bold">
+                            Comentario opcional
+                        </label>
+                        <textarea 
+                            id="swal-input-comentario" 
+                            class="form-control" 
+                            rows="3"
+                            placeholder="Agregue un comentario si lo desea..."
+                            maxlength="500"
+                            style="resize: vertical;"
+                        ></textarea>
+                        <small class="text-muted d-block mt-1">
+                            <span id="char-count-comentario">0</span>/500 caracteres
+                        </small>
+                    </div>
+                `,
                 showCancelButton: true,
-                confirmButtonColor: '#3085d6',
-                cancelButtonColor: '#d33',
-                confirmButtonText: 'Sí, aceptar',
-                cancelButtonText: 'Cancelar'
+                confirmButtonColor: '#28a745',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: 'Sí, aceptar y continuar',
+                cancelButtonText: 'Cancelar',
+                focusConfirm: false,
+                preConfirm: () => {
+                    const comentario = document.getElementById('swal-input-comentario').value;
+                    
+                    if (comentario.length > 500) {
+                        Swal.showValidationMessage('El comentario no puede exceder 500 caracteres');
+                        return false;
+                    }
+                    
+                    return { comentario: comentario.trim() };
+                },
+                didOpen: () => {
+                    const textarea = document.getElementById('swal-input-comentario');
+                    const charCount = document.getElementById('char-count-comentario');
+                    
+                    textarea.addEventListener('input', function() {
+                        charCount.textContent = this.value.length;
+                        
+                        if (this.value.length > 450) {
+                            charCount.classList.add('text-danger');
+                            charCount.classList.remove('text-muted');
+                        } else {
+                            charCount.classList.remove('text-danger');
+                            charCount.classList.add('text-muted');
+                        }
+                    });
+                    
+                    setTimeout(() => {
+                        textarea.focus();
+                    }, 100);
+                }
             }).then((result) => {
                 if (result.isConfirmed) {
-                    Swal.fire(
-                        '¡Aceptado!',
-                        'El documento ha sido aceptado correctamente.',
-                        'success'
-                    );
-                    modal.hide();
+                    // Mostrar loading
+                    Swal.fire({
+                        title: 'Procesando...',
+                        text: 'Aceptando voucher y creando proceso de selección de árbitro',
+                        allowOutsideClick: false,
+                        allowEscapeKey: false,
+                        showConfirmButton: false,
+                        didOpen: () => {
+                            Swal.showLoading();
+                        }
+                    });
+                    
+                    // Crear FormData para enviar
+                    const formData = new FormData();
+                    formData.append('_token', csrfToken);
+                    formData.append('comentario', result.value.comentario);
+                    
+                    // Usar la URL correcta para aceptar
+                    const url = `/arbitrajes/${arbitrajeId}/aceptar`;
+                    console.log('Enviando aceptación a:', url);
+                    
+                    // Usar fetch con FormData
+                    fetch(url, {
+                        method: 'POST',
+                        headers: {
+                            'Accept': 'application/json',
+                            'X-Requested-With': 'XMLHttpRequest'
+                        },
+                        body: formData
+                    })
+                    .then(response => {
+                        console.log('Respuesta recibida. Status:', response.status);
+                        
+                        if (!response.ok) {
+                            throw new Error(`Error ${response.status}: ${response.statusText}`);
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        console.log('Respuesta del servidor:', data);
+                        
+                        if (data.success) {
+                            Swal.fire({
+                                title: '¡Éxito!',
+                                html: `
+                                    <div class="text-start">
+                                        <p class="mb-2">${data.message}</p>
+                                        <hr>
+                                        <small class="text-muted">
+                                            <strong>Nuevo proceso creado:</strong> ${data.data.nuevo_proceso}<br>
+                                            <strong>Estado del arbitraje:</strong> ${data.data.arbitraje_estado}
+                                            ${result.value.comentario ? `<br><strong>Comentario:</strong> ${result.value.comentario}` : ''}
+                                        </small>
+                                    </div>
+                                `,
+                                icon: 'success',
+                                confirmButtonColor: '#28a745'
+                            }).then(() => {
+                                // Recargar la página para ver los cambios
+                                window.location.reload();
+                            });
+                        } else {
+                            Swal.fire({
+                                title: 'Error',
+                                text: data.message || 'Error al aceptar el arbitraje',
+                                icon: 'error',
+                                confirmButtonColor: '#dc3545'
+                            });
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error en la solicitud de aceptación:', error);
+                        
+                        Swal.fire({
+                            title: 'Error',
+                            html: `
+                                <div class="text-start">
+                                    <p>Error al procesar la aceptación:</p>
+                                    <p class="text-danger">${error.message}</p>
+                                    <hr>
+                                    <small class="text-muted">
+                                        <strong>URL intentada:</strong> ${url}<br>
+                                        <strong>Método:</strong> POST
+                                    </small>
+                                </div>
+                            `,
+                            icon: 'error',
+                            confirmButtonColor: '#dc3545'
+                        });
+                    });
                 }
             });
-        }
+        }, 300);
     });
     
-    btnRechazar.addEventListener('click', function() {
-        if (documentoActual) {
+    // Acción Rechazar con motivo personalizado - VERSIÓN CORREGIDA
+    btnRechazarArbitraje.addEventListener('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        
+        // Obtener el ID del arbitraje
+        const pathArray = window.location.pathname.split('/');
+        const arbitrajeId = pathArray[pathArray.length - 2];
+        
+        console.log('ID del arbitraje:', arbitrajeId);
+        console.log('Ruta actual:', window.location.pathname);
+        
+        // Validar ID
+        if (!arbitrajeId || isNaN(arbitrajeId)) {
             Swal.fire({
-                title: '¿Rechazar documento?',
-                input: 'text',
-                inputLabel: 'Motivo del rechazo',
-                inputPlaceholder: 'Ingresa el motivo del rechazo...',
+                title: 'Error',
+                text: 'ID de arbitraje inválido',
+                icon: 'error'
+            });
+            return;
+        }
+        
+        // Obtener token CSRF
+        let csrfToken = '';
+        const metaTag = document.querySelector('meta[name="csrf-token"]');
+        if (metaTag) {
+            csrfToken = metaTag.getAttribute('content');
+        }
+        
+        console.log('Token CSRF:', csrfToken ? 'Encontrado' : 'No encontrado');
+        console.log('URL a usar:', `/arbitrajes/${arbitrajeId}/rechazar`);
+        
+        if (!csrfToken) {
+            Swal.fire({
+                title: 'Error',
+                text: 'No se pudo obtener el token de seguridad. Recarga la página e intenta nuevamente.',
+                icon: 'error'
+            });
+            return;
+        }
+        
+        // Cerrar el modal primero
+        modal.hide();
+        
+        // Esperar un momento para que se cierre el modal
+        setTimeout(() => {
+            Swal.fire({
+                title: '¿Rechazar arbitraje completo?',
+                text: 'Esta acción rechazará TODO el proceso de arbitraje.',
+                icon: 'warning',
+                html: `
+                    <div class="text-start mt-3">
+                        <label for="swal-input-motivo" class="form-label fw-bold">
+                            Motivo del rechazo <span class="text-danger">*</span>
+                        </label>
+                        <textarea 
+                            id="swal-input-motivo" 
+                            class="form-control" 
+                            rows="4"
+                            placeholder="Describe el motivo del rechazo..."
+                            maxlength="500"
+                            style="resize: vertical;"
+                        ></textarea>
+                        <small class="text-muted d-block mt-1">
+                            <span id="char-count">0</span>/500 caracteres
+                        </small>
+                    </div>
+                `,
                 showCancelButton: true,
                 confirmButtonColor: '#d33',
                 cancelButtonColor: '#3085d6',
-                confirmButtonText: 'Rechazar',
-                cancelButtonText: 'Cancelar'
+                confirmButtonText: 'Sí, rechazar arbitraje',
+                cancelButtonText: 'Cancelar',
+                focusConfirm: false,
+                preConfirm: () => {
+                    const motivo = document.getElementById('swal-input-motivo').value;
+                    
+                    if (!motivo || motivo.trim() === '') {
+                        Swal.showValidationMessage('Debe proporcionar un motivo para el rechazo');
+                        return false;
+                    }
+                    
+                    if (motivo.length > 500) {
+                        Swal.showValidationMessage('El motivo no puede exceder 500 caracteres');
+                        return false;
+                    }
+                    
+                    return { motivo: motivo.trim() };
+                },
+                didOpen: () => {
+                    const textarea = document.getElementById('swal-input-motivo');
+                    const charCount = document.getElementById('char-count');
+                    
+                    textarea.addEventListener('input', function() {
+                        charCount.textContent = this.value.length;
+                        
+                        if (this.value.length > 450) {
+                            charCount.classList.add('text-danger');
+                            charCount.classList.remove('text-muted');
+                        } else {
+                            charCount.classList.remove('text-danger');
+                            charCount.classList.add('text-muted');
+                        }
+                    });
+                    
+                    setTimeout(() => {
+                        textarea.focus();
+                    }, 100);
+                }
             }).then((result) => {
-                if (result.isConfirmed && result.value) {
-                    Swal.fire(
-                        '¡Rechazado!',
-                        `El documento ha sido rechazado. Motivo: ${result.value}`,
-                        'warning'
-                    );
-                    modal.hide();
+                if (result.isConfirmed) {
+                    // Mostrar loading
+                    Swal.fire({
+                        title: 'Procesando...',
+                        text: 'Rechazando arbitraje',
+                        allowOutsideClick: false,
+                        allowEscapeKey: false,
+                        showConfirmButton: false,
+                        didOpen: () => {
+                            Swal.showLoading();
+                        }
+                    });
+                    
+                    // Crear FormData para enviar
+                    const formData = new FormData();
+                    formData.append('_token', csrfToken);
+                    formData.append('motivo', result.value.motivo);
+                    
+                    // IMPORTANTE: Usar la URL correcta sin /admin/
+                    const url = `/arbitrajes/${arbitrajeId}/rechazar`;
+                    console.log('Enviando a:', url);
+                    
+                    // Usar fetch con FormData
+                    fetch(url, {
+                        method: 'POST',
+                        headers: {
+                            'Accept': 'application/json',
+                            'X-Requested-With': 'XMLHttpRequest'
+                        },
+                        body: formData
+                    })
+                    .then(response => {
+                        console.log('Respuesta recibida. Status:', response.status);
+                        
+                        if (!response.ok) {
+                            throw new Error(`Error ${response.status}: ${response.statusText}`);
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        console.log('Respuesta del servidor:', data);
+                        
+                        if (data.success) {
+                            Swal.fire({
+                                title: '¡Éxito!',
+                                html: `
+                                    <div class="text-start">
+                                        <p class="mb-2">${data.message}</p>
+                                        <hr>
+                                        <small class="text-muted">
+                                            <strong>Motivo registrado:</strong><br>
+                                            ${result.value.motivo}
+                                        </small>
+                                    </div>
+                                `,
+                                icon: 'success',
+                                confirmButtonColor: '#28a745'
+                            }).then(() => {
+                                // Recargar la página
+                                window.location.reload();
+                            });
+                        } else {
+                            Swal.fire({
+                                title: 'Error',
+                                text: data.message || 'Error al rechazar el arbitraje',
+                                icon: 'error',
+                                confirmButtonColor: '#dc3545'
+                            });
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error en la solicitud:', error);
+                        
+                        Swal.fire({
+                            title: 'Error',
+                            html: `
+                                <div class="text-start">
+                                    <p>Error al procesar la solicitud:</p>
+                                    <p class="text-danger">${error.message}</p>
+                                    <hr>
+                                    <small class="text-muted">
+                                        <strong>URL intentada:</strong> ${url}<br>
+                                        <strong>Método:</strong> POST<br>
+                                        <strong>Token:</strong> ${csrfToken ? 'Presente' : 'Ausente'}
+                                    </small>
+                                </div>
+                            `,
+                            icon: 'error',
+                            confirmButtonColor: '#dc3545'
+                        });
+                    });
                 }
             });
-        }
+        }, 300);
     });
     
     // Limpiar cuando se cierra el modal
@@ -771,7 +1181,7 @@ document.addEventListener('DOMContentLoaded', function() {
         isDragging = false;
     });
     
-    // Zoom con rueda del mouse en imágenes
+    // Zoom con rueda del mouse
     imageContainer.addEventListener('wheel', function(e) {
         if (documentoActual && documentoActual.tipo === 'imagen') {
             e.preventDefault();
@@ -783,13 +1193,243 @@ document.addEventListener('DOMContentLoaded', function() {
             updateImageZoom();
         }
     });
+    
+    // Copiar enlace al portapapeles
+    document.querySelectorAll('.copy-link-btn').forEach(button => {
+        button.addEventListener('click', function() {
+            const link = this.getAttribute('data-link');
+            const nombre = this.getAttribute('data-nombre');
+            
+            navigator.clipboard.writeText(link).then(function() {
+                toastMessage.textContent = `Enlace de "${nombre}" copiado al portapapeles`;
+                toast.show();
+                
+                const originalIcon = button.innerHTML;
+                button.innerHTML = '<i class="fas fa-check me-1"></i>Copiado';
+                button.classList.remove('btn-outline-info');
+                button.classList.add('btn-success');
+                
+                setTimeout(() => {
+                    button.innerHTML = originalIcon;
+                    button.classList.remove('btn-success');
+                    button.classList.add('btn-outline-info');
+                }, 2000);
+            }).catch(function(err) {
+                console.error('Error al copiar: ', err);
+                
+                const textArea = document.createElement('textarea');
+                textArea.value = link;
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+                
+                toastMessage.textContent = `Enlace de "${nombre}" copiado al portapapeles`;
+                toast.show();
+                
+                const originalIcon = button.innerHTML;
+                button.innerHTML = '<i class="fas fa-check me-1"></i>Copiado';
+                button.classList.remove('btn-outline-info');
+                button.classList.add('btn-success');
+                
+                setTimeout(() => {
+                    button.innerHTML = originalIcon;
+                    button.classList.remove('btn-success');
+                    button.classList.add('btn-outline-info');
+                }, 2000);
+            });
+        });
+    });
+});
+
+// Manejar el evento de finalizar proceso con SweetAlert
+document.querySelectorAll('.btn-finalizar-proceso').forEach(button => {
+    button.addEventListener('click', function(e) {
+        e.preventDefault();
+        
+        const procesoNombre = this.getAttribute('data-proceso-nombre');
+        const procesoId = this.getAttribute('data-proceso-id');
+        const formId = this.getAttribute('data-form-id');
+        const form = document.getElementById(formId);
+        
+        Swal.fire({
+            title: '¿Finalizar proceso?',
+            html: `
+                <div class="text-start">
+                    <p class="mb-3">
+                        <strong>Proceso:</strong> ${procesoNombre}
+                    </p>
+                    <div class="alert alert-warning" role="alert">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        <strong>Importante:</strong> Esta acción no se puede deshacer. Se creará automáticamente el siguiente proceso en el flujo del arbitraje.
+                    </div>
+                    <div class="form-check mt-3">
+                        <input class="form-check-input" type="checkbox" id="confirmarProceso">
+                        <label class="form-check-label" for="confirmarProceso">
+                            Confirmo que deseo finalizar este proceso
+                        </label>
+                    </div>
+                </div>
+            `,
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#ffc107',
+            cancelButtonColor: '#6c757d',
+            confirmButtonText: 'Sí, finalizar proceso',
+            cancelButtonText: 'Cancelar',
+            focusConfirm: false,
+            preConfirm: () => {
+                const confirmado = document.getElementById('confirmarProceso').checked;
+                if (!confirmado) {
+                    Swal.showValidationMessage('Debes confirmar la acción marcando la casilla');
+                    return false;
+                }
+                return true;
+            },
+            didOpen: () => {
+                document.getElementById('confirmarProceso').focus();
+            }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // Mostrar loading
+                Swal.fire({
+                    title: 'Procesando...',
+                    text: 'Finalizando proceso y creando el siguiente paso',
+                    allowOutsideClick: false,
+                    allowEscapeKey: false,
+                    showConfirmButton: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                    }
+                });
+                
+                // Enviar el formulario
+                fetch(form.action, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: new URLSearchParams(new FormData(form))
+                })
+                .then(response => {
+                    if (response.redirected) {
+                        // Si hay redirección (respuesta con redirección)
+                        return response.text().then(() => {
+                            return { redirect: response.url };
+                        });
+                    } else if (response.headers.get('content-type')?.includes('application/json')) {
+                        return response.json();
+                    } else {
+                        return response.text();
+                    }
+                })
+                .then(data => {
+                    console.log('Respuesta del servidor:', data);
+                    
+                    if (data && data.redirect) {
+                        // Si hubo redirección, recargar la página
+                        Swal.fire({
+                            title: '¡Éxito!',
+                            text: 'Proceso finalizado correctamente',
+                            icon: 'success',
+                            confirmButtonColor: '#28a745'
+                        }).then(() => {
+                            window.location.reload();
+                        });
+                    } else if (data && typeof data === 'string' && data.includes('success')) {
+                        // Si la respuesta es texto con "success"
+                        Swal.fire({
+                            title: '¡Éxito!',
+                            text: 'Proceso finalizado correctamente',
+                            icon: 'success',
+                            confirmButtonColor: '#28a745'
+                        }).then(() => {
+                            window.location.reload();
+                        });
+                    } else if (data && data.success) {
+                        // Si la respuesta es JSON con success
+                        Swal.fire({
+                            title: '¡Éxito!',
+                            text: data.message || 'Proceso finalizado correctamente',
+                            icon: 'success',
+                            confirmButtonColor: '#28a745'
+                        }).then(() => {
+                            window.location.reload();
+                        });
+                    } else {
+                        throw new Error('Respuesta inesperada del servidor');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    
+                    Swal.fire({
+                        title: 'Error',
+                        html: `
+                            <div class="text-start">
+                                <p>Ocurrió un error al procesar la solicitud:</p>
+                                <p class="text-danger">${error.message}</p>
+                                <hr>
+                                <small class="text-muted">
+                                    Si el problema persiste, contacta al administrador del sistema.
+                                </small>
+                            </div>
+                        `,
+                        icon: 'error',
+                        confirmButtonColor: '#dc3545'
+                    });
+                });
+            }
+        });
+    });
 });
 </script>
 @endpush
 
 @push('styles')
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+
 <style>
-/* Estilos principales */
+/* Asegurar que SweetAlert tenga prioridad sobre Bootstrap */
+.modal.fade:not(.show) {
+    display: none !important;
+}
+
+.modal-backdrop.fade:not(.show) {
+    display: none !important;
+}
+
+.swal2-popup {
+    z-index: 99999 !important;
+}
+
+.swal2-container {
+    z-index: 99998 !important;
+}
+
+.swal2-textarea {
+    min-height: 100px;
+    max-height: 200px;
+    resize: vertical;
+}
+
+/* Mejorar la visibilidad del textarea */
+#swal-input-motivo {
+    font-size: 14px;
+    line-height: 1.5;
+    padding: 10px;
+    border: 2px solid #ddd;
+    border-radius: 4px;
+    transition: border-color 0.3s;
+}
+
+#swal-input-motivo:focus {
+    border-color: #dc3545;
+    box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
+    outline: none;
+}
+
 .border-start {
     border-left-width: 4px !important;
 }
@@ -814,7 +1454,6 @@ document.addEventListener('DOMContentLoaded', function() {
     color: #6c757d;
 }
 
-/* Estilos para el modal */
 .modal-header {
     border-bottom: 2px solid rgba(255, 255, 255, 0.2);
 }
@@ -828,7 +1467,6 @@ document.addEventListener('DOMContentLoaded', function() {
     filter: invert(1) grayscale(100%) brightness(200%);
 }
 
-/* Visor de imágenes mejorado con desplazamiento */
 .image-viewer-wrapper {
     position: relative;
     background-color: #f8f9fa;
@@ -900,7 +1538,6 @@ document.addEventListener('DOMContentLoaded', function() {
     transform: translateY(0);
 }
 
-/* Scrollbar personalizado para el contenedor de imagen */
 .image-container::-webkit-scrollbar {
     width: 10px;
     height: 10px;
@@ -920,29 +1557,12 @@ document.addEventListener('DOMContentLoaded', function() {
     background: #555;
 }
 
-/* Indicador de arrastre */
-.image-wrapper.draggable {
-    cursor: grab;
-}
-
-.image-wrapper.dragging {
-    cursor: grabbing;
-}
-
-/* Visor de PDF */
 .pdf-viewer-wrapper {
     border-radius: 8px;
     overflow: hidden;
     background-color: #f8f9fa;
 }
 
-.pdf-controls {
-    background: rgba(255, 255, 255, 0.95);
-    padding: 10px;
-    border-radius: 8px;
-}
-
-/* Información del documento */
 .document-info .info-item {
     border-bottom: 1px solid #f0f0f0;
     padding-bottom: 10px;
@@ -952,17 +1572,16 @@ document.addEventListener('DOMContentLoaded', function() {
     border-bottom: none;
 }
 
-.file-icon {
-    animation: pulse 2s infinite;
+.copy-link-btn:hover {
+    background-color: #17a2b8;
+    color: white;
+    border-color: #17a2b8;
 }
 
-@keyframes pulse {
-    0% { transform: scale(1); }
-    50% { transform: scale(1.05); }
-    100% { transform: scale(1); }
+.toast {
+    min-width: 300px;
 }
 
-/* Responsive */
 @media (max-width: 768px) {
     .modal-dialog {
         margin: 10px;
@@ -983,9 +1602,16 @@ document.addEventListener('DOMContentLoaded', function() {
     .zoomable-image {
         max-height: 60vh;
     }
+    
+    .list-group-item .row > div {
+        margin-bottom: 10px;
+    }
+    
+    .list-group-item .text-end {
+        text-align: left !important;
+    }
 }
 
-/* Mejoras para botones */
 .btn-success {
     background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
     border: none;
@@ -1001,13 +1627,21 @@ document.addEventListener('DOMContentLoaded', function() {
     color: white;
 }
 
-/* Hover effects */
+.btn-outline-warning:hover {
+    background: linear-gradient(135deg, #ffc107 0%, #e0a800 100%);
+    color: #212529;
+}
+
+.btn-outline-info:hover {
+    background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
+    color: white;
+}
+
 .btn:hover {
     transform: translateY(-2px);
     transition: transform 0.2s ease;
 }
 
-/* Animaciones de carga */
 .spinner-border {
     width: 3rem;
     height: 3rem;
@@ -1017,13 +1651,29 @@ document.addEventListener('DOMContentLoaded', function() {
     min-height: 300px;
 }
 
-/* Indicador visual cuando se puede arrastrar */
 .image-container.zoom-active {
     cursor: grab;
 }
 
 .image-container.zoom-active:active {
     cursor: grabbing;
+}
+
+/* Estilos para los formularios de administración */
+.card.border-primary {
+    border-width: 2px !important;
+}
+
+.card.border-warning {
+    border-width: 2px !important;
+}
+
+.card-header.bg-primary {
+    background: linear-gradient(135deg, #0d6efd 0%, #0b5ed7 100%);
+}
+
+.card-header.bg-warning {
+    background: linear-gradient(135deg, #ffc107 0%, #e0a800 100%);
 }
 </style>
 @endpush

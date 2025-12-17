@@ -15,6 +15,8 @@ use App\Http\Controllers\PersonaController;
 use App\Http\Controllers\ArbitrajeRegistroController;
 use App\Http\Controllers\ArbitrajeController;
 use App\Http\Controllers\AdminArbitrajeController;
+use App\Http\Controllers\ProcesoArbitrajeController;
+use App\Http\Controllers\ProcesoArbitrajeDocumentoController;
 
 
 Route::get('/', [PageController::class, 'welcome'])->name('welcome');
@@ -142,6 +144,16 @@ Route::middleware(['auth', 'checkrole:admin'])->group(function () {
     // Vista detalle de un arbitraje
     Route::get('/arbitrajes/{id}/detalle', [AdminArbitrajeController::class, 'detalle'])
         ->name('admin.arbitrajes.detalle');
+
+    Route::post('/arbitrajes/{id}/rechazar', [AdminArbitrajeController::class, 'rechazar'])
+        ->name('admin.arbitrajes.rechazar');
+    Route::post('/arbitrajes/{id}/aceptar', [AdminArbitrajeController::class, 'aceptar'])
+    ->name('admin.arbitrajes.aceptar');
+    Route::post('/arbitraje/{id_arbitraje}/documentos',[ProcesoArbitrajeDocumentoController::class, 'store'])->name('arbitraje.documentos.store');
+    Route::post(
+        '/arbitraje/{id_arbitraje}/siguiente-proceso',
+        [ProcesoArbitrajeController::class, 'pasarSiguienteProceso']
+    )->name('arbitraje.siguiente.proceso');
 });
 
 require __DIR__.'/auth.php';

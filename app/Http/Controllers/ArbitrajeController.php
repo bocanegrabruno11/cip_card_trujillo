@@ -114,4 +114,6 @@ class ArbitrajeController extends Controller
             ], 500);
         }
     }
+
+    
 }

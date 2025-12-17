@@ -298,11 +298,7 @@
                 </ul>
             </li>
             
-            <li>
-                <a href="{{ route('jrd') }}" class="menu-link {{ request()->routeIs('jrd') ? 'active' : '' }}">
-                    <i class="fas fa-gavel"></i> JRD
-                </a>
-            </li>
+
             <!-- Agrega más items según necesites -->
             @yield('sidebar-menu')
         </ul>

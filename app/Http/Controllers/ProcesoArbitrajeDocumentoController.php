@@ -2,64 +2,52 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\ProcesoArbitraje;
 use App\Models\ProcesoArbitrajeDocumento;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class ProcesoArbitrajeDocumentoController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
+    public function store(Request $request, $id_arbitraje)
     {
-        //
-    }
+        $request->validate([
+            'archivo' => 'required|file|mimes:pdf,jpg,jpeg,png|max:20480',
+            'proceso_id' => 'required|exists:procesos_arbitraje,id_proceso_arbitraje'
+        ]);
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-    }
+        // 1️⃣ Obtener el proceso específico
+        $proceso = ProcesoArbitraje::find($request->proceso_id);
+        
+        if (!$proceso || $proceso->arbitraje_id != $id_arbitraje) {
+            return back()->with('error', 'Proceso no válido para este arbitraje.');
+        }
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
-    {
-        //
-    }
+        // 2️⃣ Guardar archivo en storage/app/public/uploads/vouchers
+        $file = $request->file('archivo');
+        
+        // Crear nombre único
+        $filename = time() . '_' . $file->getClientOriginalName();
+        
+        // Guardar usando storeAs
+        $relativePath = $file->storeAs('uploads/vouchers', $filename, 'public');
+        
+        // Crear la ruta completa CON /storage/ al inicio
+        $fullPath = '/storage/' . $relativePath;
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(ProcesoArbitrajeDocumento $procesoArbitrajeDocumento)
-    {
-        //
-    }
+        // 3️⃣ Determinar tipo de documento
+        $extension = strtolower($file->getClientOriginalExtension());
+        $tipoDocumento = ($extension === 'pdf') ? 'pdf' : 'imagen';
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(ProcesoArbitrajeDocumento $procesoArbitrajeDocumento)
-    {
-        //
-    }
+        // 4️⃣ Registrar documento CON la ruta completa que incluye /storage/
+        ProcesoArbitrajeDocumento::create([
+            'proceso_arbitraje_id' => $proceso->id_proceso_arbitraje,
+            'fecha_subida'        => now(),
+            'tipo_documento'      => $tipoDocumento,
+            'nombre_original'     => $file->getClientOriginalName(),
+            'ruta_archivo'        => $fullPath, // "/storage/uploads/vouchers/1765993567_nombre.pdf"
+        ]);
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, ProcesoArbitrajeDocumento $procesoArbitrajeDocumento)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(ProcesoArbitrajeDocumento $procesoArbitrajeDocumento)
-    {
-        //
+        return back()->with('success', 'Documento registrado correctamente.');
     }
 }
