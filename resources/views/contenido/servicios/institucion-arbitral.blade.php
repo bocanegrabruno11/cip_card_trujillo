@@ -908,7 +908,7 @@
             {{-- Foto --}}
             <div class="repo-form-group">
                 <label>Foto del DNI (Frontal)</label>
-                <input type="file" name="foto_dni" accept="image/*" required class="file-input">
+                <input type="file" name="foto_dni" accept=".jpg, .jpeg, .png" required class="file-input">
             </div>
 
             <button type="submit" id="btnRepoSubmit" class="repo-submit-btn">
