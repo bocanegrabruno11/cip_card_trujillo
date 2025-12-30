@@ -1,7 +1,7 @@
 @extends('mesa-partes.app')
 
-@section('title', 'Control de JRD')
-@section('page-title', 'Mis JRD')
+@section('title', 'Control de JPRD')
+@section('page-title', 'Mis JPRD')
 
 @section('content')
 
@@ -10,8 +10,8 @@
     <!-- Header con búsqueda -->
     <div class="row mb-4">
         <div class="col-md-8">
-            <h3 class="mb-0">Control de JRD</h3>
-            <p class="text-muted">Gestiona y visualiza todos tus procesos de JRD</p>
+            <h3 class="mb-0">Control de JPRD</h3>
+            <p class="text-muted">Gestiona y visualiza todos tus procesos de JPRD</p>
         </div>
         <div class="col-md-4">
             <div class="input-group">
@@ -37,7 +37,7 @@
     <!-- Mensaje sin resultados -->
     <div id="noResults" class="alert alert-info text-center" style="display: none;">
         <i class="fas fa-info-circle fa-2x mb-3"></i>
-        <h5>No se encontraron JRD</h5>
+        <h5>No se encontraron JPRD</h5>
         <p class="mb-0">No tienes JRD registrados o no coinciden con tu búsqueda.</p>
     </div>
 

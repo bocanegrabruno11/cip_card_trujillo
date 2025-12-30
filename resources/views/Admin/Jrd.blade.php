@@ -10,8 +10,8 @@
     <!-- Header con filtros -->
     <div class="row mb-4">
         <div class="col-md-6">
-            <h3 class="mb-0">Gestión de JRD</h3>
-            <p class="text-muted">Administra y visualiza todos los procesos de JRD del sistema</p>
+            <h3 class="mb-0">Gestión de JPRD</h3>
+            <p class="text-muted">Administra y visualiza todos los procesos de JPRD del sistema</p>
         </div>
         <div class="col-md-6">
             <div class="card shadow-sm">
@@ -100,21 +100,21 @@
         <div class="spinner-border text-danger" role="status">
             <span class="visually-hidden">Cargando...</span>
         </div>
-        <p class="mt-3 text-muted">Cargando JRD...</p>
+        <p class="mt-3 text-muted">Cargando JPRD...</p>
     </div>
 
     <!-- Mensaje sin resultados -->
     <div id="noResults" class="alert alert-info text-center" style="display: none;">
         <i class="fas fa-info-circle fa-2x mb-3"></i>
-        <h5>No se encontraron JRD</h5>
-        <p class="mb-0">No hay JRD registrados o no coinciden con tu búsqueda.</p>
+        <h5>No se encontraron JPRD</h5>
+        <p class="mb-0">No hay JPRD registrados o no coinciden con tu búsqueda.</p>
     </div>
 
     <!-- Tabla de JRD -->
     <div class="card shadow-sm">
         <div class="card-header bg-danger text-white">
             <h5 class="mb-0">
-                <i class="fas fa-list me-2"></i>Listado de JRD
+                <i class="fas fa-list me-2"></i>Listado de JPRD
             </h5>
         </div>
         <div class="card-body p-0">

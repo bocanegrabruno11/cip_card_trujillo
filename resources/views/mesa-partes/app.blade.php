@@ -302,19 +302,19 @@
 <li class="menu-item-dropdown">
     <div class="menu-link-dropdown {{ request()->routeIs('jrd') || request()->routeIs('registros.jrd') ? 'active' : '' }}" onclick="toggleSubmenu(this)">
         <span>
-            <i class="fas fa-gavel"></i> JRD
+            <i class="fas fa-gavel"></i> JPRD
         </span>
         <i class="fas fa-chevron-down"></i>
     </div>
     <ul class="submenu {{ request()->routeIs('jrd') || request()->routeIs('registros.jrd') ? 'show' : '' }}">
         <li>
             <a href="{{ route('jrd') }}" class="submenu-link {{ request()->routeIs('jrd') ? 'active' : '' }}">
-                <i class="fas fa-plus-circle"></i> Nuevo JRD
+                <i class="fas fa-plus-circle"></i> Nuevo JPRD
             </a>
         </li>
         <li>
             <a href="{{ route('registros.jrd') }}" class="submenu-link {{ request()->routeIs('registros.jrd') ? 'active' : '' }}">
-                <i class="fas fa-list"></i> Registros de JRD
+                <i class="fas fa-list"></i> Registros de JPRD
             </a>
         </li>
     </ul>

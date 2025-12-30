@@ -29,6 +29,6 @@ class ProcesoJrd extends Model
 
     public function documentos()
     {
-        return $this->hasMany(ProcesoJrdDocumento::class, 'proceso_jrd_id', 'id_proceso_jrd');
+        return $this->hasMany(ProcesoJrdDocumento::class, 'proceso_jrd_id');
     }
 }

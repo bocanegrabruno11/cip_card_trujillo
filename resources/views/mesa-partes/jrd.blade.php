@@ -1,7 +1,7 @@
 @extends('mesa-partes.app')
 
-@section('title', 'JRD')
-@section('page-title', 'Registrar JRD')
+@section('title', 'JPRD')
+@section('page-title', 'Registrar JPRD')
 
 @section('content')
 
@@ -50,7 +50,7 @@
                 <h5 class="modal-title">✓ Registro Exitoso</h5>
             </div>
             <div class="modal-body">
-                <p>El JRD se ha registrado correctamente.</p>
+                <p>El JPRD se ha registrado correctamente.</p>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-success" id="btn-success-ok">
@@ -91,7 +91,7 @@
     <form id="jrdForm">
         @csrf
 
-        <h4>Registrar JRD</h4>
+        <h4>Registrar JPRD</h4>
 
         <!-- DATOS DEL JRD -->
         <div class="mb-3">
