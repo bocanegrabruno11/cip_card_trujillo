@@ -58,12 +58,12 @@ class RepoSolicitudController extends Controller
                 'estado' => 'pendiente',
             ]);
 
-            return back()->with('success', 'Solicitud enviada correctamente. El administrador revisará sus datos.');
+            return back()->with('success', 'Solicitud enviada correctamente.');
 
         } catch (\Exception $e) {
             return back()
                 ->withInput()
-                ->with('error', 'Ocurrió un error al procesar su solicitud. Intente nuevamente.');
+                ->with('error', 'Ocurrió un error al procesar su solicitud..');
         }
     }
 
