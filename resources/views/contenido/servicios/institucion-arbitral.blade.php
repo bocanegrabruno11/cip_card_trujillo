@@ -796,7 +796,7 @@
                 <div id="mCodeGroup" class="data-row" style="display: none;">
                     <div class="data-icon"><i class="fas fa-id-card"></i></div>
                     <div class="data-content">
-                        <strong>Registro / Código</strong>
+                        <strong>Registro de Colegiatura</strong>
                         <span id="mCode" class="data-text"></span>
                     </div>
                 </div>
