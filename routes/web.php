@@ -134,8 +134,6 @@ Route::post('/jrd', [JrdRegistroController::class, 'store'])->name('jrd.store');
     Route::get('/jrd/mis-jrd', [JrdController::class, 'misJrd'])->name('jrd.mis');
 });
 
-
-
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
@@ -178,6 +176,13 @@ Route::middleware(['auth', 'checkrole:admin'])->group(function () {
         return view('Admin.Jrd');
     })->name('Admin.Jrd');
     
+
+    // Documentos JRD
+    Route::post(
+        '/jrd/{id_jrd}/documentos',
+        [JrdDocumentoController::class, 'store']
+    )->name('jrd.documento.store');
+
  // Rutas para JRD
     Route::get('/jrd', [AdminJrdController::class, 'index'])->name('admin.jrd.index');
     Route::get('/jrd/obtener', [AdminJrdController::class, 'obtenerJrd'])->name('admin.jrd.obtener');
@@ -201,6 +206,8 @@ Route::middleware(['auth', 'checkrole:admin'])->group(function () {
     });
 
 });
+
+
 
 require __DIR__.'/auth.php';
 
