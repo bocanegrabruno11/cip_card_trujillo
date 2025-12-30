@@ -161,11 +161,6 @@
         <ul class="sidebar-menu">
             <!-- Menú completo -->
             <li>
-                <a href="{{ route('Admin.dashboard') }}" class="menu-link {{ request()->routeIs('dashboard') ? 'active' : '' }}">
-                    <i class="fas fa-home"></i> Dashboard
-                </a>
-            </li>
-            <li>
                 <a href="{{ route('Admin.Arbitraje') }}" class="menu-link {{ request()->routeIs('Arbitraje') ? 'active' : '' }}">
                     <i class="fas fa-gavel"></i> Ver Arbitrajes
                 </a>

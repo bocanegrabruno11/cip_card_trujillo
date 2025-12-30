@@ -15,7 +15,6 @@ use App\Http\Controllers\PersonaController;
 use App\Http\Controllers\ArbitrajeRegistroController;
 use App\Http\Controllers\ArbitrajeController;
 use App\Http\Controllers\AdminArbitrajeController;
-<<<<<<< HEAD
 use App\Http\Controllers\ProcesoArbitrajeController;
 use App\Http\Controllers\ProcesoArbitrajeDocumentoController;
 use App\Http\Controllers\JrdRegistroController;
@@ -24,10 +23,7 @@ use App\Http\Controllers\JrdRegistroController;
  use App\Http\Controllers\JrdDocumentoController;
   use App\Http\Controllers\JrdProcesoController;
 use App\Http\Controllers\DashboardController;
-
-=======
 use App\Http\Controllers\RepoSolicitudController;
->>>>>>> 73ac1f001bb842e2ebc6e21ea2ec129199346efd
 
 Route::post('/solicitudes-repo', [RepoSolicitudController::class, 'store'])->name('solicitudes.store');
 Route::get('/', [PageController::class, 'welcome'])->name('welcome');
@@ -168,7 +164,6 @@ Route::middleware(['auth', 'checkrole:admin'])->group(function () {
     Route::get('/arbitrajes/{id}/detalle', [AdminArbitrajeController::class, 'detalle'])
         ->name('admin.arbitrajes.detalle');
 
-<<<<<<< HEAD
     Route::post('/arbitrajes/{id}/rechazar', [AdminArbitrajeController::class, 'rechazar'])
         ->name('admin.arbitrajes.rechazar');
     Route::post('/arbitrajes/{id}/aceptar', [AdminArbitrajeController::class, 'aceptar'])
@@ -184,29 +179,27 @@ Route::middleware(['auth', 'checkrole:admin'])->group(function () {
     })->name('Admin.Jrd');
     
  // Rutas para JRD
-Route::get('/jrd', [AdminJrdController::class, 'index'])->name('admin.jrd');
-Route::get('/jrd/obtener', [AdminJrdController::class, 'obtenerJrd'])->name('admin.jrd.obtener');
-Route::get('/jrd/detalle/{id}', [AdminJrdController::class, 'detalle'])->name('admin.jrd.detalle'); // Agregar el prefijo admin
-Route::put('/jrd/{id}/estado', [AdminJrdController::class, 'actualizarEstado'])->name('admin.jrd.estado');
-Route::post('/jrd/{id}/proceso', [AdminJrdController::class, 'agregarProceso'])->name('admin.jrd.proceso.agregar');
+    Route::get('/jrd', [AdminJrdController::class, 'index'])->name('admin.jrd.index');
+    Route::get('/jrd/obtener', [AdminJrdController::class, 'obtenerJrd'])->name('admin.jrd.obtener');
+    Route::get('/jrd/{id}', [AdminJrdController::class, 'detalle'])->name('admin.jrd.detalle');
+    Route::get('/jrd/obtener/{id}', [AdminJrdController::class, 'obtenerUno'])->name('admin.jrd.obtener.uno');
+    Route::post('/jrd/{id_jrd}/rechazar', [AdminJrdController::class, 'rechazar'])->name('admin.jrd.rechazar');
+    Route::post('/jrd/{id_jrd}/aceptar', [AdminJrdController::class, 'aceptar'])->name('admin.jrd.aceptar');
 
-    // Rutas admin para documentos JRD
-    Route::post('/jrd/{id_jrd}/documento', [JrdDocumentoController::class, 'store'])->name('jrd.documento.store');
-    Route::post('/jrd/{id_jrd}/documento/drive', [JrdDocumentoController::class, 'storeDrive'])->name('jrd.documento.drive');
-    Route::delete('/jrd/{id_jrd}/documento/{id_documento}', [JrdDocumentoController::class, 'destroy'])->name('jrd.documento.destroy');
-    
-    // Rutas admin para procesos JRD
+
     Route::post('/jrd/{id_jrd}/proceso/siguiente', [JrdProcesoController::class, 'pasarSiguienteProceso'])->name('jrd.proceso.siguiente');
-    Route::post('/jrd/{id_jrd}/proceso', [JrdProcesoController::class, 'crearProceso'])->name('jrd.proceso.crear');
-    Route::put('/jrd/{id_jrd}/proceso/{id_proceso}', [JrdProcesoController::class, 'actualizarEstadoProceso'])->name('jrd.proceso.actualizar');
-=======
+    Route::post('/jrd/{id_jrd}/proceso/crear', [JrdProcesoController::class, 'crearProceso'])->name('jrd.proceso.crear');
+    Route::post('/jrd/{id_jrd}/proceso/{id_proceso}/actualizar', [JrdProcesoController::class, 'actualizarEstadoProceso'])->name('jrd.proceso.actualizar');
+
+    // Documentos JRD
+
     Route::prefix('admin/gestion-permisos')->name('admin.solicitudes.')->group(function () {
         Route::get('/', [RepoSolicitudController::class, 'index'])->name('index');
         Route::put('/{id}', [RepoSolicitudController::class, 'updateState'])->name('update');
         Route::delete('/{id}', [RepoSolicitudController::class, 'destroy'])->name('destroy');
         Route::get('/{id}', [RepoSolicitudController::class, 'show'])->name('show');
     });
->>>>>>> 73ac1f001bb842e2ebc6e21ea2ec129199346efd
+
 });
 
 require __DIR__.'/auth.php';

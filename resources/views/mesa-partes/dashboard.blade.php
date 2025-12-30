@@ -153,7 +153,7 @@
     </div>
 
     <!-- ESTADÍSTICAS JRD -->
-    <h5 class="mb-3 mt-4"><i class="fas fa-gavel me-2"></i>JRD</h5>
+    <h5 class="mb-3 mt-4"><i class="fas fa-gavel me-2"></i>JPRD</h5>
     <div class="stats-grid">
         <div class="stat-card">
             <div class="stat-icon" style="background-color: rgba(255, 193, 7, 0.1); color: #ffc107;">
@@ -204,7 +204,7 @@
             <i class="fas fa-gavel"></i>
             <div>
                 <strong>JRD</strong>
-                <small class="d-block text-muted">Ver procesos JRD</small>
+                <small class="d-block text-muted">Iniciar procesos JPRD</small>
             </div>
         </a>
     </div>
