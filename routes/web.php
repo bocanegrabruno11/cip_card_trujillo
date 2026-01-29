@@ -261,5 +261,26 @@ Route::get('/php-check', function () {
         'post_max_size' => ini_get('post_max_size'),
     ];
 });
+
+Route::get('/fix-permissions-final', function () {
+    // La ruta física donde están las fotos
+    $target = '/app/storage/app/public';
+    
+    echo "<h1>Arreglando Permisos...</h1>";
+    
+    // Comando de sistema para dar permisos totales recursivos
+    // Esto es más potente que el chmod de PHP porque lo hace el sistema operativo
+    $output = shell_exec("chmod -R 777 $target 2>&1");
+    
+    echo "Comando ejecutado: <code>chmod -R 777 $target</code><br>";
+    echo "Resultado: <pre>$output</pre>";
+    
+    if (is_null($output)) {
+        echo "<h3 style='color:green'>✅ Permisos aplicados correctamente.</h3>";
+        echo "Prueba recargar tu imagen ahora.";
+    } else {
+        echo "<h3 style='color:red'>⚠️ Hubo una salida inesperada (revisar arriba).</h3>";
+    }
+});
 require __DIR__.'/auth.php';
 
