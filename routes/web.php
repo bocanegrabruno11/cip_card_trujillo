@@ -206,57 +206,44 @@ Route::middleware(['auth', 'checkrole:admin'])->group(function () {
     });
 
 });
-
-Route::get('/ver-imagen-directa', function () {
-    // 1. Definir la ruta física exacta donde debería estar la imagen
-    // AJUSTA ESTO: Cambia 'nombre_de_tu_archivo.webp' por el nombre real de la imagen que acabas de subir
-    // Ejemplo: 'publicaciones/6/tu_imagen.webp'
+Route::get('/buscar-archivos-perdidos', function () {
+    // 1. Rutas a investigar
+    $rutaPublica = storage_path('app/public'); // Donde DEBERÍAN estar
+    $rutaPrivada = storage_path('app');        // Donde CREEMOS que están
     
-    // Vamos a listar lo que hay en la carpeta 'publicaciones' para ver si le atinamos
-    $basePath = storage_path('app/public/publicaciones'); 
+    echo "<h1>Búsqueda de Archivos Perdidos</h1>";
     
-    if (!is_dir($basePath)) {
-        return "ERROR: La carpeta 'publicaciones' no existe en: " . $basePath;
-    }
-
-    // Buscamos carpetas numeradas (ej. 6, 7, 8...)
-    $carpetas = scandir($basePath);
-    echo "<h1>Explorador de Archivos (Storage)</h1>";
+    // 2. Revisar el "Cajón Privado" (storage/app)
+    echo "<h3>Explorando carpeta PRIVADA ($rutaPrivada):</h3>";
+    $contenidoPrivado = scandir($rutaPrivada);
     
-    foreach ($carpetas as $carpeta) {
-        if ($carpeta === '.' || $carpeta === '..') continue;
-        
-        $rutaCompleta = $basePath . '/' . $carpeta;
-        if (is_dir($rutaCompleta)) {
-            echo "<h3>Carpeta ID: $carpeta</h3>";
-            $archivos = scandir($rutaCompleta);
-            foreach ($archivos as $archivo) {
-                if ($archivo === '.' || $archivo === '..') continue;
-                
-                $rutaArchivo = $rutaCompleta . '/' . $archivo;
-                $urlPublica = asset('storage/publicaciones/' . $carpeta . '/' . $archivo);
-                
-                echo "<div>";
-                echo "<strong>Archivo:</strong> $archivo <br>";
-                echo "<strong>Ruta Física:</strong> $rutaArchivo <br>";
-                echo "<strong>Permisos:</strong> " . substr(sprintf('%o', fileperms($rutaArchivo)), -4) . "<br>";
-                echo "<strong>Dueño:</strong> " . fileowner($rutaArchivo) . "<br>";
-                
-                // Intentar leer el archivo con PHP
-                if (is_readable($rutaArchivo)) {
-                    echo "<span style='color:green'>PHP PUEDE LEERLO ✅</span><br>";
-                    echo "<a href='$urlPublica' target='_blank'>Intento Link Público</a><br>";
-                    // Mostrar imagen directa via base64 para probar que el dato existe
-                    $data = base64_encode(file_get_contents($rutaArchivo));
-                    echo "<img src='data:image/webp;base64,$data' width='100'><br>";
-                } else {
-                    echo "<span style='color:red'>PHP NO PUEDE LEERLO (Error de Permisos) ❌</span>";
-                }
-                echo "</div><hr>";
+    // Filtrar puntos . y ..
+    $contenidoPrivado = array_diff($contenidoPrivado, ['.', '..']);
+    
+    if (empty($contenidoPrivado)) {
+        echo "La carpeta privada está casi vacía.<br>";
+    } else {
+        echo "<ul>";
+        foreach ($contenidoPrivado as $item) {
+            $esDir = is_dir($rutaPrivada . '/' . $item) ? '📁 Carpeta' : '📄 Archivo';
+            
+            // Si encontramos la carpeta 'publicaciones' aquí, ¡BINGO!
+            $style = ($item == 'publicaciones') ? 'color:red; font-weight:bold; font-size:1.2em;' : '';
+            
+            echo "<li style='$style'>$esDir: $item";
+            
+            if ($item == 'publicaciones') {
+                echo " <--- ¡AQUÍ ESTÁN TUS FOTOS! (En el lugar incorrecto)";
             }
+            echo "</li>";
         }
+        echo "</ul>";
     }
-    return "";
+
+    // 3. Revisar Configuración Actual
+    echo "<hr><h3>Configuración Detectada:</h3>";
+    echo "FILESYSTEM_DISK actual: <strong>" . config('filesystems.default') . "</strong><br>";
+    echo "(Si dice 'local', ese es el problema).";
 });
 require __DIR__.'/auth.php';
 
