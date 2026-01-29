@@ -208,42 +208,56 @@ Route::middleware(['auth', 'checkrole:admin'])->group(function () {
 });
 
 
-
-// --- RUTA TEMPORAL PARA ARREGLAR STORAGE EN RAILWAY ---
-Route::get('/fix-storage-railway', function () {
-    $targetFolder = storage_path('app/public');
-    $linkFolder = public_path('storage');
+Route::get('/force-fix-storage', function () {
+    $targetFolder = storage_path('app/public'); // Donde están los archivos reales
+    $linkFolder = public_path('storage');       // El acceso directo público
 
     $report = [];
 
-    // 1. Borrar el enlace simbólico viejo si existe (para evitar conflictos)
-    if (file_exists($linkFolder)) {
-        // En Linux, unlink borra el enlace simbólico
-        unlink($linkFolder); 
-        $report[] = 'Enlace simbólico viejo eliminado.';
+    // 1. Diagnóstico Inicial
+    if (is_link($linkFolder)) {
+        $report[] = 'ESTADO: Actualmente es un ENLACE.';
+        unlink($linkFolder); // Borrar enlace
+        $report[] = 'ACCIÓN: Enlace eliminado.';
+    } elseif (is_dir($linkFolder)) {
+        $report[] = 'ESTADO: Actualmente es una CARPETA REAL (¡Este es el problema!).';
+        // Borrado recursivo de la carpeta
+        $files = new RecursiveIteratorIterator(
+            new RecursiveDirectoryIterator($linkFolder, RecursiveDirectoryIterator::SKIP_DOTS),
+            RecursiveIteratorIterator::CHILD_FIRST
+        );
+        foreach ($files as $fileinfo) {
+            $todo = ($fileinfo->isDir() ? 'rmdir' : 'unlink');
+            $todo($fileinfo->getRealPath());
+        }
+        rmdir($linkFolder);
+        $report[] = 'ACCIÓN: Carpeta física eliminada exitosamente.';
+    } else {
+        $report[] = 'ESTADO: No existe nada en public/storage.';
     }
 
-    // 2. Crear el nuevo enlace usando el comando de Artisan
+    // 2. Crear el enlace nuevo
     try {
+        // Ejecutamos el comando nativo de Laravel
         Illuminate\Support\Facades\Artisan::call('storage:link');
-        $report[] = 'Nuevo enlace creado correctamente (Artisan).';
+        $report[] = 'ÉXITO: Nuevo enlace simbólico creado.';
     } catch (\Exception $e) {
-        $report[] = 'Error al crear enlace: ' . $e->getMessage();
+        $report[] = 'ERROR al crear enlace: ' . $e->getMessage();
     }
 
-    // 3. Intentar arreglar permisos (chmod 777 a la carpeta de destino)
+    // 3. Permisos (Vital para el Volumen)
     try {
         chmod($targetFolder, 0777);
-        $report[] = 'Permisos de lectura/escritura asignados a storage/app/public.';
+        $report[] = 'Permisos 777 aplicados a storage/app/public.';
     } catch (\Exception $e) {
-        $report[] = 'Alerta de permisos: ' . $e->getMessage();
+        // A veces falla en algunos sistemas de archivos, no es crítico si el usuario es el dueño
+        $report[] = 'Nota de permisos: ' . $e->getMessage();
     }
 
     return response()->json([
-        'status' => 'Proceso terminado',
+        'status' => 'Reparación Finalizada',
         'reporte' => $report,
-        'target_path' => $targetFolder,
-        'link_path' => $linkFolder
+        'config_disk' => config('filesystems.default') // Debería decir 'public'
     ]);
 });
 require __DIR__.'/auth.php';
