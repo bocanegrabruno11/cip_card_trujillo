@@ -253,5 +253,13 @@ Route::get('/sherlock-holmes', function () {
         echo "Conclusión: La subida está fallando silenciosamente o la base de datos tiene nombres de archivos que físicamente no existen.";
     }
 });
+
+Route::get('/php-check', function () {
+    return [
+        'gd_instalado' => extension_loaded('gd') ? 'SÍ ✅' : 'NO ❌',
+        'upload_max_filesize' => ini_get('upload_max_filesize'),
+        'post_max_size' => ini_get('post_max_size'),
+    ];
+});
 require __DIR__.'/auth.php';
 
