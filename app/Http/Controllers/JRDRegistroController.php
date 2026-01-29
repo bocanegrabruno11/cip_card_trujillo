@@ -9,13 +9,14 @@ use App\Models\Jrd;
 use App\Models\ProcesoJrd;
 use App\Models\ProcesoJrdPersona;
 use App\Models\ProcesoJrdDocumento;
+use Illuminate\Support\Facades\Log;
 
 class JrdRegistroController extends Controller
 {
     public function store(Request $request)
     {
         // DEBUG: Ver qué llega
-        \Log::info('Request completo JRD:', $request->all());
+        Log::info('Request completo JRD:', $request->all());
         
         // Validación adicional para el link de Drive
         $request->validate([
@@ -98,7 +99,7 @@ class JrdRegistroController extends Controller
         } catch (\Exception $e) {
             DB::rollBack();
             
-            \Log::error('Error en JRD:', [
+            Log::error('Error en JRD:', [
                 'message' => $e->getMessage(),
                 'trace' => $e->getTraceAsString()
             ]);
