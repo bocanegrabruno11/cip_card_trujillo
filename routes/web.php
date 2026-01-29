@@ -115,7 +115,7 @@ Route::post('/arbitraje/registrar', [ArbitrajeRegistroController::class, 'store'
     ->name('arbitraje.store');
 
 Route::get('/arbitraje/registros', [ArbitrajeController::class, 'registros'])
-    ->name('RegistrosArbitraje');
+    ->name('RegistrosArbitraje2');
 
 Route::get('/arbitraje/obtener', [ArbitrajeController::class, 'obtenerArbitrajes'])
     ->name('arbitrajes.obtener');
