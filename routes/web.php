@@ -206,44 +206,52 @@ Route::middleware(['auth', 'checkrole:admin'])->group(function () {
     });
 
 });
-Route::get('/buscar-archivos-perdidos', function () {
-    // 1. Rutas a investigar
-    $rutaPublica = storage_path('app/public'); // Donde DEBERÍAN estar
-    $rutaPrivada = storage_path('app');        // Donde CREEMOS que están
+Route::get('/sherlock-holmes', function () {
+    echo "<h1>🕵️‍♂️ Sherlock Holmes: Detective de Archivos</h1>";
     
-    echo "<h1>Búsqueda de Archivos Perdidos</h1>";
-    
-    // 2. Revisar el "Cajón Privado" (storage/app)
-    echo "<h3>Explorando carpeta PRIVADA ($rutaPrivada):</h3>";
-    $contenidoPrivado = scandir($rutaPrivada);
-    
-    // Filtrar puntos . y ..
-    $contenidoPrivado = array_diff($contenidoPrivado, ['.', '..']);
-    
-    if (empty($contenidoPrivado)) {
-        echo "La carpeta privada está casi vacía.<br>";
-    } else {
-        echo "<ul>";
-        foreach ($contenidoPrivado as $item) {
-            $esDir = is_dir($rutaPrivada . '/' . $item) ? '📁 Carpeta' : '📄 Archivo';
-            
-            // Si encontramos la carpeta 'publicaciones' aquí, ¡BINGO!
-            $style = ($item == 'publicaciones') ? 'color:red; font-weight:bold; font-size:1.2em;' : '';
-            
-            echo "<li style='$style'>$esDir: $item";
-            
-            if ($item == 'publicaciones') {
-                echo " <--- ¡AQUÍ ESTÁN TUS FOTOS! (En el lugar incorrecto)";
-            }
-            echo "</li>";
-        }
-        echo "</ul>";
+    // --- PRUEBA 1: ¿Tenemos permiso de escritura? ---
+    $testPath = storage_path('app/public/prueba_escritura.txt');
+    echo "<h3>1. Prueba de Escritura en el Disco Público</h3>";
+    try {
+        file_put_contents($testPath, "Hola Railway, puedo escribir aquí " . date('Y-m-d H:i:s'));
+        echo "<span style='color:green'>✅ ÉXITO: Pude escribir un archivo en: $testPath</span><br>";
+        echo "Permisos de la carpeta: " . substr(sprintf('%o', fileperms(dirname($testPath))), -4) . "<br>";
+    } catch (\Exception $e) {
+        echo "<span style='color:red'>❌ FALLO CRÍTICO: No puedo escribir. Error: " . $e->getMessage() . "</span><br>";
+        echo "Esto explica por qué no se guardan las fotos.";
     }
 
-    // 3. Revisar Configuración Actual
-    echo "<hr><h3>Configuración Detectada:</h3>";
-    echo "FILESYSTEM_DISK actual: <strong>" . config('filesystems.default') . "</strong><br>";
-    echo "(Si dice 'local', ese es el problema).";
+    // --- PRUEBA 2: Búsqueda Global de Imágenes ---
+    echo "<h3>2. Búsqueda de archivos .webp en TODO el proyecto (/app)</h3>";
+    echo "<i>Buscando... esto puede tardar un poco...</i><br><br>";
+    
+    // Buscamos desde la raíz del proyecto
+    $rootPath = base_path(); 
+    $found = false;
+
+    try {
+        $iterator = new RecursiveIteratorIterator(
+            new RecursiveDirectoryIterator($rootPath, RecursiveDirectoryIterator::SKIP_DOTS),
+            RecursiveIteratorIterator::SELF_FIRST
+        );
+
+        foreach ($iterator as $item) {
+            // Filtramos solo archivos .webp para no llenar la pantalla
+            if ($item->isFile() && $item->getExtension() == 'webp') {
+                echo "📸 <strong>ENCONTRADO:</strong> " . $item->getRealPath() . "<br>";
+                echo "&nbsp;&nbsp;&nbsp;➡️ Permisos: " . substr(sprintf('%o', fileperms($item->getRealPath())), -4);
+                echo " | Dueño: " . fileowner($item->getRealPath()) . "<br>";
+                $found = true;
+            }
+        }
+    } catch (\Exception $e) {
+        echo "Error durante la búsqueda: " . $e->getMessage();
+    }
+
+    if (!$found) {
+        echo "<br><strong style='color:orange'>🔍 RESULTADO: No encontré ningún archivo .webp en todo el proyecto.</strong><br>";
+        echo "Conclusión: La subida está fallando silenciosamente o la base de datos tiene nombres de archivos que físicamente no existen.";
+    }
 });
 require __DIR__.'/auth.php';
 
