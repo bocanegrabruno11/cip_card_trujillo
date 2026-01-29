@@ -207,58 +207,56 @@ Route::middleware(['auth', 'checkrole:admin'])->group(function () {
 
 });
 
+Route::get('/ver-imagen-directa', function () {
+    // 1. Definir la ruta física exacta donde debería estar la imagen
+    // AJUSTA ESTO: Cambia 'nombre_de_tu_archivo.webp' por el nombre real de la imagen que acabas de subir
+    // Ejemplo: 'publicaciones/6/tu_imagen.webp'
+    
+    // Vamos a listar lo que hay en la carpeta 'publicaciones' para ver si le atinamos
+    $basePath = storage_path('app/public/publicaciones'); 
+    
+    if (!is_dir($basePath)) {
+        return "ERROR: La carpeta 'publicaciones' no existe en: " . $basePath;
+    }
 
-Route::get('/force-fix-storage', function () {
-    $targetFolder = storage_path('app/public'); // Donde están los archivos reales
-    $linkFolder = public_path('storage');       // El acceso directo público
-
-    $report = [];
-
-    // 1. Diagnóstico Inicial
-    if (is_link($linkFolder)) {
-        $report[] = 'ESTADO: Actualmente es un ENLACE.';
-        unlink($linkFolder); // Borrar enlace
-        $report[] = 'ACCIÓN: Enlace eliminado.';
-    } elseif (is_dir($linkFolder)) {
-        $report[] = 'ESTADO: Actualmente es una CARPETA REAL (¡Este es el problema!).';
-        // Borrado recursivo de la carpeta
-        $files = new RecursiveIteratorIterator(
-            new RecursiveDirectoryIterator($linkFolder, RecursiveDirectoryIterator::SKIP_DOTS),
-            RecursiveIteratorIterator::CHILD_FIRST
-        );
-        foreach ($files as $fileinfo) {
-            $todo = ($fileinfo->isDir() ? 'rmdir' : 'unlink');
-            $todo($fileinfo->getRealPath());
+    // Buscamos carpetas numeradas (ej. 6, 7, 8...)
+    $carpetas = scandir($basePath);
+    echo "<h1>Explorador de Archivos (Storage)</h1>";
+    
+    foreach ($carpetas as $carpeta) {
+        if ($carpeta === '.' || $carpeta === '..') continue;
+        
+        $rutaCompleta = $basePath . '/' . $carpeta;
+        if (is_dir($rutaCompleta)) {
+            echo "<h3>Carpeta ID: $carpeta</h3>";
+            $archivos = scandir($rutaCompleta);
+            foreach ($archivos as $archivo) {
+                if ($archivo === '.' || $archivo === '..') continue;
+                
+                $rutaArchivo = $rutaCompleta . '/' . $archivo;
+                $urlPublica = asset('storage/publicaciones/' . $carpeta . '/' . $archivo);
+                
+                echo "<div>";
+                echo "<strong>Archivo:</strong> $archivo <br>";
+                echo "<strong>Ruta Física:</strong> $rutaArchivo <br>";
+                echo "<strong>Permisos:</strong> " . substr(sprintf('%o', fileperms($rutaArchivo)), -4) . "<br>";
+                echo "<strong>Dueño:</strong> " . fileowner($rutaArchivo) . "<br>";
+                
+                // Intentar leer el archivo con PHP
+                if (is_readable($rutaArchivo)) {
+                    echo "<span style='color:green'>PHP PUEDE LEERLO ✅</span><br>";
+                    echo "<a href='$urlPublica' target='_blank'>Intento Link Público</a><br>";
+                    // Mostrar imagen directa via base64 para probar que el dato existe
+                    $data = base64_encode(file_get_contents($rutaArchivo));
+                    echo "<img src='data:image/webp;base64,$data' width='100'><br>";
+                } else {
+                    echo "<span style='color:red'>PHP NO PUEDE LEERLO (Error de Permisos) ❌</span>";
+                }
+                echo "</div><hr>";
+            }
         }
-        rmdir($linkFolder);
-        $report[] = 'ACCIÓN: Carpeta física eliminada exitosamente.';
-    } else {
-        $report[] = 'ESTADO: No existe nada en public/storage.';
     }
-
-    // 2. Crear el enlace nuevo
-    try {
-        // Ejecutamos el comando nativo de Laravel
-        Illuminate\Support\Facades\Artisan::call('storage:link');
-        $report[] = 'ÉXITO: Nuevo enlace simbólico creado.';
-    } catch (\Exception $e) {
-        $report[] = 'ERROR al crear enlace: ' . $e->getMessage();
-    }
-
-    // 3. Permisos (Vital para el Volumen)
-    try {
-        chmod($targetFolder, 0777);
-        $report[] = 'Permisos 777 aplicados a storage/app/public.';
-    } catch (\Exception $e) {
-        // A veces falla en algunos sistemas de archivos, no es crítico si el usuario es el dueño
-        $report[] = 'Nota de permisos: ' . $e->getMessage();
-    }
-
-    return response()->json([
-        'status' => 'Reparación Finalizada',
-        'reporte' => $report,
-        'config_disk' => config('filesystems.default') // Debería decir 'public'
-    ]);
+    return "";
 });
 require __DIR__.'/auth.php';
 
