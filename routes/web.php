@@ -122,7 +122,7 @@ Route::get('/arbitraje/obtener', [ArbitrajeController::class, 'obtenerArbitrajes
 
 Route::get('/jrd', function () {
     return view('mesa-partes.jrd');
-})->name('jrd'); // Cambia 'jrd.create' por 'jrd'
+})->name('jrd');
 
 Route::get('/registros-jrd', function () {
     return view('mesa-partes.RegistrosJRD');
