@@ -282,5 +282,23 @@ Route::get('/fix-permissions-final', function () {
         echo "<h3 style='color:red'>⚠️ Hubo una salida inesperada (revisar arriba).</h3>";
     }
 });
+
+// --- RUTA DE DIAGNÓSTICO PARA EL ERROR 500 ---
+Route::get('/debug-mesa-error', function () {
+    try {
+        // 1. Intentamos instanciar el controlador manualmente
+        $controller = app()->make(\App\Http\Controllers\DashboardController::class);
+        
+        // 2. Intentamos ejecutar el método index
+        return $controller->index();
+        
+    } catch (\Throwable $e) {
+        // 3. Si falla, mostramos el error real en pantalla
+        echo "<h1>CAZAMOS EL ERROR:</h1>";
+        echo "<h3>Mensaje: " . $e->getMessage() . "</h3>";
+        echo "<strong>Archivo:</strong> " . $e->getFile() . " en línea " . $e->getLine();
+        dd($e); // Muestra la traza completa
+    }
+});
 require __DIR__.'/auth.php';
 
