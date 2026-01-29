@@ -209,5 +209,42 @@ Route::middleware(['auth', 'checkrole:admin'])->group(function () {
 
 
 
+// --- RUTA TEMPORAL PARA ARREGLAR STORAGE EN RAILWAY ---
+Route::get('/fix-storage-railway', function () {
+    $targetFolder = storage_path('app/public');
+    $linkFolder = public_path('storage');
+
+    $report = [];
+
+    // 1. Borrar el enlace simbólico viejo si existe (para evitar conflictos)
+    if (file_exists($linkFolder)) {
+        // En Linux, unlink borra el enlace simbólico
+        unlink($linkFolder); 
+        $report[] = 'Enlace simbólico viejo eliminado.';
+    }
+
+    // 2. Crear el nuevo enlace usando el comando de Artisan
+    try {
+        Illuminate\Support\Facades\Artisan::call('storage:link');
+        $report[] = 'Nuevo enlace creado correctamente (Artisan).';
+    } catch (\Exception $e) {
+        $report[] = 'Error al crear enlace: ' . $e->getMessage();
+    }
+
+    // 3. Intentar arreglar permisos (chmod 777 a la carpeta de destino)
+    try {
+        chmod($targetFolder, 0777);
+        $report[] = 'Permisos de lectura/escritura asignados a storage/app/public.';
+    } catch (\Exception $e) {
+        $report[] = 'Alerta de permisos: ' . $e->getMessage();
+    }
+
+    return response()->json([
+        'status' => 'Proceso terminado',
+        'reporte' => $report,
+        'target_path' => $targetFolder,
+        'link_path' => $linkFolder
+    ]);
+});
 require __DIR__.'/auth.php';
 
