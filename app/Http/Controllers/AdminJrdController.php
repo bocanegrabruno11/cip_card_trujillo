@@ -89,7 +89,7 @@ class AdminJrdController extends Controller
                 'user.persona'
             ])->findOrFail($id);
             
-            return view('Admin.jrd-detalle', compact('jrd'));
+            return view('Admin.Jrd-detalle', compact('jrd'));
             
         } catch (\Exception $e) {
             Log::error('Error al obtener detalle de JRD:', [
