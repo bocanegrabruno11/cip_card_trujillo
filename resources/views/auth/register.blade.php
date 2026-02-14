@@ -94,10 +94,18 @@
             background-color: #000; color: white; border: none;
             padding: 15px 40px; border-radius: 50px; font-weight: bold;
             font-size: 14px; cursor: pointer; text-transform: uppercase;
-            transition: transform 0.2s;
+            transition: all 0.2s;
+            display: flex; align-items: center; justify-content: center; gap: 10px;
         }
 
         .btn-register:hover { transform: scale(1.05); background-color: #222; }
+
+        /* Estilo para botón desactivado */
+        .btn-register:disabled {
+            background-color: #555;
+            cursor: not-allowed;
+            transform: none;
+        }
 
         .login-redirect-link {
             font-size: 14px; color: #555; text-decoration: none;
@@ -121,6 +129,8 @@
         .footer-subtitle {
             font-size: 10px; line-height: 1.4; text-transform: uppercase;
         }
+
+        .d-none { display: none; }
 
         @media (max-width: 768px) {
             .form-grid { grid-template-columns: 1fr; gap: 20px; }
@@ -158,12 +168,11 @@
 
     <div class="register-card">
         
-        <form method="POST" action="{{ route('register') }}">
+        <form method="POST" action="{{ route('register') }}" id="registerForm">
             @csrf
 
             <div class="form-grid">
 
-                <!-- Nombre -->
                 <div class="input-group">
                     <label>Nombres y Apellidos <span>*</span></label>
                     <input type="text" name="name" class="input-field" value="{{ old('name') }}" required>
@@ -172,7 +181,6 @@
                     @enderror
                 </div>
 
-                <!-- Email -->
                 <div class="input-group">
                     <label>Email <span>*</span></label>
                     <input type="email" name="email" class="input-field" value="{{ old('email') }}" required>
@@ -181,9 +189,6 @@
                     @enderror
                 </div>
 
-                
-
-                <!-- Contraseña -->
                 <div class="input-group">
                     <label>Contraseña <span>*</span></label>
                     <div class="password-wrapper">
@@ -196,7 +201,6 @@
                     @enderror
                 </div>
 
-                <!-- CONFIRMAR -->
                 <div class="input-group">
                     <label>Confirmar Contraseña <span>*</span></label>
                     <input type="password" name="password_confirmation" class="input-field" required>
@@ -205,9 +209,11 @@
                     @enderror
                 </div>
 
-                <!-- ACCIONES -->
                 <div class="actions-container">
-                    <button type="submit" class="btn-register">REGISTRARME</button>
+                    <button type="submit" class="btn-register" id="btnRegister">
+                        <span id="btnText">REGISTRARME</span>
+                        <i id="btnSpinner" class="fas fa-circle-notch fa-spin d-none"></i>
+                    </button>
 
                     <a href="{{ route('login') }}" class="login-redirect-link">
                         ¿Ya tienes una cuenta? <strong>Inicia sesión</strong>
@@ -254,6 +260,20 @@
             icon.classList.add('fa-eye-slash');
         }
     }
+
+    // Lógica para desactivar botón al registrarse
+    document.getElementById('registerForm').addEventListener('submit', function() {
+        const btn = document.getElementById('btnRegister');
+        const text = document.getElementById('btnText');
+        const spinner = document.getElementById('btnSpinner');
+
+        // Desactivar botón
+        btn.disabled = true;
+
+        // Cambiar texto y mostrar spinner
+        text.textContent = "PROCESANDO...";
+        spinner.classList.remove('d-none');
+    });
 </script>
 
 </body>

@@ -359,13 +359,14 @@
                 
                 {{-- 2. EL CARD --}}
                 <li class="has-dropdown {{ request()->routeIs('card.*') ? 'current-menu-item' : '' }}" onclick="toggleMobileDropdown(this)">
-                    <a href="javascript:void(0)">CARD</a>
+                    <a href="javascript:void(0)">NOSOTROS</a>
                     <ul class="dropdown-menu">
                         <li><a href="{{ route('presentacion') }}" onclick="handleMenuClick(event, this)">Presentación</a></li>
-                        <li><a href="{{ route('organizacion-card') }}" onclick="handleMenuClick(event, this)">Organización del CARD</a></li>
+                        <li><a href="{{ route('organo-direccion') }}" onclick="handleMenuClick(event, this)">Organo de Dirección</a></li>
+                        <li><a href="{{ route('organo-decision') }}" onclick="handleMenuClick(event, this)">Organo de Decisión</a></li>
+                        <li><a href="{{ route('organo-gestion') }}" onclick="handleMenuClick(event, this)">Organo de Gestión</a></li>
                         <li><a href="{{ route('mision-vision') }}" onclick="handleMenuClick(event, this)">Visión y Misión</a></li>
                         <li><a href="{{ route('organigrama') }}" onclick="handleMenuClick(event, this)">Organigrama</a></li>
-                        <li><a href="{{ route('nuestro-equipo') }}" onclick="handleMenuClick(event, this)">Nuestro equipo</a></li>
                         <li><a href="{{ route('certificaciones') }}" onclick="handleMenuClick(event, this)">Certificaciones</a></li>
                         <li><a href="{{ route('politicas') }}" onclick="handleMenuClick(event, this)">Políticas</a></li>
                         <li><a href="{{ route('licencias') }}" onclick="handleMenuClick(event, this)">Licencia de funcionamiento</a></li>
@@ -386,7 +387,7 @@
                     <a href="javascript:void(0)">SERVICIOS</a>
                     <ul class="dropdown-menu">
                         <li><a href="{{ route('institucion-arbitral') }}" onclick="handleMenuClick(event, this)">Institución Arbitral</a></li>
-                        <li><a href="{{ route('junta-prevencion') }}" onclick="handleMenuClick(event, this)">Junta de Prevención y Resolución de Disputas (CAJPRD)</a></li>
+                        <li><a href="{{ route('junta-prevencion') }}" onclick="handleMenuClick(event, this)">Junta de Prevención y Resolución de Disputas</a></li>
                     </ul>
                 </li>
                 

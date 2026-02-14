@@ -132,41 +132,45 @@ class PageController extends Controller
         return view('contenido.detalle-evento', compact('evento', 'imagenPrincipal', 'galeria'));
     }
 
-    public function organizacionCard()
+    public function organoDireccion()
     {
-        // 1. Órgano Directivo (Decano y directivos)
-        $directivos = OrganizacionCard::where('grupo', 'directivo')
+        // 1. Órgano de Dirección
+        $organoDireccion = OrganizacionCard::where('grupo', 'organo_direccion')
             ->where('activo', true)
             ->orderBy('orden', 'asc')
             ->get();
 
-        // 2. Órgano Decisorio - Presidente (Suele ser uno solo)
-        $decisorioPresidente = OrganizacionCard::where('grupo', 'decisorio_presidente')
-            ->where('activo', true)
-            ->first();
-
-        // 3. Órgano Decisorio - Miembros
-        $decisorioMiembros = OrganizacionCard::where('grupo', 'decisorio_miembros')
+        // 2. Órgano de Decisión
+        $organoDecision = OrganizacionCard::where('grupo', 'organo_decision')
             ->where('activo', true)
             ->orderBy('orden', 'asc')
             ->get();
 
-        // 4. Secretaría General
-        $secretaria = OrganizacionCard::where('grupo', 'secretaria')
+        // 3. Órgano de Gestión - Secretaría Arbitral
+        $secArbitral = OrganizacionCard::where('grupo', 'organo_gestion_secretaria_arbitral')
             ->where('activo', true)
-            ->first();
+            ->orderBy('orden', 'asc')
+            ->get();
 
+        // 4. Órgano de Gestión - Secretaría Técnica
+        $secTecnica = OrganizacionCard::where('grupo', 'organo_gestion_secretaria_tecnica')
+            ->where('activo', true)
+            ->orderBy('orden', 'asc')
+            ->get();
+
+        // 5. Documento de Resolución (Se mantiene la lógica existente)
         $documentoResolucion = Documentacion::where('seccion', 'organizacion')
-        ->where('activo', true)
-        ->whereDate('fecha_publicacion', '<=', Carbon::today())
-        ->orderBy('fecha_publicacion', 'desc')
-        ->first();
-        // Retornamos todas las colecciones a la vista
-        return view('contenido.organizacion-card', compact(
-            'directivos', 
-            'decisorioPresidente', 
-            'decisorioMiembros', 
-            'secretaria',
+            ->where('activo', true)
+            ->whereDate('fecha_publicacion', '<=', Carbon::today())
+            ->orderBy('fecha_publicacion', 'desc')
+            ->first();
+
+        // Retornamos las nuevas variables a la vista
+        return view('contenido.organo-direccion', compact(
+            'organoDireccion', 
+            'organoDecision', 
+            'secArbitral', 
+            'secTecnica',
             'documentoResolucion'
         ));
     }
@@ -176,31 +180,32 @@ class PageController extends Controller
         return view('contenido.organigrama');
     }
 
-    public function nuestroEquipo()
+    public function organoDecision()
     {
-        // Traemos todos los miembros activos de los grupos requeridos, ordenados por su 'orden'
+        // Traemos todos los miembros activos
+        $organoDecision = OrganizacionCard::where('activo', true)
+            ->where('grupo', 'organo_decision')
+            ->orderBy('orden', 'asc')
+            ->get();
+
+        return view('contenido.organo-decision', compact('organoDecision'));
+    }
+    public function organoGestion()
+    {
+        // Traemos todos los miembros activos
         $miembros = OrganizacionCard::where('activo', true)
             ->whereIn('grupo', [
-                'secretaria', 
-                'secretarios_arbitrales', 
-                'apoyo', 
-                'administrativo'
+                'organo_gestion_secretaria_arbitral',
+                'organo_gestion_secretaria_tecnica'
             ])
             ->orderBy('orden', 'asc')
             ->get();
 
-        // Filtramos las colecciones para enviarlas separadas a la vista
-        $secretaria = $miembros->where('grupo', 'secretaria')->first();
-        $secretariosArbitrales = $miembros->where('grupo', 'secretarios_arbitrales');
-        $personalApoyo = $miembros->where('grupo', 'apoyo');
-        $soporteAdmin = $miembros->where('grupo', 'administrativo');
+        // Filtramos las colecciones
+        $secArbitral = $miembros->where('grupo', 'organo_gestion_secretaria_arbitral');
+        $secTecnica = $miembros->where('grupo', 'organo_gestion_secretaria_tecnica');
 
-        return view('contenido.nuestro-equipo', compact(
-            'secretaria', 
-            'secretariosArbitrales', 
-            'personalApoyo', 
-            'soporteAdmin'
-        ));
+        return view('contenido.organo-gestion', compact('secArbitral', 'secTecnica'));
     }
 
     public function certificaciones()
@@ -260,48 +265,165 @@ class PageController extends Controller
     
     public function institucionArbitral()
     {
-        // 1. Obtenemos documentos de 'institucion', que estén activos, ordenados por fecha
+       
+
+        return view('contenido.servicios.institucion-arbitral');
+    }
+   
+    public function arbitralNormativa()
+    {
         $documentos = Documentacion::where('seccion', 'institucion')
+            ->where('categoria', 'normativa')
             ->where('activo', true)
             ->whereDate('fecha_publicacion', '<=', Carbon::today())
             ->orderBy('fecha_publicacion', 'desc')
             ->get();
+        return view('contenido.servicios.arbitral.normativa', compact('documentos'));
+    }
+
+    public function arbitralTarifario()
+    {
+        $tarifas = Documentacion::where('seccion', 'institucion')
+            ->where('categoria', 'tarifario')
+            ->where('activo', true)
+           
+            ->get();
+        return view('contenido.servicios.arbitral.tarifario', compact('tarifas'));
+    }
+
+    public function arbitralNomina()
+    {
+        // Carga los documentos de la categoría incorporación/nómina
+        $docsNomina = Documentacion::where('seccion', 'institucion')
+            ->where('categoria', 'incorporacion')
+            ->where('activo', true)
+            ->get();
+
+        // Carga los perfiles de los árbitros
         $arbitrosNomina = OrganizacionCard::where('grupo', 'arbitros-nomina')
             ->where('activo', true)
             ->orderBy('orden')
             ->get();
 
-        
-        $docsPorCategoria = $documentos->groupBy('categoria');
-        $tienePermisoRepo = false;
-        if (Auth::check()) {
-            // Verifica si existe una solicitud APROBADA para el email del usuario actual
-            $tienePermisoRepo = SolicitudRepositorio::where('email', Auth::user()->email)
-                                ->where('estado', 'aprobado')
-                                ->exists();
-        }
+        return view('contenido.servicios.arbitral.nomina-arbitros', compact('docsNomina', 'arbitrosNomina'));
+    }
 
-        return view('contenido.servicios.institucion-arbitral', compact('docsPorCategoria','arbitrosNomina','tienePermisoRepo'));
+    public function arbitralIncorporacion()
+    {
+        $docsIncorporacion = Documentacion::where('seccion', 'institucion')
+            ->where('categoria', 'incorporacion')
+            ->where('activo', true)
+            ->get();
+            
+        $requisitos = Documentacion::where('seccion', 'institucion')
+            ->where('categoria', 'requisitos')
+            ->where('activo', true)
+            ->get();
+
+        return view('contenido.servicios.arbitral.requisitos', compact('docsIncorporacion', 'requisitos'));
+    }
+
+    public function arbitralSolicitar()
+    {
+        $formularios = Documentacion::where('seccion', 'institucion')
+            ->where('categoria', 'solicitar')
+            ->where('activo', true)
+            ->get();
+        return view('contenido.servicios.arbitral.solicitar', compact('formularios'));
+    }
+
+    public function arbitralRepositorio()
+    {
+
+        
+        $docsInformativos = Documentacion::where('seccion', 'institucion')
+            ->where('categoria', 'repositorio')
+            ->where('activo', true)
+            ->get();
+
+        return view('contenido.servicios.arbitral.laudos', compact('docsInformativos'));
     }
 
     public function juntaPrevencion()
     {
-        // Misma lógica para la Junta
+
+        return view('contenido.servicios.junta-prevencion');
+    }
+
+    public function juntaPrevencionNormativa()
+    {
         $documentos = Documentacion::where('seccion', 'junta')
+            ->where('categoria', 'normativa')
             ->where('activo', true)
             ->whereDate('fecha_publicacion', '<=', Carbon::today())
             ->orderBy('fecha_publicacion', 'desc')
             ->get();
+        return view('contenido.servicios.jrd.normativa', compact('documentos'));
+    }
 
-        $docsPorCategoria = $documentos->groupBy('categoria');
+    public function juntaPrevencionTarifario()
+    {
+        $tarifas = Documentacion::where('seccion', 'junta')
+            ->where('categoria', 'tarifario')
+            ->where('activo', true)
+           
+            ->get();
+        return view('contenido.servicios.jrd.tarifario', compact('tarifas'));
+    }
 
+    public function juntaPrevencionNomina()
+    {
+        // Carga los documentos de la categoría incorporación/nómina
+        $docsNomina = Documentacion::where('seccion', 'junta')
+            ->where('categoria', 'incorporacion')
+            ->where('activo', true)
+            ->get();
+
+        // Carga los perfiles de los árbitros
         $adjudicadoresNomina = OrganizacionCard::where('grupo', 'adjudicadores-nomina')
             ->where('activo', true)
             ->orderBy('orden')
             ->get();
 
-        return view('contenido.servicios.junta-prevencion', compact('docsPorCategoria','adjudicadoresNomina'));
+        return view('contenido.servicios.jrd.nomina-adjudicadores', compact('docsNomina', 'adjudicadoresNomina'));
     }
+
+    public function juntaPrevencionIncorporacion()
+    {
+        $docsIncorporacion = Documentacion::where('seccion', 'junta')
+            ->where('categoria', 'incorporacion')
+            ->where('activo', true)
+            ->get();
+            
+        $requisitos = Documentacion::where('seccion', 'junta')
+            ->where('categoria', 'requisitos')
+            ->where('activo', true)
+            ->get();
+
+        return view('contenido.servicios.jrd.requisitos', compact('docsIncorporacion', 'requisitos'));
+    }
+
+    public function juntaPrevencionSolicitar()
+    {
+        $formularios = Documentacion::where('seccion', 'junta')
+            ->where('categoria', 'solicitar')
+            ->where('activo', true)
+            ->get();
+        return view('contenido.servicios.jrd.solicitar', compact('formularios'));
+    }
+
+    public function juntaPrevencionRepositorio()
+    {
+
+        
+        $docsInformativos = Documentacion::where('seccion', 'junta')
+            ->where('categoria', 'repositorio')
+            ->where('activo', true)
+            ->get();
+
+        return view('contenido.servicios.jrd.laudos', compact('docsInformativos'));
+    }
+
 
     public function convocatoria()
     {

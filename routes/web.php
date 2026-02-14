@@ -32,11 +32,27 @@ Route::get('/presentacion', [PageController::class, 'presentacion'])->name('pres
 Route::get('/comunicados', [PageController::class, 'comunicados'])->name('comunicados');
 Route::get('/eventos', [PageController::class, 'eventos'])->name('eventos');
 Route::get('/detalle-evento/{id}', [PageController::class, 'detalleEvento'])->name('detalle-evento');
-Route::get('/organizacion-card', [PageController::class, 'organizacionCard'])->name('organizacion-card');
+Route::get('/organo-direccion', [PageController::class, 'organoDireccion'])->name('organo-direccion');
+Route::get('/organo-decision', [PageController::class, 'organoDecision'])->name('organo-decision');
+Route::get('/organo-gestion', [PageController::class, 'organoGestion'])->name('organo-gestion');
 Route::get('/organigrama', [PageController::class, 'organigrama'])->name('organigrama');
 Route::get('/institucion-arbitral', [PageController::class, 'institucionArbitral'])->name('institucion-arbitral');
+Route::get('/inst/normativa', [PageController::class, 'arbitralNormativa'])->name('institucion-arbitral.normativa');
+Route::get('/inst/nomina', [PageController::class, 'arbitralNomina'])->name('institucion-arbitral.nomina');
+Route::get('/inst/repositorio', [PageController::class, 'arbitralRepositorio'])->name('institucion-arbitral.repositorio');
+Route::get('/inst/requisitos-incorporacion', [PageController::class, 'arbitralIncorporacion'])->name('institucion-arbitral.requisitos-incorporacion');
+Route::get('/inst/tarifario', [PageController::class, 'arbitralTarifario'])->name('institucion-arbitral.tarifario');
+Route::get('/inst/solicitar', [PageController::class, 'arbitralSolicitar'])->name('institucion-arbitral.solicitar');
+
 Route::get('/junta-prevencion', [PageController::class, 'juntaPrevencion'])->name('junta-prevencion');
-Route::get('/nuestro-equipo', [PageController::class, 'nuestroEquipo'])->name('nuestro-equipo');
+Route::get('/jun-prev/normativa', [PageController::class, 'juntaPrevencionNormativa'])->name('junta-prevencion.normativa');
+Route::get('/jun-prev/nomina', [PageController::class, 'juntaPrevencionNomina'])->name('junta-prevencion.nomina');
+Route::get('/jun-prev/repositorio', [PageController::class, 'juntaPrevencionRepositorio'])->name('junta-prevencion.repositorio');
+Route::get('/jun-prev/requisitos-incorporacion', [PageController::class, 'juntaPrevencionIncorporacion'])->name('junta-prevencion.requisitos-incorporacion');
+Route::get('/jun-prev/tarifario', [PageController::class, 'juntaPrevencionTarifario'])->name('junta-prevencion.tarifario');
+Route::get('/jun-prev/solicitar', [PageController::class, 'juntaPrevencionSolicitar'])->name('junta-prevencion.solicitar');
+
+
 Route::get('/certificaciones', [PageController::class, 'certificaciones'])->name('certificaciones');
 Route::get('/politicas', [PageController::class, 'politicas'])->name('politicas');
 Route::get('/licencias', [PageController::class, 'licencias'])->name('licencias');

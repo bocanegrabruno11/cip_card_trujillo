@@ -170,11 +170,11 @@
                     <i class="fas fa-users-cog"></i> Ver JRD
                 </a>
             </li>
-            <li>
+            <!-- <li>
                 <a href="{{ route('admin.solicitudes.index') }}" class="menu-link {{ request()->routeIs('admin.solicitudes.index') ? 'active' : '' }}">
                     <i class="fas fa-file "></i> Permisos de Repositorio
                 </a>
-            </li>
+            </li> -->
         </ul>
 
         <div class="user-footer">
@@ -206,33 +206,51 @@
 
     <!-- Modal de Logout -->
     <div class="modal fade" id="logoutModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content border-0 shadow-lg">
-                <div class="modal-header bg-dark text-white border-0">
-                    <h5 class="modal-title fw-bold">Cerrar Sesión</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body text-center p-4">
-                    <i class="fas fa-sign-out-alt fa-3x text-secondary mb-3"></i>
-                    <h5 class="fw-bold mb-2">¿Deseas salir del sistema?</h5>
-                    <p class="text-muted mb-0">Selecciona "Salir" si estás listo para finalizar tu sesión actual.</p>
-                </div>
-                <div class="modal-footer border-0 justify-content-center pb-4">
-                    <button type="button" class="btn btn-light px-4" data-bs-dismiss="modal">Cancelar</button>
-                    
-                    <form action="{{ route('logout') }}" method="POST">
-                        @csrf
-                        <button type="submit" class="btn btn-danger px-4 fw-bold">Salir</button>
-                    </form>
-                </div>
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg">
+            <div class="modal-header bg-dark text-white border-0">
+                <h5 class="modal-title fw-bold">Cerrar Sesión</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-center p-4">
+                <i class="fas fa-sign-out-alt fa-3x text-secondary mb-3"></i>
+                <h5 class="fw-bold mb-2">¿Deseas salir del sistema?</h5>
+                <p class="text-muted mb-0">Selecciona "Salir" si estás listo para finalizar tu sesión actual.</p>
+            </div>
+            <div class="modal-footer border-0 justify-content-center pb-4">
+                <button type="button" class="btn btn-light px-4" data-bs-dismiss="modal" id="btnCancelConf">Cancelar</button>
+                
+                <form action="{{ route('logout') }}" method="POST" id="formLogoutConf">
+                    @csrf
+                    <button type="submit" class="btn btn-danger px-4 fw-bold" id="btnSubmitConf">
+                        <span id="txtLogoutConf">Salir</span>
+                        <i id="spinLogoutConf" class="fas fa-circle-notch fa-spin d-none"></i>
+                    </button>
+                </form>
             </div>
         </div>
     </div>
+</div>
 
     <!-- Scripts globales -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-    
+    <script>
+    document.getElementById('formLogoutConf').addEventListener('submit', function() {
+        const btnSubmit = document.getElementById('btnSubmitConf');
+        const btnCancel = document.getElementById('btnCancelConf');
+        const text = document.getElementById('txtLogoutConf');
+        const spinner = document.getElementById('spinLogoutConf');
+
+        // Desactivar ambos botones para evitar cualquier acción adicional
+        btnSubmit.disabled = true;
+        btnCancel.disabled = true;
+
+        // Mostrar feedback de carga
+        text.textContent = "Saliendo...";
+        spinner.classList.remove('d-none');
+    });
+</script>
     <script>
         // Función para mostrar/ocultar el sidebar en móviles
         function toggleSidebar() {

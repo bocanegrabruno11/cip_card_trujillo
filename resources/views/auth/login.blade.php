@@ -91,16 +91,27 @@
             color: white; padding: 15px; border-radius: 5px;
             border: none; font-size: 16px; font-weight: bold;
             cursor: pointer; margin-bottom: 25px;
-            transition: background 0.3s;
+            transition: all 0.3s;
+            display: flex; justify-content: center; align-items: center; gap: 10px;
         }
 
         .btn-login:hover { background-color: #c2181e; }
 
+        /* Estilo para botón desactivado */
+        .btn-login:disabled {
+            background-color: #f08b8e;
+            cursor: not-allowed;
+            opacity: 0.8;
+        }
+
         .forgot-link, .register-link {
             text-decoration: none; font-size: 14px; color: #555;
+            display: block; margin-bottom: 15px;
         }
 
         .forgot-link:hover, .register-link:hover { color: #E31E24; }
+
+        .d-none { display: none; }
 
         @media (max-width: 900px) {
             .login-container { flex-direction: column; }
@@ -116,18 +127,14 @@
 
     <div class="login-container">
 
-        <!-- BRANDING -->
         <div class="left-branding">
             <div class="brand-logo-large">
                 <i class="fas fa-scale-balanced"></i>
             </div>
-
             <div class="brand-title">CARD</div>
-
             <div class="brand-subtitle">
                 CENTRO DE ARBITRAJE Y RESOLUCIÓN DE DISPUTAS DEL CIP TRUJILLO
             </div>
-
             <div class="brand-footer-logo">
                 <img src="{{ asset('img/logo.png') }}">
                 <div class="brand-footer-text">
@@ -137,39 +144,31 @@
             </div>
         </div>
 
-        <!-- FORMULARIO REAL DE BREEZE -->
         <div class="right-form">
             <div class="login-card">
-
-                <!-- SESSION STATUS -->
                 @if (session('status'))
                     <div style="color: red; margin-bottom:10px;">
                         {{ session('status') }}
                     </div>
                 @endif
 
-                <form method="POST" action="{{ route('login') }}">
+                <form method="POST" action="{{ route('login') }}" id="loginForm">
                     @csrf
 
-                    <!-- Email -->
                     <div class="input-group">
                         <label>Usuario o Email <span>*</span></label>
                         <input type="email" name="email" class="input-field" value="{{ old('email') }}" required>
-
                         @error('email')
                             <small style="color:red;">{{ $message }}</small>
                         @enderror
                     </div>
 
-                    <!-- Password -->
                     <div class="input-group">
                         <label>Contraseña <span>*</span></label>
-
                         <div class="password-wrapper">
                             <input type="password" name="password" id="password" class="input-field" required>
                             <i class="fas fa-eye-slash toggle-password" onclick="togglePassword()"></i>
                         </div>
-
                         @error('password')
                             <small style="color:red;">{{ $message }}</small>
                         @enderror
@@ -177,20 +176,21 @@
 
                     <a href="{{ route('password.request') }}" class="forgot-link">¿Olvidaste tu contraseña?</a>
 
-                    <button type="submit" class="btn-login">Iniciar Sesión</button>
+                    <button type="submit" class="btn-login" id="btnLogin">
+                        <span id="btnText">Iniciar Sesión</span>
+                        <i id="btnSpinner" class="fas fa-circle-notch fa-spin d-none"></i>
+                    </button>
 
                     <a href="{{ route('register') }}" class="register-link">
                         ¿No tienes una cuenta? Regístrate ahora
                     </a>
-
                 </form>
-
             </div>
         </div>
-
     </div>
 
     <script>
+        // Función para ver/ocultar contraseña
         function togglePassword() {
             const input = document.getElementById('password');
             const icon = document.querySelector('.toggle-password');
@@ -205,6 +205,20 @@
                 icon.classList.add("fa-eye-slash");
             }
         }
+
+        // Lógica para desactivar el botón al enviar
+        document.getElementById('loginForm').addEventListener('submit', function() {
+            const btn = document.getElementById('btnLogin');
+            const text = document.getElementById('btnText');
+            const spinner = document.getElementById('btnSpinner');
+
+            // Desactivar botón
+            btn.disabled = true;
+            
+            // Cambiar texto por spinner
+            text.textContent = "Accediendo...";
+            spinner.classList.remove('d-none');
+        });
     </script>
 
 </body>
