@@ -13,7 +13,7 @@ use App\Models\TarifaEscala;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-
+use Barryvdh\DomPDF\Facade\Pdf;
 class PageController extends Controller
 {
     public function misionVision()
@@ -438,54 +438,200 @@ class PageController extends Controller
         return view('contenido.convocatoria', compact('documentos'));
     }
 
-    public function calcInstDeterminada()
+    public function calculadoraArbitraje()
     {
-        $escalas = TarifaEscala::where('activo', true)->get();
+        // Traemos SOLO las tarifas activas de arbitraje
+        $escalas = TarifaEscala::where('activo', true)
+            ->where('tipo_calculadora', 'servicio_arbitral')
+            ->get();
 
+        // Organizamos los datos para JS
         $data = [
-            'unico'    => $escalas->where('tipo_calculadora', 'servicio_arbitral')->where('tipo', 'arbitro_unico')->values(),
-            'tribunal' => $escalas->where('tipo_calculadora', 'servicio_arbitral')->where('tipo', 'tribunal_arbitral')->values(),
-            'gastos'   => $escalas->where('tipo_calculadora', 'servicio_arbitral')->where('tipo', 'gastos_administrativos')->values(),
+            'unico'    => $escalas->where('tipo', 'arbitro_unico')->values(),
+            'tribunal' => $escalas->where('tipo', 'tribunal_arbitral')->values(),
+            'gastos'   => $escalas->where('tipo', 'gastos_administrativos')->values(),
         ];
 
+        // Obtenemos el IGV (o usamos 18% por defecto)
         $configIgv = TarifaConfiguracion::where('clave', 'igv')->first();
         $igv = $configIgv ? floatval($configIgv->valor) : 18.00;
 
-        return view('contenido.calculadoras.institucion-determinada', compact('data', 'igv'));
+        return view('contenido.calculadoras.arbitraje', compact('data', 'igv'));
     }
 
-    public function calcInstIndeterminada()
-    {
-        $escalas = TarifaEscala::where('activo', true)->get();
-        $data = [
-            'unico'    => $escalas->where('tipo_calculadora', 'servicio_arbitral')->where('tipo', 'arbitro_unico')->values(),
-            'tribunal' => $escalas->where('tipo_calculadora', 'servicio_arbitral')->where('tipo', 'tribunal_arbitral')->values(),
-            'gastos'   => $escalas->where('tipo_calculadora', 'servicio_arbitral')->where('tipo', 'gastos_administrativos')->values(),
-        ];
-
-        $config = TarifaConfiguracion::whereIn('clave', ['igv', 'porcentaje_indeterminado'])->pluck('valor', 'clave');
-        
-        $igv = floatval($config['igv'] ?? 18.00);
-        $porcentajeIndeterminado = floatval($config['porcentaje_indeterminado'] ?? 5.00); // El 5% del PDF
-
-        return view('contenido.calculadoras.institucion-indeterminada', compact('data', 'igv', 'porcentajeIndeterminado'));
-    }
+ 
 
     public function calcJunta() {
 
-         $escalas = TarifaEscala::where('activo', true)->get();
+    // 1. Obtener tarifas activas SOLO de JPRD
+    $escalas = TarifaEscala::where('activo', true)
+        ->where('tipo_calculadora', 'junta_prevencion')
+        ->get();
+
+    // 2. Agrupar por tipo para facilitar el uso en JS
+    $data = [
+        'administrativos' => $escalas->where('tipo', 'gastos_administrativos')->values(),
+        'unico'           => $escalas->where('tipo', 'arbitro_unico')->values(),
+        'tribunal'        => $escalas->where('tipo', 'tribunal_arbitral')->values(),
+    ];
+
+    // 3. Obtener IGV global
+    $configIgv = TarifaConfiguracion::where('clave', 'igv')->first();
+    $igv = $configIgv ? floatval($configIgv->valor) : 18.00;
+
+    return view('contenido.calculadoras.junta', compact('data', 'igv'));
+    }
+    public function exportarPdfJunta(Request $request)
+    {
+        $monto = floatval($request->input('monto'));
+        $tipo = $request->input('tipo_miembro'); // 'unico' o 'tribunal'
+        
+        // 1. Obtener Tarifas (Reutilizamos lógica)
+        $escalas = TarifaEscala::where('activo', true)
+            ->where('tipo_calculadora', 'junta_prevencion')
+            ->get();
+
+        // 2. Lógica de Cálculo (Réplica del JS para seguridad)
+        
+        // A. Tasa Administrativa
+        $tarifaAdmin = $escalas->where('tipo', 'gastos_administrativos')
+            ->where('monto_min', '<=', $monto)
+            ->filter(function($item) use ($monto) {
+                return $item->monto_max === null || $monto <= $item->monto_max;
+            })->first();
+        $gastosAdmin = $tarifaAdmin ? $tarifaAdmin->monto_fijo : 0;
+
+        // B. Honorarios
+        $honorariosUnitario = 0;
+        $honorariosTotal = 0;
+        $rangoDetectado = $tarifaAdmin ? $tarifaAdmin->rango_letra : '-';
+        $mensajeError = null;
+
+        if ($tipo === 'unico') {
+            $tarifaUnico = $escalas->where('tipo', 'arbitro_unico')
+                ->where('monto_min', '<=', $monto)
+                ->where('monto_max', '>=', $monto)
+                ->first();
+                
+            if ($tarifaUnico) {
+                $honorariosUnitario = $tarifaUnico->monto_fijo;
+                $honorariosTotal = $honorariosUnitario; // Solo 1
+            } else {
+                $mensajeError = ($monto > 40000000) ? 'Corresponde Tribunal' : 'Fuera de rango';
+            }
+        } else { // Tribunal
+            $tarifaTrib = $escalas->where('tipo', 'tribunal_arbitral')
+                ->where('monto_min', '<=', $monto)
+                ->filter(function($item) use ($monto) {
+                    return $item->monto_max === null || $monto <= $item->monto_max;
+                })->first();
+
+            if ($tarifaTrib) {
+                $honorariosUnitario = $tarifaTrib->monto_fijo;
+                $honorariosTotal = $honorariosUnitario * 3;
+            } else {
+                $mensajeError = ($monto <= 40000000) ? 'Corresponde Miembro Único' : 'Fuera de rango';
+            }
+        }
+
+        // 3. Obtener IGV
+        $configIgv = TarifaConfiguracion::where('clave', 'igv')->first();
+        $igv = $configIgv ? floatval($configIgv->valor) : 18.00;
+
+        // 4. Generar PDF
         $data = [
-            'unico'    => $escalas->where('tipo_calculadora', 'junta_prevencion')->where('tipo', 'arbitro_unico')->values(),
-            'tribunal' => $escalas->where('tipo_calculadora', 'junta_prevencion')->where('tipo', 'tribunal_arbitral')->values(),
-            'gastos'   => $escalas->where('tipo_calculadora', 'junta_prevencion')->where('tipo', 'gastos_administrativos')->values(),
+            'monto' => $monto,
+            'tipo' => $tipo,
+            'rango' => $rangoDetectado,
+            'gastosAdmin' => $gastosAdmin,
+            'honoUnitario' => $honorariosUnitario,
+            'honoTotal' => $honorariosTotal,
+            'igv' => $igv,
+            'error' => $mensajeError,
+            'fecha' => date('d/m/Y H:i')
         ];
 
-        $config = TarifaConfiguracion::whereIn('clave', ['igv', 'porcentaje_indeterminado'])->pluck('valor', 'clave');
-        
-        $igv = floatval($config['igv'] ?? 18.00);
-        $porcentajeIndeterminado = floatval($config['porcentaje_indeterminado'] ?? 5.00); // El 5% del PDF
-        return view('contenido.calculadoras.junta', compact('data', 'igv', 'porcentajeIndeterminado'));
+        $pdf = Pdf::loadView('contenido.calculadoras.pdf-junta', $data);
+        return $pdf->download('Resultados_Calculadora_JRD_CARD_'.date('Y-m-d_H-i-s').'.pdf');
     }
 
-    
+    public function exportarPdfArbitraje(Request $request)
+    {
+        $montoInput = floatval($request->input('monto'));
+        $tipoCuantia = $request->input('tipo_cuantia'); // 'determinada' o 'indeterminada'
+        $tipoOrgano = $request->input('tipo_organo'); // 'unico' o 'tribunal'
+        $cantidad = intval($request->input('cantidad_pretensiones'));
+        
+        // Validación básica
+        if ($cantidad < 1) $cantidad = 1;
+
+        // 1. Determinar base de cálculo (Lógica del 4%)
+        $montoCalculo = $montoInput;
+        if ($tipoCuantia === 'indeterminada') {
+            $montoCalculo = $montoInput * 0.04;
+        }
+
+        // 2. Obtener Tarifas
+        $escalas = TarifaEscala::where('activo', true)
+            ->where('tipo_calculadora', 'servicio_arbitral')
+            ->get();
+
+        // Función auxiliar para calcular (reutilizable)
+        $calcular = function($monto, $tipoTabla) use ($escalas) {
+            // Buscar rango
+            $rango = $escalas->where('tipo', $tipoTabla)
+                ->where('monto_min', '<=', $monto)
+                ->filter(function($item) use ($monto) {
+                    return $item->monto_max === null || $monto <= $item->monto_max;
+                })->first();
+
+            if (!$rango) return 0;
+            
+            // Caso "A criterio"
+            if ($rango->monto_fijo == 0 && $rango->porcentaje_exceso == 0) return -1;
+
+            // Fórmula: Fijo + ((Monto - BaseExceso) * %)
+            $variable = 0;
+            if ($rango->porcentaje_exceso > 0) {
+                $variable = ($monto - $rango->base_exceso) * ($rango->porcentaje_exceso / 100);
+            }
+            return $rango->monto_fijo + $variable;
+        };
+
+        // 3. Ejecutar Cálculos Base
+        $tablaHonorarios = ($tipoOrgano === 'unico') ? 'arbitro_unico' : 'tribunal_arbitral';
+        
+        $honorariosBase = $calcular($montoCalculo, $tablaHonorarios);
+        $gastosBase = $calcular($montoCalculo, 'gastos_administrativos');
+
+        // 4. Aplicar Multiplicador (Solo si es indeterminada)
+        $honorariosFinal = ($honorariosBase === -1) ? -1 : $honorariosBase;
+        $gastosFinal = ($gastosBase === -1) ? -1 : $gastosBase;
+
+        if ($tipoCuantia === 'indeterminada') {
+            if ($honorariosFinal !== -1) $honorariosFinal *= $cantidad;
+            if ($gastosFinal !== -1) $gastosFinal *= $cantidad;
+        }
+
+        // 5. Configuración IGV
+        $configIgv = TarifaConfiguracion::where('clave', 'igv')->first();
+        $igv = $configIgv ? floatval($configIgv->valor) : 18.00;
+
+        // 6. Generar PDF
+        $data = [
+            'montoInput' => $montoInput,
+            'montoCalculo' => $montoCalculo, // El valor del 4% (o el original)
+            'tipoCuantia' => $tipoCuantia,
+            'tipoOrgano' => $tipoOrgano,
+            'cantidad' => $cantidad,
+            'honorariosTotal' => $honorariosFinal,
+            'gastosTotal' => $gastosFinal,
+            'igv' => $igv,
+            'fecha' => date('d/m/Y H:i')
+        ];
+
+        $pdf = Pdf::loadView('contenido.calculadoras.pdf-arbitraje', $data);
+        return $pdf->download('Resultados_Calculadora_Arbitraje_CARD_'.date('Y-m-d_H-i-s').'.pdf');
+    }
+
 }

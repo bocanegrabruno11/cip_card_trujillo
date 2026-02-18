@@ -185,11 +185,11 @@
             <a href="{{ route('junta-prevencion.normativa') }}" class="btn-card">Ver Documentos</a>
         </div>
 
-        <!-- <div class="info-card">
-            <h3>Tarifarios</h3>
+        <div class="info-card">
+            <h3>Tarifarios y Calculadora</h3>
             <p>Acceda al cuadro de honorarios de los miembros de la Junta y los gastos administrativos del Centro según los montos de obra.</p>
             <a href="{{ route('junta-prevencion.tarifario') }}" class="btn-card">Ver Tarifario</a>
-        </div> -->
+        </div>
 
         <div class="info-card">
             <h3>Nómina de Adjudicadores</h3>

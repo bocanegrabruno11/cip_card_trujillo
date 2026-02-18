@@ -62,11 +62,10 @@ Route::get('/junta-res-disputas', [PageController::class, 'juntaResDisputas'])->
 Route::get('/dispute-review', [PageController::class, 'disputeReview'])->name('dispute-review');
 Route::get('/dispute-avoidance-res', [PageController::class, 'disputeAvoidanceRes'])->name('dispute-avoidance-res');
 Route::get('/convocatoria', [PageController::class, 'convocatoria'])->name('convocatoria');
-Route::get('/calculadora/institucion/determinada', [PageController::class, 'calcInstDeterminada'])->name('calc.inst.det');
-Route::get('/calculadora/institucion/indeterminada', [PageController::class, 'calcInstIndeterminada'])->name('calc.inst.indet');
+Route::get('/calculadora/arbitraje/ver', [PageController::class, 'calculadoraArbitraje'])->name('calc.arbitraje.ver');
 Route::get('/calculadora/junta/calc', [PageController::class, 'calcJunta'])->name('calc.junta');
-
-
+Route::post('/calculadora/juntap/pdf', [PageController::class, 'exportarPdfJunta'])->name('calculadora.junta.pdf');
+Route::post('/calculadora/arbitrajec/pdf', [PageController::class, 'exportarPdfArbitraje'])->name('calculadora.arbitraje.pdf');
 // En web.php
 Route::get('/documentos/ver/{filename}', [DocumentoController::class, 'mostrar'])
     ->name('documentos.mostrar');

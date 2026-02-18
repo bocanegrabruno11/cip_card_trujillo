@@ -26,7 +26,7 @@
     <h2 class="section-title">TARIFARIO Y CALCULADORA</h2>
 
     <div class="calc-card">
-        <h5 class="calc-title">Calculadoras del Centro de Arbitraje</h5>
+        <h5 class="calc-title">Calculadoras JRD</h5>
         <button onclick="window.open('{{ route('calc.junta') }}','calc','width=550,height=750')" class="btn-red">
             ACCEDER A LA CALCULADORA
         </button>

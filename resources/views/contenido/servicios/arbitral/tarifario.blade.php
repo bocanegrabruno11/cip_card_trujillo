@@ -28,12 +28,10 @@
 
     <div class="calc-card">
         <h5 class="calc-title">Calculadoras del Centro de Arbitraje</h5>
-        <button onclick="window.open('{{ route('calc.inst.det') }}','calc','width=550,height=750')" class="btn-red">
-            CALCULADORA PARA CUANTÍA DETERMINADA
+        <button onclick="window.open('{{ route('calc.arbitraje.ver') }}','calc','width=550,height=750')" class="btn-red">
+            ABRIR CALCULADORA
         </button>
-        <button onclick="window.open('{{ route('calc.inst.indet') }}','calc','width=550,height=750')" class="btn-red">
-            CALCULADORA PARA CUANTÍA INDETERMINADA
-        </button>
+      
     </div>
 
     <div class="doc-grid">
