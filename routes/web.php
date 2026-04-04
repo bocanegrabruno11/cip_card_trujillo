@@ -15,7 +15,6 @@ use App\Http\Controllers\PersonaController;
 use App\Http\Controllers\ArbitrajeRegistroController;
 use App\Http\Controllers\ArbitrajeController;
 use App\Http\Controllers\AdminArbitrajeController;
-use App\Http\Controllers\ProcesoArbitrajeController;
 use App\Http\Controllers\ProcesoArbitrajeDocumentoController;
 use App\Http\Controllers\JrdRegistroController;
  use App\Http\Controllers\JrdController;
@@ -24,6 +23,12 @@ use App\Http\Controllers\JrdRegistroController;
   use App\Http\Controllers\JrdProcesoController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\RepoSolicitudController;
+use App\Http\Controllers\EtapaArbitralController;
+use App\Http\Controllers\DocumentoController;
+use App\Http\Controllers\VoucherController;
+use App\Http\Controllers\ProcesoDeArbitrajeController;
+use App\Http\Controllers\EtapaJrdController;
+
 
 Route::post('/solicitudes-repo', [RepoSolicitudController::class, 'store'])->name('solicitudes.store');
 Route::get('/', [PageController::class, 'welcome'])->name('welcome');
@@ -118,6 +123,11 @@ Route::middleware(['auth', 'checkrole:mesa_partes'])->prefix('mesa-partes')->gro
         return view('mesa-partes.jrd');
     })->name('jrd');
 
+    Route::get('/jrd/obtener/mesapartes', [JrdController::class, 'obtenerJrdMesaPartes'])->name('jrd.obtener.mesapartes');
+    Route::post('/jrd/{id}/documentos/mesapartes', [JrdDocumentoController::class, 'storeMesaPartes'])->name('jrd.documentos.store.mesapartes');
+
+Route::post('/arbitraje/{id_arbitraje}/documentos2',[ProcesoArbitrajeDocumentoController::class, 'store'])->name('arbitraje.documentos.store');
+
 // Ruta para procesar la actualización - DEBE SER PUT
 Route::put('mesa-partes/persona/update', [PersonaController::class, 'update'])
     ->name('persona.update');  // Asegúrate que este nombre coincida
@@ -135,9 +145,6 @@ Route::get('/arbitraje/registros', [ArbitrajeController::class, 'registros'])
 Route::get('/arbitraje/obtener', [ArbitrajeController::class, 'obtenerArbitrajes'])
     ->name('arbitrajes.obtener');
 
-Route::get('/jrd', function () {
-    return view('mesa-partes.jrd');
-})->name('jrd');
 
 Route::get('/registros-jrd', function () {
     return view('mesa-partes.RegistrosJRD');
@@ -145,7 +152,6 @@ Route::get('/registros-jrd', function () {
 Route::get('/jrd/registrar', [JrdRegistroController::class, 'create'])->name('jrd.create');
 Route::post('/jrd', [JrdRegistroController::class, 'store'])->name('jrd.store');
 
-    Route::get('/jrd/obtener', [JrdController::class, 'obtenerJrd'])->name('jrd.obtener');
     Route::get('/jrd/mis-jrd', [JrdController::class, 'misJrd'])->name('jrd.mis');
 });
 
@@ -156,6 +162,83 @@ Route::middleware('auth')->group(function () {
 });
 
 Route::middleware(['auth', 'checkrole:admin'])->group(function () {
+
+// CRUD dentro del módulo arbitraje (etapas)
+Route::get('/admin/arbitraje/etapas', [EtapaArbitralController::class, 'index'])
+    ->name('Admin.etapas.index');
+
+Route::post('/admin/arbitraje/etapas', [EtapaArbitralController::class, 'store'])
+    ->name('Admin.etapas.store');
+
+Route::put('/admin/arbitraje/etapas/{id}', [EtapaArbitralController::class, 'update'])
+    ->name('Admin.etapas.update');
+
+Route::delete('/admin/arbitraje/etapas/{id}', [EtapaArbitralController::class, 'destroy'])
+    ->name('Admin.etapas.destroy');
+
+Route::get('/admin/arbitraje/etapas/toggle/{id}', [EtapaArbitralController::class, 'toggle'])
+    ->name('Admin.etapas.toggle');
+
+// CRUD dentro del módulo JRD (etapas)
+Route::get('/admin/jrd/etapas', [EtapaJrdController::class, 'index'])
+    ->name('Admin.jrd.etapas.index');
+
+Route::post('/admin/jrd/etapas', [EtapaJrdController::class, 'store'])
+    ->name('Admin.jrd.etapas.store');
+
+Route::put('/admin/jrd/etapas/{id}', [EtapaJrdController::class, 'update'])
+    ->name('Admin.jrd.etapas.update');
+
+Route::delete('/admin/jrd/etapas/{id}', [EtapaJrdController::class, 'destroy'])
+    ->name('Admin.jrd.etapas.destroy');
+
+Route::get('/admin/jrd/etapas/toggle/{id}', [EtapaJrdController::class, 'toggle'])
+    ->name('Admin.jrd.etapas.toggle');
+
+    
+    // Nuevas rutas para acciones de admin
+    Route::post('/jrd/{id_jrd}/voucher/aceptar', [AdminJrdController::class, 'aceptarVoucher'])->name('admin.jrd.voucher.aceptar');
+    Route::post('/jrd/{id_jrd}/voucher/rechazar', [AdminJrdController::class, 'rechazarVoucher'])->name('admin.jrd.voucher.rechazar');
+    Route::post('/jrd/{id_jrd}/archivar', [AdminJrdController::class, 'archivar'])->name('admin.jrd.archivar');
+    
+    // Documentos JRD
+    Route::post('/jrd/{id_jrd}/documentos', [JrdDocumentoController::class, 'store'])->name('jrd.documento.store');
+// Procesar voucher (aceptar/rechazar)
+Route::post('/arbitrajes/{id_arbitraje}/voucher/{id_documento}/procesar', [VoucherController::class, 'procesar'])
+    ->name('admin.arbitrajes.voucher.procesar');
+// Comentar documento
+Route::put('/documentos/{id}/comentar', [ProcesoArbitrajeDocumentoController::class, 'comentar'])
+    ->name('documentos.comentar');
+
+    // Archivar proceso (no crea siguiente)
+Route::post('/arbitraje/{id_arbitraje}/archivar-proceso', [AdminArbitrajeController::class, 'archivarProceso'])
+    ->name('arbitraje.archivar.proceso');
+Route::post('/arbitrajes/{id}/archivar', [AdminArbitrajeController::class, 'archivar'])
+    ->name('admin.arbitrajes.archivar');
+// ===== RUTAS DE PROCESOS DE ARBITRAJE =====
+// Obtener procesos de un arbitraje
+Route::get('/procesos/arbitraje/{id_arbitraje}', [ProcesoDeArbitrajeController::class, 'index'])
+    ->name('procesos.index');
+
+// Obtener un proceso específico
+Route::get('/procesos/{id_proceso}', [ProcesoDeArbitrajeController::class, 'show'])
+    ->name('procesos.show');
+
+// Pasar al siguiente proceso (API)
+Route::post('/procesos/{id_proceso}/siguiente', [ProcesoDeArbitrajeController::class, 'pasarSiguiente'])
+    ->name('procesos.siguiente');
+
+// Crear el primer proceso de un arbitraje
+Route::post('/procesos/arbitraje/{id_arbitraje}/primer-proceso', [ProcesoDeArbitrajeController::class, 'crearPrimerProceso'])
+    ->name('procesos.crear-primero');
+
+// Obtener proceso activo de un arbitraje
+Route::get('/procesos/arbitraje/{id_arbitraje}/activo', [ProcesoDeArbitrajeController::class, 'obtenerProcesoActivo'])
+    ->name('procesos.activo');
+
+// Obtener todos los procesos con etapas
+Route::get('/procesos/arbitraje/{id_arbitraje}/completo', [ProcesoDeArbitrajeController::class, 'obtenerConEtapas'])
+    ->name('procesos.completo');
 
     Route::get('/admin/dashboard', function () {
         return view('Admin.dashboard');
@@ -177,16 +260,16 @@ Route::middleware(['auth', 'checkrole:admin'])->group(function () {
     Route::get('/arbitrajes/{id}/detalle', [AdminArbitrajeController::class, 'detalle'])
         ->name('admin.arbitrajes.detalle');
 
+    
     Route::post('/arbitrajes/{id}/rechazar', [AdminArbitrajeController::class, 'rechazar'])
         ->name('admin.arbitrajes.rechazar');
     Route::post('/arbitrajes/{id}/aceptar', [AdminArbitrajeController::class, 'aceptar'])
     ->name('admin.arbitrajes.aceptar');
     Route::post('/arbitraje/{id_arbitraje}/documentos',[ProcesoArbitrajeDocumentoController::class, 'store'])->name('arbitraje.documentos.store');
-    Route::post(
-        '/arbitraje/{id_arbitraje}/siguiente-proceso',
-        [ProcesoArbitrajeController::class, 'pasarSiguienteProceso']
-    )->name('arbitraje.siguiente.proceso');
    
+    Route::post('/arbitraje/{id_arbitraje}/siguiente-proceso', [AdminArbitrajeController::class, 'pasarSiguienteProceso'])
+        ->name('arbitraje.siguiente.proceso');
+
     Route::get('/admin/Jrd', function () {
         return view('Admin.Jrd');
     })->name('Admin.Jrd');
@@ -221,6 +304,7 @@ Route::middleware(['auth', 'checkrole:admin'])->group(function () {
     });
 
 });
+
 Route::get('/sherlock-holmes', function () {
     echo "<h1>🕵️‍♂️ Sherlock Holmes: Detective de Archivos</h1>";
     

@@ -101,7 +101,7 @@
         <div class="row align-items-center">
             <div class="col-md-8">
                 <h1 class="h3 mb-2">¡Bienvenido, {{ Auth::user()->name }}!</h1>
-                <p class="mb-0">Sistema de Mesa de Partes del CIP</p>
+                <p class="mb-0">Sistema de Mesa de Partes del CIP CDLL</p>
                 <small>
                     <i class="fas fa-calendar-alt me-1"></i>
                     {{ now()->format('d/m/Y H:i') }}

@@ -12,13 +12,23 @@ class ProcesoArbitrajePersona extends Model
     protected $fillable = [
         'arbitraje_id',
         'dni',
+        'nombres',
+        'apellidos',
+        'correo',
+        'telefono',
+        'ruc',
         'tipo'
     ];
     
     public $timestamps = false;
     
+    // 🔥 Relación con arbitraje
     public function arbitraje()
     {
-        return $this->belongsTo(Arbitraje::class, 'arbitraje_id', 'id_arbitraje');
+        return $this->belongsTo(
+            Arbitraje::class,
+            'arbitraje_id',
+            'id_arbitraje'
+        );
     }
 }

@@ -121,7 +121,7 @@
             <div class="table-responsive">
                 <table class="table table-hover mb-0" id="tablaArbitrajes">
                     <thead class="table-light">
-                        <tr>
+                        32
                             <th width="80">ID</th>
                             <th>Materia</th>
                             <th>Creador</th>
@@ -129,11 +129,18 @@
                             <th>Personas</th>
                             <th width="150">Fecha Inicio</th>
                             <th width="120">Estado</th>
-                            <th width="100" class="text-center">Acciones</th>
+                            <th width="120" class="text-center">Acciones</th>
                         </tr>
                     </thead>
                     <tbody id="arbitrajesTableBody">
-                        <!-- Se llenará dinámicamente -->
+                        <tr>
+                            <td colspan="8" class="text-center py-5">
+                                <div class="spinner-border text-danger" role="status">
+                                    <span class="visually-hidden">Cargando...</span>
+                                </div>
+                                <p class="mt-2 mb-0">Cargando arbitrajes...</p>
+                            </td>
+                        </tr>
                     </tbody>
                 </table>
             </div>
@@ -142,58 +149,341 @@
 
 </div>
 
-@endsection
+<!-- Modal para subir documentos -->
+<div class="modal fade" id="uploadDocumentModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title">
+                    <i class="fas fa-cloud-upload-alt me-2"></i>Subir Documento
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="uploadDocumentForm" enctype="multipart/form-data">
+                @csrf
+                <div class="modal-body">
+                    <input type="hidden" id="upload_arbitraje_id" name="id_arbitraje">
+                    <input type="hidden" id="upload_proceso_id" name="proceso_id">
+                    
+                    <div class="alert alert-info mb-3">
+                        <small>
+                            <strong>Arbitraje ID:</strong> <span id="info_arbitraje_id"></span><br>
+                            <strong>Proceso ID:</strong> <span id="info_proceso_id"></span>
+                        </small>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Tipo de Documento <span class="text-danger">*</span></label>
+                        <select class="form-select" id="tipo_documento" name="tipo_documento" required>
+                            <option value="">Seleccione...</option>
+                            <option value="archivo">📄 Subir Archivo (PDF, JPG, PNG)</option>
+                            <option value="link">🔗 Enlace (Google Drive, Dropbox, etc.)</option>
+                        </select>
+                    </div>
+                    
+                    <div id="campo_archivo" style="display: none;">
+                        <div class="mb-3">
+                            <label class="form-label">Archivo <span class="text-danger">*</span></label>
+                            <input type="file" class="form-control" name="archivo" accept=".pdf,.jpg,.jpeg,.png">
+                            <small class="text-muted">Formatos: PDF, JPG, JPEG, PNG (Máx. 20MB)</small>
+                        </div>
+                    </div>
+                    
+                    <div id="campo_link" style="display: none;">
+                        <div class="mb-3">
+                            <label class="form-label">Enlace <span class="text-danger">*</span></label>
+                            <input type="url" class="form-control" name="link" placeholder="https://drive.google.com/...">
+                            <small class="text-muted">Enlace a documento en Drive, Dropbox, etc.</small>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Nombre del Documento <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" name="nombre_documento" placeholder="Ej: Contrato firmado" required>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Observaciones (opcional)</label>
+                        <textarea class="form-control" name="observaciones" rows="3"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-danger">
+                        <i class="fas fa-upload me-2"></i>Subir Documento
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 
-@push('scripts')
+<!-- Modal de mensajes -->
+<div class="modal fade" id="messageModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="messageModalTitle">Mensaje</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p id="messageModalBody"></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Aceptar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script>
-let arbitrajes = [];
-// CORRECCIÓN: Definir la ruta de detalle correctamente
-const detalleRoute = '{{ route("admin.arbitrajes.detalle", ":id") }}';
+// Script principal - Inicio
+console.log('=== ADMIN ARBITRAJES SCRIPT INICIADO ===');
+console.log('URL actual:', window.location.href);
 
-// Función para formatear fechas
+// Función para redirigir al detalle del arbitraje
+function irADetalle(id) {
+    const url = `/arbitrajes/${id}/detalle`;
+    console.log('Redirigiendo a:', url);
+    window.location.href = url;
+}
+
+// Esperar a que el DOM esté listo
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('DOM cargado completamente');
+    cargarArbitrajes();
+    
+    const btnBuscar = document.getElementById('btnBuscar');
+    const searchDni = document.getElementById('searchDni');
+    
+    if (btnBuscar) {
+        btnBuscar.addEventListener('click', function() {
+            const dni = searchDni ? searchDni.value.trim() : '';
+            console.log('Buscando por DNI:', dni);
+            cargarArbitrajes(dni);
+        });
+    }
+    
+    if (searchDni) {
+        searchDni.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                const dni = this.value.trim();
+                console.log('Enter presionado, buscando:', dni);
+                cargarArbitrajes(dni);
+            }
+        });
+    }
+    
+    // Configurar el cambio de tipo de documento
+    const tipoDoc = document.getElementById('tipo_documento');
+    if (tipoDoc) {
+        tipoDoc.addEventListener('change', function() {
+            const tipo = this.value;
+            const campoArchivo = document.getElementById('campo_archivo');
+            const campoLink = document.getElementById('campo_link');
+            const archivoInput = document.querySelector('input[name="archivo"]');
+            const linkInput = document.querySelector('input[name="link"]');
+            
+            if (tipo === 'archivo') {
+                if (campoArchivo) campoArchivo.style.display = 'block';
+                if (campoLink) campoLink.style.display = 'none';
+                if (archivoInput) archivoInput.required = true;
+                if (linkInput) linkInput.required = false;
+            } else if (tipo === 'link') {
+                if (campoArchivo) campoArchivo.style.display = 'none';
+                if (campoLink) campoLink.style.display = 'block';
+                if (archivoInput) archivoInput.required = false;
+                if (linkInput) linkInput.required = true;
+            } else {
+                if (campoArchivo) campoArchivo.style.display = 'none';
+                if (campoLink) campoLink.style.display = 'none';
+                if (archivoInput) archivoInput.required = false;
+                if (linkInput) linkInput.required = false;
+            }
+        });
+    }
+    
+    // Configurar el formulario de subida
+    const uploadForm = document.getElementById('uploadDocumentForm');
+    if (uploadForm) {
+        uploadForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            subirDocumentoHandler(e);
+        });
+    }
+});
+
+// Funciones
 function formatFecha(fecha) {
     if (!fecha) return 'No especificada';
     const date = new Date(fecha);
     return date.toLocaleDateString('es-PE', { 
         year: 'numeric', 
         month: 'short', 
-        day: 'numeric'
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
     });
 }
 
-// Función para obtener badge de estado
 function getEstadoBadge(estado) {
     const badges = {
         'validando': 'bg-warning text-dark',
         'iniciado': 'bg-info',
         'en proceso': 'bg-primary',
         'terminado': 'bg-success',
-        'rechazado': 'bg-danger'
+        'rechazado': 'bg-danger',
+        'finalizado': 'bg-secondary'
     };
-    const badgeClass = badges[estado.toLowerCase()] || 'bg-secondary';
-    return `<span class="badge ${badgeClass}">${estado.toUpperCase()}</span>`;
+    const badgeClass = badges[estado?.toLowerCase()] || 'bg-secondary';
+    return `<span class="badge ${badgeClass}">${(estado || 'iniciado').toUpperCase()}</span>`;
 }
 
-// Función para actualizar estadísticas
+function showMessage(title, message, isError = false) {
+    const modalElement = document.getElementById('messageModal');
+    if (modalElement) {
+        const modal = new bootstrap.Modal(modalElement);
+        document.getElementById('messageModalTitle').textContent = title;
+        document.getElementById('messageModalTitle').className = `modal-title text-${isError ? 'danger' : 'success'}`;
+        document.getElementById('messageModalBody').textContent = message;
+        modal.show();
+    } else {
+        alert(message);
+    }
+}
+
 function actualizarEstadisticas(data) {
     const total = data.length;
-    const validando = data.filter(a => a.estado.toLowerCase() === 'validando').length;
-    const proceso = data.filter(a => a.estado.toLowerCase() === 'en proceso' || a.estado.toLowerCase() === 'iniciado').length;
-    const terminados = data.filter(a => a.estado.toLowerCase() === 'terminado').length;
+    const validando = data.filter(a => a.estado?.toLowerCase() === 'validando').length;
+    const proceso = data.filter(a => a.estado?.toLowerCase() === 'en proceso' || a.estado?.toLowerCase() === 'iniciado').length;
+    const terminados = data.filter(a => a.estado?.toLowerCase() === 'terminado').length;
     
-    document.getElementById('totalArbitrajes').textContent = total;
-    document.getElementById('totalValidando').textContent = validando;
-    document.getElementById('totalProceso').textContent = proceso;
-    document.getElementById('totalTerminados').textContent = terminados;
+    const totalEl = document.getElementById('totalArbitrajes');
+    const validandoEl = document.getElementById('totalValidando');
+    const procesoEl = document.getElementById('totalProceso');
+    const terminadosEl = document.getElementById('totalTerminados');
+    
+    if (totalEl) totalEl.textContent = total;
+    if (validandoEl) validandoEl.textContent = validando;
+    if (procesoEl) procesoEl.textContent = proceso;
+    if (terminadosEl) terminadosEl.textContent = terminados;
 }
 
-// Función para renderizar tabla de arbitrajes
+function subirDocumento(arbitrajeId, procesoId) {
+    document.getElementById('upload_arbitraje_id').value = arbitrajeId;
+    document.getElementById('upload_proceso_id').value = procesoId;
+    document.getElementById('info_arbitraje_id').textContent = arbitrajeId;
+    document.getElementById('info_proceso_id').textContent = procesoId;
+    
+    document.getElementById('uploadDocumentForm').reset();
+    document.getElementById('campo_archivo').style.display = 'none';
+    document.getElementById('campo_link').style.display = 'none';
+    document.getElementById('tipo_documento').value = '';
+    
+    new bootstrap.Modal(document.getElementById('uploadDocumentModal')).show();
+}
+
+function subirDocumentoHandler(e) {
+    const tipoDocumento = document.getElementById('tipo_documento').value;
+    const nombreDocumento = document.querySelector('input[name="nombre_documento"]').value.trim();
+    
+    if (!tipoDocumento) {
+        showMessage('Error', 'Seleccione el tipo de documento', true);
+        return;
+    }
+    if (!nombreDocumento) {
+        showMessage('Error', 'Ingrese el nombre del documento', true);
+        return;
+    }
+    
+    if (tipoDocumento === 'archivo') {
+        const archivo = document.querySelector('input[name="archivo"]').files[0];
+        if (!archivo) {
+            showMessage('Error', 'Seleccione un archivo', true);
+            return;
+        }
+        if (archivo.size > 20 * 1024 * 1024) {
+            showMessage('Error', 'El archivo no debe superar los 20MB', true);
+            return;
+        }
+    }
+    
+    if (tipoDocumento === 'link') {
+        const link = document.querySelector('input[name="link"]').value.trim();
+        if (!link) {
+            showMessage('Error', 'Ingrese el enlace del documento', true);
+            return;
+        }
+        if (!link.startsWith('http://') && !link.startsWith('https://')) {
+            showMessage('Error', 'El enlace debe comenzar con http:// o https://', true);
+            return;
+        }
+    }
+    
+    const formData = new FormData();
+    const arbitrajeId = document.getElementById('upload_arbitraje_id').value;
+    const procesoId = document.getElementById('upload_proceso_id').value;
+    
+    formData.append('id_arbitraje', arbitrajeId);
+    formData.append('proceso_id', procesoId);
+    formData.append('tipo_documento', tipoDocumento);
+    formData.append('nombre_documento', nombreDocumento);
+    formData.append('observaciones', document.querySelector('textarea[name="observaciones"]').value);
+    
+    if (tipoDocumento === 'archivo') {
+        formData.append('archivo', document.querySelector('input[name="archivo"]').files[0]);
+    } else {
+        formData.append('link', document.querySelector('input[name="link"]').value.trim());
+    }
+    
+    const submitBtn = e.target.querySelector('button[type="submit"]');
+    const originalText = submitBtn.innerHTML;
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Subiendo...';
+    submitBtn.disabled = true;
+    
+    fetch(`/arbitraje/${arbitrajeId}/documentos`, {
+        method: 'POST',
+        headers: {
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '{{ csrf_token() }}'
+        },
+        body: formData
+    })
+    .then(async response => {
+        const text = await response.text();
+        try {
+            const json = JSON.parse(text);
+            return { response, json };
+        } catch (e) {
+            throw new Error(text.substring(0, 200));
+        }
+    })
+    .then(({ response, json }) => {
+        submitBtn.innerHTML = originalText;
+        submitBtn.disabled = false;
+        
+        if (response.ok && json.success) {
+            showMessage('Éxito', 'Documento subido correctamente');
+            bootstrap.Modal.getInstance(document.getElementById('uploadDocumentModal')).hide();
+            e.target.reset();
+            cargarArbitrajes();
+        } else {
+            showMessage('Error', json.message || 'Error al subir el documento', true);
+        }
+    })
+    .catch(error => {
+        submitBtn.innerHTML = originalText;
+        submitBtn.disabled = false;
+        console.error('Error:', error);
+        showMessage('Error', 'Error de conexión: ' + error.message, true);
+    });
+}
+
 function renderArbitrajes(data) {
     const tbody = document.getElementById('arbitrajesTableBody');
     
     if (!data || data.length === 0) {
         document.getElementById('noResults').style.display = 'block';
-        tbody.innerHTML = '';
+        tbody.innerHTML = '<tr><td colspan="8" class="text-center text-muted py-4">No hay arbitrajes registrados</td></tr>';
         actualizarEstadisticas([]);
         return;
     }
@@ -201,133 +491,96 @@ function renderArbitrajes(data) {
     document.getElementById('noResults').style.display = 'none';
     actualizarEstadisticas(data);
     
-    tbody.innerHTML = data.map(arb => {
-        // Obtener DNIs de las personas involucradas
-        const dnis = arb.personas && arb.personas.length > 0 
-            ? arb.personas.map(p => `${p.dni} (${p.tipo})`).join('<br>')
-            : '<span class="text-muted">Sin personas</span>';
-        
-        // CORRECCIÓN: Usar la ruta con nombre
-        const detalleUrl = detalleRoute.replace(':id', arb.id_arbitraje);
-        
-        return `
-            <tr>
-                <td><strong>#${arb.id_arbitraje}</strong></td>
-                <td>
-                    <strong>${arb.nombre_materia}</strong>
-                    <br>
-                    <small class="text-muted">${arb.descripcion.substring(0, 50)}...</small>
-                </td>
-                <td>${arb.creador_nombre}</td>
-                <td><span class="badge bg-secondary">${arb.creador_dni}</span></td>
-                <td><small>${dnis}</small></td>
-                <td>
-                    <small>
-                        <i class="fas fa-calendar me-1"></i>
-                        ${formatFecha(arb.fecha_inicio)}
-                    </small>
-                </td>
-                <td>${getEstadoBadge(arb.estado)}</td>
-                <td class="text-center">
-                    <a href="${detalleUrl}" 
-                       class="btn btn-sm btn-danger"
-                       title="Ver detalles">
-                        <i class="fas fa-eye"></i>
-                    </a>
-                </td>
-            </tr>
-        `;
-    }).join('');
+    tbody.innerHTML = data.map(arb => `
+        <tr style="cursor: pointer;">
+            <td><strong>#${arb.id_arbitraje}</strong></td>
+            <td>
+                <strong>${arb.nombre_materia || 'Sin materia'}</strong><br>
+                <small class="text-muted">${(arb.pretenciones || '').substring(0, 60)}${(arb.pretenciones || '').length > 60 ? '...' : ''}</small>
+            </td>
+            <td>${arb.creador_nombre || 'No especificado'}</td>
+            <td><span class="badge bg-secondary">${arb.creador_dni || 'N/A'}</span></td>
+            <td><small>${arb.personas?.map(p => `${p.dni} (${p.tipo})`).join('<br>') || 'Sin personas'}</small></td>
+            <td><small>${formatFecha(arb.fecha_inicio)}</small></td>
+            <td>${getEstadoBadge(arb.estado)}</td>
+            <td class="text-center">
+                <button class="btn btn-sm btn-danger" onclick="irADetalle(${arb.id_arbitraje})" title="Ver detalles">
+                    <i class="fas fa-eye"></i>
+                </button>
+            </td>
+        </tr>
+    `).join('');
+    
+    // Agregar evento de clic en la fila para redirigir también
+    document.querySelectorAll('#arbitrajesTableBody tr').forEach(row => {
+        row.addEventListener('click', function(e) {
+            // Evitar que se dispare si se hizo clic en el botón
+            if (e.target.closest('.btn')) return;
+            const id = this.querySelector('td:first-child').textContent.replace('#', '');
+            irADetalle(id);
+        });
+    });
 }
 
-// Función para cargar arbitrajes
 function cargarArbitrajes(dni = '') {
-    const loading = document.getElementById('loading');
-    loading.style.display = 'block';
+    console.log('=== Cargando arbitrajes ===');
+    console.log('DNI:', dni);
     
-    let url = '{{ route("admin.arbitrajes.obtener") }}';
-    if (dni) {
-        url += `?dni=${encodeURIComponent(dni)}`;
+    const loading = document.getElementById('loading');
+    const noResults = document.getElementById('noResults');
+    const tbody = document.getElementById('arbitrajesTableBody');
+    
+    if (loading) loading.style.display = 'block';
+    if (noResults) noResults.style.display = 'none';
+    
+    if (tbody) {
+        tbody.innerHTML = '<tr><td colspan="8" class="text-center py-5"><div class="spinner-border text-danger" role="status"><span class="visually-hidden">Cargando...</span></div><p class="mt-2 mb-0">Cargando arbitrajes...</p></td></tr>';
     }
     
+    let url = '/arbitrajes/obtener';
+    if (dni) url += `?dni=${encodeURIComponent(dni)}`;
+    
+    console.log('Fetch URL:', url);
+    
     fetch(url)
-        .then(response => response.json())
+        .then(response => {
+            console.log('Response status:', response.status);
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
         .then(data => {
-            loading.style.display = 'none';
+            console.log('Datos recibidos:', data);
+            if (loading) loading.style.display = 'none';
             
-            if (data.success) {
-                arbitrajes = data.arbitrajes;
-                renderArbitrajes(arbitrajes);
+            if (data.success && data.arbitrajes && data.arbitrajes.length > 0) {
+                console.log('Renderizando', data.arbitrajes.length, 'arbitrajes');
+                renderArbitrajes(data.arbitrajes);
             } else {
-                document.getElementById('noResults').style.display = 'block';
+                console.log('No hay arbitrajes');
+                if (noResults) noResults.style.display = 'block';
+                if (tbody) tbody.innerHTML = '<tr><td colspan="8" class="text-center text-muted py-4">No hay arbitrajes registrados</td></tr>';
+                actualizarEstadisticas([]);
             }
         })
         .catch(error => {
-            loading.style.display = 'none';
-            console.error('Error:', error);
-            document.getElementById('noResults').style.display = 'block';
+            console.error('Error en fetch:', error);
+            if (loading) loading.style.display = 'none';
+            if (noResults) noResults.style.display = 'block';
+            if (tbody) tbody.innerHTML = `<tr><td colspan="8" class="text-center text-danger py-4">Error al cargar los datos: ${error.message}</td></tr>`;
+            actualizarEstadisticas([]);
         });
 }
-
-// Event listeners
-document.addEventListener('DOMContentLoaded', function() {
-    // Cargar arbitrajes al iniciar
-    cargarArbitrajes();
-    
-    // Botón de búsqueda
-    document.getElementById('btnBuscar').addEventListener('click', function() {
-        const dni = document.getElementById('searchDni').value.trim();
-        cargarArbitrajes(dni);
-    });
-    
-    // Búsqueda al presionar Enter
-    document.getElementById('searchDni').addEventListener('keypress', function(e) {
-        if (e.key === 'Enter') {
-            const dni = this.value.trim();
-            cargarArbitrajes(dni);
-        }
-    });
-});
 </script>
-@endpush
+@endsection
 
 @push('styles')
 <style>
-.table-hover tbody tr:hover {
-    background-color: #f8f9fa;
-    cursor: pointer;
-}
-
-.card {
-    border: none;
-    transition: all 0.3s ease;
-}
-
-.card:hover {
-    transform: translateY(-2px);
-}
-
-.badge {
-    font-size: 0.75rem;
-    font-weight: 600;
-    letter-spacing: 0.5px;
-    padding: 0.5em 0.75em;
-}
-
-.opacity-50 {
-    opacity: 0.5;
-}
-
-.table thead th {
-    font-weight: 600;
-    text-transform: uppercase;
-    font-size: 0.85rem;
-    color: #495057;
-}
-
-.btn-sm {
-    padding: 0.25rem 0.5rem;
-    font-size: 0.875rem;
-}
+.table-hover tbody tr:hover { background-color: #f8f9fa; cursor: pointer; }
+.card { border: none; transition: all 0.3s ease; }
+.card:hover { transform: translateY(-2px); }
+.badge { font-size: 0.75rem; font-weight: 600; padding: 0.5em 0.75em; }
+.gap-2 { gap: 0.5rem; }
 </style>
 @endpush
