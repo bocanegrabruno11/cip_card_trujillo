@@ -174,7 +174,7 @@
                         @enderror
                     </div>
 
-                    <a href="{{ route('password.request') }}" class="forgot-link">¿Olvidaste tu contraseña?</a>
+                    <!-- <a href="{{ route('password.request') }}" class="forgot-link">¿Olvidaste tu contraseña?</a> -->
 
                     <button type="submit" class="btn-login" id="btnLogin">
                         <span id="btnText">Iniciar Sesión</span>
