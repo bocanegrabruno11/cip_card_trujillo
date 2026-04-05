@@ -362,9 +362,9 @@
                     <a href="javascript:void(0)">NOSOTROS</a>
                     <ul class="dropdown-menu">
                         <li><a href="{{ route('presentacion') }}" onclick="handleMenuClick(event, this)">Presentación</a></li>
-                        <li><a href="{{ route('organo-direccion') }}" onclick="handleMenuClick(event, this)">Organo de Dirección</a></li>
-                        <li><a href="{{ route('organo-decision') }}" onclick="handleMenuClick(event, this)">Organo de Decisión</a></li>
-                        <li><a href="{{ route('organo-gestion') }}" onclick="handleMenuClick(event, this)">Organo de Gestión</a></li>
+                        <li><a href="{{ route('organo-direccion') }}" onclick="handleMenuClick(event, this)">Órgano Directivo</a></li>
+                        <li><a href="{{ route('organo-decision') }}" onclick="handleMenuClick(event, this)">Órgano Decisorio</a></li>
+                        <li><a href="{{ route('organo-gestion-secretaria') }}" onclick="handleMenuClick(event, this)">Secretaría General</a></li>
                         <li><a href="{{ route('mision-vision') }}" onclick="handleMenuClick(event, this)">Visión y Misión</a></li>
                         <li><a href="{{ route('organigrama') }}" onclick="handleMenuClick(event, this)">Organigrama</a></li>
                         <li><a href="{{ route('certificaciones') }}" onclick="handleMenuClick(event, this)">Certificaciones</a></li>

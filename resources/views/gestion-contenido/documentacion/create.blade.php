@@ -37,7 +37,7 @@
                                 <select name="seccion" id="selectSeccion" class="form-select" required>
                                     <option value="">Seleccione...</option>
                                     <option value="institucion">Institución Arbitral</option>
-                                    <option value="junta">Junta de Prevención (JRD)</option>
+                                    <option value="junta">Junta de Prevención (JPRD)</option>
                                     <!-- <option value="convocatorias">Convocatorias</option> -->
                                     <option value="certificaciones">Certificaciones</option>
                                     <option value="politicas">Políticas</option>

@@ -43,10 +43,11 @@
                                 <select name="grupo" class="form-select" required>
                                     <option value="" disabled {{ old('grupo') == '' ? 'selected' : '' }}>Seleccione...</option>
                                     
-                                    <option value="organo_direccion" {{ old('grupo') == 'organo_direccion' ? 'selected' : '' }}>Órgano de Dirección</option>
-                                    <option value="organo_decision" {{ old('grupo') == 'organo_decision' ? 'selected' : '' }}>Órgano de Decisión</option>
-                                    <option value="organo_gestion_secretaria_arbitral" {{ old('grupo') == 'organo_gestion_secretaria_arbitral' ? 'selected' : '' }}>Órgano de Gestión - Sec. Arbitral</option>
-                                    <option value="organo_gestion_secretaria_tecnica" {{ old('grupo') == 'organo_gestion_secretaria_tecnica' ? 'selected' : '' }}>Órgano de Gestión - Sec. Técnica</option>
+                                    <option value="organo_direccion" {{ old('grupo') == 'organo_direccion' ? 'selected' : '' }}>Órgano Directivo</option>
+                                    <option value="organo_decision" {{ old('grupo') == 'organo_decision' ? 'selected' : '' }}>Órgano Decisorio</option>
+                                    <option value="organo_gestion_secretaria_general" {{ old('grupo') == 'organo_gestion_secretaria_general' ? 'selected' : '' }}>Secretaría General</option>
+                                    <option value="organo_gestion_secretaria_arbitral" {{ old('grupo') == 'organo_gestion_secretaria_arbitral' ? 'selected' : '' }}>Secretaría Arbitral</option>
+                                    <option value="organo_gestion_secretaria_tecnica" {{ old('grupo') == 'organo_gestion_secretaria_tecnica' ? 'selected' : '' }}>Secretaría Técnica</option>
                                     <option value="arbitros-nomina" {{ old('grupo') == 'arbitros-nomina' ? 'selected' : '' }}>Nómina de Arbitros</option>
                                     <option value="adjudicadores-nomina" {{ old('grupo') == 'adjudicadores-nomina' ? 'selected' : '' }}>Nómina de Adjudicadores</option>
                                 </select>

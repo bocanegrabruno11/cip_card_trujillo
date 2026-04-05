@@ -34,10 +34,11 @@
                         <label class="form-label small fw-bold">Grupo</label>
                         <select name="grupo" class="form-select form-select-sm">
                             <option value="">Todos los grupos</option>
-                            <option value="organo_direccion" {{ request('grupo') == 'organo_direccion' ? 'selected' : '' }}>Órgano de Dirección</option>
-                            <option value="organo_decision" {{ request('grupo') == 'organo_decision' ? 'selected' : '' }}>Órgano de Decisión</option>
-                            <option value="organo_gestion_secretaria_arbitral" {{ request('grupo') == 'organo_gestion_secretaria_arbitral' ? 'selected' : '' }}>Órgano de Gestión - Sec. Arbitral</option>
-                            <option value="organo_gestion_secretaria_tecnica" {{ request('grupo') == 'organo_gestion_secretaria_tecnica' ? 'selected' : '' }}>Órgano de Gestión - Sec. Técnica</option>
+                            <option value="organo_direccion" {{ request('grupo') == 'organo_direccion' ? 'selected' : '' }}>Órgano Directivo</option>
+                            <option value="organo_decision" {{ request('grupo') == 'organo_decision' ? 'selected' : '' }}>Órgano Decisorio</option>
+                            <option value="organo_gestion_secretaria_general" {{ request('grupo') == 'organo_gestion_secretaria_general' ? 'selected' : '' }}>Secretaría General</option>
+                            <option value="organo_gestion_secretaria_arbitral" {{ request('grupo') == 'organo_gestion_secretaria_arbitral' ? 'selected' : '' }}>Secretaría Arbitral</option>
+                            <option value="organo_gestion_secretaria_tecnica" {{ request('grupo') == 'organo_gestion_secretaria_tecnica' ? 'selected' : '' }}>Secretaría Técnica</option>
                             <option value="arbitros-nomina" {{ request('grupo') == 'arbitros-nomina' ? 'selected' : '' }}>Nómina de Arbitros</option>
                             <option value="adjudicadores-nomina" {{ request('grupo') == 'adjudicadores-nomina' ? 'selected' : '' }}>Nómina de Adjudicadores</option>
                         </select>

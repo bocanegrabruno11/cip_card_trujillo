@@ -34,7 +34,7 @@ Route::get('/eventos', [PageController::class, 'eventos'])->name('eventos');
 Route::get('/detalle-evento/{id}', [PageController::class, 'detalleEvento'])->name('detalle-evento');
 Route::get('/organo-direccion', [PageController::class, 'organoDireccion'])->name('organo-direccion');
 Route::get('/organo-decision', [PageController::class, 'organoDecision'])->name('organo-decision');
-Route::get('/organo-gestion', [PageController::class, 'organoGestion'])->name('organo-gestion');
+Route::get('/organo-gestion-secretaria', [PageController::class, 'organoGestionSecretaria'])->name('organo-gestion-secretaria');
 Route::get('/organigrama', [PageController::class, 'organigrama'])->name('organigrama');
 Route::get('/institucion-arbitral', [PageController::class, 'institucionArbitral'])->name('institucion-arbitral');
 Route::get('/inst/normativa', [PageController::class, 'arbitralNormativa'])->name('institucion-arbitral.normativa');

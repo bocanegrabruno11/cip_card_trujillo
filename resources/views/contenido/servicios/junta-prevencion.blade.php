@@ -167,9 +167,9 @@
     <section class="presentacion-hero">
         <div class="presentacion-layout">
             <div class="presentacion-text">
-                <h2><i class="fas fa-hard-hat"></i> Presentación JRD</h2>
+                <h2><i class="fas fa-hard-hat"></i> Presentación JPRD</h2>
                 <p>
-                    La <strong>Junta de Prevención y Resolución de Disputas (JRD)</strong> del Colegio de Ingenieros del Perú - CD La Libertad, es un mecanismo moderno de solución de controversias diseñado para acompañar la ejecución de proyectos de construcción. Nuestro objetivo es prevenir que las discrepancias paralicen las obras, emitiendo decisiones técnicas vinculantes y oportunas que garanticen la continuidad de la inversión pública y privada.
+                    La <strong>Junta de Prevención y Resolución de Disputas (JPRD)</strong> del Colegio de Ingenieros del Perú - CD La Libertad, es un mecanismo moderno de solución de controversias diseñado para acompañar la ejecución de proyectos de construcción. Nuestro objetivo es prevenir que las discrepancias paralicen las obras, emitiendo decisiones técnicas vinculantes y oportunas que garanticen la continuidad de la inversión pública y privada.
                 </p>
             </div>
             <div class="presentacion-image-container text-center">
@@ -180,7 +180,7 @@
 
     <div class="card-grid">
         <div class="info-card">
-            <h3>Normativa JRD</h3>
+            <h3>Normativa JPRD</h3>
             <p>Consulte la Ley de Contrataciones del Estado, su Reglamento y las directivas de OSCE que regulan la obligatoriedad y el funcionamiento de la JRD.</p>
             <a href="{{ route('junta-prevencion.normativa') }}" class="btn-card">Ver Documentos</a>
         </div>
@@ -211,7 +211,7 @@
 
         <div class="info-card card-highlight">
             <h3>Solicitar el servicio</h3>
-            <p>Inicie el trámite para la designación de miembros o el registro de una JRD ante nuestro centro para su obra en curso.</p>
+            <p>Inicie el trámite para la designación de miembros o el registro de una JPRD ante nuestro centro para su obra en curso.</p>
             <a href="{{ route('junta-prevencion.solicitar') }}" class="btn-card">Continuar</a>
         </div>
     </div>

@@ -27,7 +27,7 @@
                         <label class="form-label fw-bold">Pertenece a la Calculadora:</label>
                         <select name="tipo_calculadora" class="form-select @error('tipo_calculadora') is-invalid @enderror" required>
                             <option value="servicio_arbitral" {{ $tarifa->tipo_calculadora == 'servicio_arbitral' ? 'selected' : '' }}>Servicio Arbitral (Arbitraje)</option>
-                            <option value="junta_prevencion" {{ $tarifa->tipo_calculadora == 'junta_prevencion' ? 'selected' : '' }}>Junta de Prevención (JRD)</option>
+                            <option value="junta_prevencion" {{ $tarifa->tipo_calculadora == 'junta_prevencion' ? 'selected' : '' }}>Junta de Prevención (JPRD)</option>
                         </select>
                         @error('tipo_calculadora') <div class="invalid-feedback">{{ $message }}</div> @enderror
                     </div>

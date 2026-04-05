@@ -24,10 +24,10 @@
     /* === ENCABEZADO === */
     .team-header {
         text-align: center;
-        margin-bottom: 60px;
+        margin-bottom: 50px;
     }
     .team-header h2 {
-        color: var(--rojo-institucional); /* Cambiado de azul a rojo */
+        color: var(--rojo-institucional); 
         font-size: 2.5rem;
         font-weight: 800;
         margin-bottom: 10px;
@@ -65,7 +65,7 @@
         display: block;
         width: 50px;
         height: 3px;
-        background-color: var(--rojo-institucional); /* Cambiado de azul a rojo */
+        background-color: var(--rojo-institucional);
         margin: 10px auto 0;
         border-radius: 2px;
     }
@@ -75,8 +75,35 @@
         display: flex;
         flex-wrap: wrap;
         justify-content: center;
-        gap: 30px;
+        gap: 20px; /* Reducido para que entren más juntas */
         margin-bottom: 60px;
+    }
+
+    /* === DISPOSICIÓN EN DOS COLUMNAS PARA ARBITRAL Y TÉCNICA === */
+    .dual-section {
+        display: flex;
+        gap: 60px; /* Mayor separación para dar espacio a la línea */
+        justify-content: space-between;
+        flex-wrap: wrap;
+        position: relative; /* Necesario para la línea divisoria absoluta */
+    }
+    
+    /* LÍNEA DIVISORIA VERTICAL */
+    .dual-section::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        bottom: 50px; /* Para que no pegue hasta el fondo */
+        left: 50%;
+        width: 2px;
+        background-color: #ddd; /* Color de la línea gris clara */
+        transform: translateX(-50%);
+    }
+
+    .dual-column {
+        flex: 1;
+        min-width: 320px;
+        z-index: 1; /* Asegura que el contenido quede sobre la línea */
     }
 
     /* === TARJETA PERSONA === */
@@ -84,17 +111,17 @@
         background: #fff;
         border-radius: 12px;
         box-shadow: 0 10px 25px rgba(0,0,0,0.05);
-        padding: 35px 25px;
+        padding: 25px 15px; /* Reducido para ahorrar espacio */
         position: relative;
         overflow: hidden;
         transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
-        border-top: 4px solid var(--rojo-institucional); /* Cambiado de azul a rojo y arriba */
+        border-top: 4px solid var(--rojo-institucional);
         display: flex;
         flex-direction: column;
         align-items: center;
         text-align: center;
         cursor: pointer;
-        width: 300px; 
+        width: 230px; /* Reducido de 300px a 230px para que entren 2 por fila */
         max-width: 100%;
     }
 
@@ -104,11 +131,11 @@
     }
 
     .profile-img-container {
-        width: 130px;
-        height: 130px;
+        width: 100px; /* Reducido de 130px a 100px */
+        height: 100px;
         border-radius: 50%;
         overflow: hidden;
-        margin-bottom: 20px;
+        margin-bottom: 15px;
         border: 4px solid #fff;
         box-shadow: 0 5px 15px rgba(0,0,0,0.1);
     }
@@ -121,15 +148,15 @@
 
     .profile-name {
         color: var(--texto-oscuro);
-        font-size: 1.2rem;
+        font-size: 1.1rem; /* Reducido ligeramente */
         font-weight: 800;
         margin-bottom: 8px;
         line-height: 1.2;
     }
 
     .profile-role {
-        color: var(--rojo-institucional); /* Destacamos el rol en rojo */
-        font-size: 0.85rem;
+        color: var(--rojo-institucional);
+        font-size: 0.8rem; /* Reducido ligeramente */
         font-weight: 700;
         text-transform: uppercase;
         margin-bottom: 10px;
@@ -138,15 +165,15 @@
 
     .profile-inst {
         color: #888;
-        font-size: 0.8rem;
+        font-size: 0.75rem;
         font-weight: 600;
         margin-bottom: 20px;
     }
 
     .btn-arrow {
-        width: 40px;
-        height: 40px;
-        background-color: var(--rojo-institucional); /* Cambiado a rojo */
+        width: 35px; /* Reducido de 40px */
+        height: 35px;
+        background-color: var(--rojo-institucional);
         color: white;
         border-radius: 50%;
         display: flex;
@@ -160,12 +187,12 @@
         transform: scale(1.1);
     }
 
-    /* === ESTILOS DEL MODAL (ACTUALIZADOS A ROJO) === */
+    /* === ESTILOS DEL MODAL === */
     .custom-modal-overlay {
         position: fixed;
         top: 0; left: 0;
         width: 100%; height: 100%;
-        background-color: var(--rojo-fondo-modal); /* FONDO ROJIZO SOLICITADO */
+        background-color: var(--rojo-fondo-modal);
         backdrop-filter: blur(8px);
         display: none;
         justify-content: center;
@@ -268,7 +295,7 @@
         margin-top: 25px;
         display: inline-flex;
         align-items: center;
-        background-color: var(--rojo-institucional); /* CAMBIADO A ROJO */
+        background-color: var(--rojo-institucional);
         color: white !important;
         padding: 12px 25px;
         border-radius: 8px;
@@ -281,12 +308,25 @@
     }
     .modal-cv-btn:hover { background-color: var(--rojo-oscuro); transform: scale(1.05); }
 
+    /* Media Queries para Responsive */
+    @media (max-width: 992px) {
+        .dual-section::after {
+            display: none; /* Oculta la línea vertical en pantallas pequeñas (Tablet/Móvil) */
+        }
+        .dual-section {
+            gap: 20px;
+        }
+    }
     @media (max-width: 768px) {
         .custom-modal-content { flex-direction: column; max-height: 90vh; overflow-y: auto; }
         .modal-sidebar, .modal-main { width: 100%; padding: 25px; text-align: center; }
         .modal-main { align-items: center; }
         .modal-info-row { justify-content: flex-start; width: 100%; }
         .modal-cv-btn { align-self: center; }
+        
+        .profile-card {
+            width: 260px; /* Ligeramente más grande en celular al estar en una sola columna */
+        }
     }
 </style>
 @endsection
@@ -295,18 +335,14 @@
 
 <div class="team-container">
     <div class="team-header">
-        <h2>Órgano de Gestión</h2>
-        <div class="separator"></div>
-        <p>
-            El equipo profesional del <strong>CARD CIP CDLL</strong> está comprometido con la excelencia administrativa y técnica para garantizar la correcta conducción de los procesos arbitrales.
-        </p>
+        <h2>Secretaría General</h2>
+        
     </div>
 
-    {{-- 1. SECRETARÍA ARBITRAL --}}
-    @if($secArbitral->count() > 0)
-        <div class="section-subtitle">Secretaría Arbitral</div>
+    {{-- 1. SECRETARÍA GENERAL (CENTRO ARRIBA, COMO LÍDER) --}}
+    @if($secGeneral->count() > 0)
         <div class="cards-grid">
-            @foreach($secArbitral as $persona)
+            @foreach($secGeneral as $persona)
                 <div class="profile-card" onclick="openModal(this)"
                      data-name="{{ $persona->nombres }}"
                      data-cargo="{{ $persona->cargo }}"
@@ -334,40 +370,81 @@
         </div>
     @endif
 
-    {{-- 2. SECRETARÍA TÉCNICA --}}
-    @if($secTecnica->count() > 0)
-        <div class="section-subtitle">Secretaría Técnica</div>
-        <div class="cards-grid">
-            @foreach($secTecnica as $persona)
-                <div class="profile-card" onclick="openModal(this)"
-                     data-name="{{ $persona->nombres }}"
-                     data-cargo="{{ $persona->cargo }}"
-                     data-img="{{ $persona->ruta_imagen ? asset('storage/' . $persona->ruta_imagen) : '' }}"
-                     data-code="{{ $persona->codigo }}"
-                     data-specialty="{{ $persona->especialidad }}"
-                     data-email="{{ $persona->email }}"
-                     data-phone="{{ $persona->telefono }}"
-                     data-cv="{{ $persona->ruta_cv ? asset('storage/' . $persona->ruta_cv) : '' }}">
-                    
-                    <div class="profile-img-container">
-                        <img src="{{ $persona->ruta_imagen ? asset('storage/' . $persona->ruta_imagen) : asset('img/default-user.jpg') }}" 
-                             class="profile-img" alt="{{ $persona->nombres }}">
-                    </div>
+    {{-- CONTENEDOR DUAL PARA ARBITRAL Y TÉCNICA (IZQUIERDA Y DERECHA) --}}
+    <div class="dual-section">
+        
+        {{-- 2. SECRETARÍA ARBITRAL (IZQUIERDA) --}}
+        <div class="dual-column">
+            @if($secArbitral->count() > 0)
+                <div class="section-subtitle">Secretaría Arbitral</div>
+                <div class="cards-grid">
+                    @foreach($secArbitral as $persona)
+                        <div class="profile-card" onclick="openModal(this)"
+                             data-name="{{ $persona->nombres }}"
+                             data-cargo="{{ $persona->cargo }}"
+                             data-img="{{ $persona->ruta_imagen ? asset('storage/' . $persona->ruta_imagen) : '' }}"
+                             data-code="{{ $persona->codigo }}"
+                             data-specialty="{{ $persona->especialidad }}"
+                             data-email="{{ $persona->email }}"
+                             data-phone="{{ $persona->telefono }}"
+                             data-cv="{{ $persona->ruta_cv ? asset('storage/' . $persona->ruta_cv) : '' }}">
+                            
+                            <div class="profile-img-container">
+                                <img src="{{ $persona->ruta_imagen ? asset('storage/' . $persona->ruta_imagen) : asset('img/default-user.jpg') }}" 
+                                     class="profile-img" alt="{{ $persona->nombres }}">
+                            </div>
 
-                    <div class="profile-name">{{ $persona->nombres }}</div>
-                    <div class="profile-role">{{ $persona->cargo }}</div>
-                    <div class="profile-inst">CARD CIP CDLL</div>
+                            <div class="profile-name">{{ $persona->nombres }}</div>
+                            <div class="profile-role">{{ $persona->cargo }}</div>
+                            <div class="profile-inst">CARD CIP CDLL</div>
 
-                    <div class="btn-arrow">
-                        <i class="fas fa-chevron-right"></i>
-                    </div>
+                            <div class="btn-arrow">
+                                <i class="fas fa-chevron-right"></i>
+                            </div>
+                        </div>
+                    @endforeach
                 </div>
-            @endforeach
+            @endif
         </div>
-    @endif
+
+        {{-- 3. SECRETARÍA TÉCNICA (DERECHA) --}}
+        <div class="dual-column">
+            @if($secTecnica->count() > 0)
+                <div class="section-subtitle">Secretaría Técnica</div>
+                <div class="cards-grid">
+                    @foreach($secTecnica as $persona)
+                        <div class="profile-card" onclick="openModal(this)"
+                             data-name="{{ $persona->nombres }}"
+                             data-cargo="{{ $persona->cargo }}"
+                             data-img="{{ $persona->ruta_imagen ? asset('storage/' . $persona->ruta_imagen) : '' }}"
+                             data-code="{{ $persona->codigo }}"
+                             data-specialty="{{ $persona->especialidad }}"
+                             data-email="{{ $persona->email }}"
+                             data-phone="{{ $persona->telefono }}"
+                             data-cv="{{ $persona->ruta_cv ? asset('storage/' . $persona->ruta_cv) : '' }}">
+                            
+                            <div class="profile-img-container">
+                                <img src="{{ $persona->ruta_imagen ? asset('storage/' . $persona->ruta_imagen) : asset('img/default-user.jpg') }}" 
+                                     class="profile-img" alt="{{ $persona->nombres }}">
+                            </div>
+
+                            <div class="profile-name">{{ $persona->nombres }}</div>
+                            <div class="profile-role">{{ $persona->cargo }}</div>
+                            <div class="profile-inst">CARD CIP CDLL</div>
+
+                            <div class="btn-arrow">
+                                <i class="fas fa-chevron-right"></i>
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
+            @endif
+        </div>
+        
+    </div> 
 </div>
 
-{{-- MODAL --}}
+{{-- MODAL (INALTERADO) --}}
 <div id="personModal" class="custom-modal-overlay">
     <div class="custom-modal-content">
         <button class="modal-close-btn" onclick="closeModal()"><i class="fas fa-times"></i></button>

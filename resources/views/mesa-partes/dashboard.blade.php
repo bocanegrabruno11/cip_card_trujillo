@@ -203,7 +203,7 @@
         <a href="{{ route('jrd') }}" class="action-btn">
             <i class="fas fa-gavel"></i>
             <div>
-                <strong>JRD</strong>
+                <strong>JPRD</strong>
                 <small class="d-block text-muted">Iniciar procesos JPRD</small>
             </div>
         </a>

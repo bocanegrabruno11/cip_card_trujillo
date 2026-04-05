@@ -190,11 +190,12 @@ class PageController extends Controller
 
         return view('contenido.organo-decision', compact('organoDecision'));
     }
-    public function organoGestion()
+    public function organoGestionSecretaria()
     {
-        // Traemos todos los miembros activos
+        // Traemos todos los miembros activos de los 3 grupos
         $miembros = OrganizacionCard::where('activo', true)
             ->whereIn('grupo', [
+                'organo_gestion_secretaria_general',
                 'organo_gestion_secretaria_arbitral',
                 'organo_gestion_secretaria_tecnica'
             ])
@@ -202,10 +203,11 @@ class PageController extends Controller
             ->get();
 
         // Filtramos las colecciones
+        $secGeneral = $miembros->where('grupo', 'organo_gestion_secretaria_general');
         $secArbitral = $miembros->where('grupo', 'organo_gestion_secretaria_arbitral');
         $secTecnica = $miembros->where('grupo', 'organo_gestion_secretaria_tecnica');
 
-        return view('contenido.organo-gestion', compact('secArbitral', 'secTecnica'));
+        return view('contenido.organo-gestion_secretaria', compact('secGeneral', 'secArbitral', 'secTecnica'));
     }
 
     public function certificaciones()

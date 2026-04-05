@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Reporte de Cálculo JRD</title>
+    <title>Reporte de Cálculo JPRD</title>
     <style>
         body { font-family: sans-serif; color: #333; }
         .header { text-align: center; margin-bottom: 30px; border-bottom: 2px solid #AD2B2E; padding-bottom: 10px; }
@@ -26,7 +26,7 @@
     <div class="header">
         <div class="title">CARD - CIP CDLL</div>
         <div class="subtitle">Centro de Arbitraje y Resolución de Disputas</div>
-        <div style="margin-top: 5px; font-size: 14px;">Estimación de Costos - Junta de Prevención (JRD)</div>
+        <div style="margin-top: 5px; font-size: 14px;">Estimación de Costos - Junta de Prevención (JPRD)</div>
     </div>
 
     <div class="section">
@@ -65,7 +65,7 @@
                 </div>
                 <div class="total-box">
                     <div class="row">
-                        <div class="label" style="color: #AD2B2E;">TOTAL JRD (3 Miembros):</div>
+                        <div class="label" style="color: #AD2B2E;">TOTAL JPRD (3 Miembros):</div>
                         <div class="value" style="color: #AD2B2E;">S/. {{ number_format($honoTotal, 2) }}</div>
                     </div>
                 </div>

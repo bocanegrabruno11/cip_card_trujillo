@@ -97,7 +97,7 @@
         {{-- SECCIÓN JUNTA --}}
         <div class="card border-0 shadow-sm mb-4">
             <div class="card-header bg-info text-dark d-flex justify-content-between align-items-center">
-                <span class="fw-bold"><i class="fas fa-handshake me-2"></i> CALCULADORA DE JUNTA DE PREVENCIÓN (JRD)</span>
+                <span class="fw-bold"><i class="fas fa-handshake me-2"></i> CALCULADORA DE JUNTA DE PREVENCIÓN (JPRD)</span>
                 <span class="badge bg-white text-dark">{{ $tarifasJunta->count() }} Registros</span>
             </div>
             

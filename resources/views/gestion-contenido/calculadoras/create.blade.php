@@ -28,7 +28,7 @@
                         <select name="tipo_calculadora" class="form-select @error('tipo_calculadora') is-invalid @enderror" required>
                             <option value="">Seleccione el sistema...</option>
                             <option value="servicio_arbitral" {{ old('tipo_calculadora') == 'servicio_arbitral' ? 'selected' : '' }}>Servicio Arbitral (Arbitraje)</option>
-                            <option value="junta_prevencion" {{ old('tipo_calculadora') == 'junta_prevencion' ? 'selected' : '' }}>Junta de Prevención (JRD)</option>
+                            <option value="junta_prevencion" {{ old('tipo_calculadora') == 'junta_prevencion' ? 'selected' : '' }}>Junta de Prevención (JPRD)</option>
                         </select>
                         @error('tipo_calculadora') <div class="invalid-feedback">{{ $message }}</div> @enderror
                     </div>

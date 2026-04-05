@@ -62,7 +62,7 @@
 <div class="clause-container">
     
     <div class="page-header">
-        <h1>Cláusula modelo Junta de Resolución de Disputas (JRD)</h1>
+        <h1>Cláusula modelo Junta de Resolución de Disputas (JPRD)</h1>
     </div>
 
     <div class="clause-box">

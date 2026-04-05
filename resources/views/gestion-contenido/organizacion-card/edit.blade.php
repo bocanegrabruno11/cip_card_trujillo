@@ -36,10 +36,11 @@
                                     {{-- Definimos el array completo de opciones --}}
                                     @php
                                         $opciones = [
-                                            'organo_direccion' => 'Órgano de Dirección',
-                                            'organo_decision' => 'Órgano de Decisión',
-                                            'organo_gestion_secretaria_arbitral' => 'Órgano de Gestión - Sec. Arbitral',
-                                            'organo_gestion_secretaria_tecnica' => 'Órgano de Gestión - Sec. Técnica',
+                                            'organo_direccion' => 'Órgano Directivo',
+                                            'organo_decision' => 'Órgano Decisorio',
+                                            'organo_gestion_secretaria_general' => 'Secretaría General',
+                                            'organo_gestion_secretaria_arbitral' => 'Secretaría Arbitral',
+                                            'organo_gestion_secretaria_tecnica' => 'Secretaría Técnica',
                                             'arbitros-nomina' => 'Nómina de Arbitros',
                                             'adjudicadores-nomina' => 'Nómina de Adjudicadores'
                                         ];

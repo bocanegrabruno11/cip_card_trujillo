@@ -73,7 +73,7 @@
                 <label class="form-label fw-bold small text-muted">TIPO DE ADJUDICADOR</label>
                 <select id="tipoMiembro" class="form-select" onchange="calcular()">
                     <option value="unico">Miembro Único / Adjudicador</option>
-                    <option value="tribunal">JRD (3 Miembros)</option>
+                    <option value="tribunal">JPRD (3 Miembros)</option>
                 </select>
                 <div id="alertaTipo" class="alert alert-danger mt-2 d-none py-2 small">
                     <i class="fas fa-exclamation-circle"></i> <span id="textoAlerta"></span>
@@ -98,7 +98,7 @@
 
         <div class="result-box" id="boxTotalTribunal" style="display: none; background: #f8f9fa; border-left: 4px solid #6c757d;">
             <div>
-                <div class="res-label">Total Mensual JRD (3 Miembros)</div>
+                <div class="res-label">Total Mensual JPRD (3 Miembros)</div>
             </div>
             <div>
                 <div class="res-amount text-secondary" id="resTotalTribunal">S/. 0.00</div>

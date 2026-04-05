@@ -220,7 +220,7 @@
             {{-- COLUMNA IZQUIERDA: CALENDARIO (ESTÁTICO SEGÚN IMAGEN) --}}
             <div>
                 <div class="calendar-title">
-                    CALENDARIO DEL PROCESO DE POSTULACIÓN DE INGENIEROS Y ARQUITECTOS PARA LA SELECCIÓN EN LA LISTA DE JRD DEL CARD CIP LIMA
+                    CALENDARIO DEL PROCESO DE POSTULACIÓN DE INGENIEROS Y ARQUITECTOS PARA LA SELECCIÓN EN LA LISTA DE JPRD DEL CARD CIP LIMA
                 </div>
                 <div class="calendar-box">
                     <ul class="calendar-list">
