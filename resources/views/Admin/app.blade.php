@@ -41,8 +41,9 @@ body {
     left: 0;
     display: flex;
     flex-direction: column;
-    z-index: 1000;
+    z-index: 1050; /* Aumentado para estar sobre el overlay en móvil */
     box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+    transition: transform 0.3s ease; /* Transición suave para móvil */
 }
 
 .sidebar-header {
@@ -61,6 +62,7 @@ body {
     padding-left: 0;
     flex: 1;
     padding-top: 20px;
+    overflow-y: auto; /* Permite scroll si hay muchos items */
 }
 
 .menu-link {
@@ -119,6 +121,7 @@ body {
     margin-left: var(--sidebar-width);
     width: 100%;
     min-height: 100vh;
+    transition: margin-left 0.3s ease;
 }
 
 .main-content {
@@ -159,105 +162,118 @@ body {
     background: none;
 }
 
-/* ===== CARDS Y CONTENIDO ===== */
-.card {
+/* ===== CARDS Y UTILIDADES (Se mantienen igual) ===== */
+.card { border: none; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); transition: all 0.3s ease; }
+.card:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+.card-header { background-color: transparent; border-bottom: 1px solid #e9ecef; padding: 18px 20px; font-weight: 600; }
+.btn { border-radius: 8px; padding: 8px 18px; font-weight: 500; transition: all 0.3s ease; }
+.btn-primary { background-color: var(--cip-red); border-color: var(--cip-red); }
+.btn-primary:hover { background-color: var(--cip-red-dark); border-color: var(--cip-red-dark); transform: translateY(-1px); }
+.table { margin-bottom: 0; }
+.table th { background-color: #f8f9fa; font-weight: 600; border-top: none; }
+.text-muted { color: #6c757d !important; }
+.badge { padding: 5px 10px; font-weight: 500; border-radius: 6px; }
+
+/* MODAL */
+.modal-content { border-radius: 12px; border: none; }
+.modal-header { border-bottom: 1px solid #e9ecef; background-color: #f8f9fa; border-radius: 12px 12px 0 0; }
+.modal-footer { border-top: 1px solid #e9ecef; }
+
+/* ===== ELEMENTOS MÓVILES (Nuevos) ===== */
+.mobile-header {
+    display: none; /* Oculto en PC */
+    background: var(--cip-red);
+    height: 60px;
+    padding: 0 20px;
+    align-items: center;
+    justify-content: space-between;
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 1000;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+
+.mobile-logo-text {
+    color: white;
+    font-weight: bold;
+    margin: 0;
+    font-size: 1.1rem;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.mobile-logo-text img {
+    height: 35px;
+}
+
+.btn-mobile-toggle {
+    background: transparent;
     border: none;
-    border-radius: 12px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-    transition: all 0.3s ease;
+    color: white;
+    font-size: 24px;
+    cursor: pointer;
+    padding: 5px;
 }
 
-.card:hover {
-    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+.sidebar-overlay {
+    display: none;
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.5);
+    z-index: 1040; /* Justo debajo del sidebar (1050) */
+    backdrop-filter: blur(2px);
 }
 
-.card-header {
-    background-color: transparent;
-    border-bottom: 1px solid #e9ecef;
-    padding: 18px 20px;
-    font-weight: 600;
-}
-
-.btn {
-    border-radius: 8px;
-    padding: 8px 18px;
-    font-weight: 500;
-    transition: all 0.3s ease;
-}
-
-.btn-primary {
-    background-color: var(--cip-red);
-    border-color: var(--cip-red);
-}
-
-.btn-primary:hover {
-    background-color: var(--cip-red-dark);
-    border-color: var(--cip-red-dark);
-    transform: translateY(-1px);
-}
-
-.table {
-    margin-bottom: 0;
-}
-
-.table th {
-    background-color: #f8f9fa;
-    font-weight: 600;
-    border-top: none;
-}
-
-/* ===== MODAL ===== */
-.modal-content {
-    border-radius: 12px;
-    border: none;
-}
-
-.modal-header {
-    border-bottom: 1px solid #e9ecef;
-    background-color: #f8f9fa;
-    border-radius: 12px 12px 0 0;
-}
-
-.modal-footer {
-    border-top: 1px solid #e9ecef;
-}
-
-/* ===== RESPONSIVE ===== */
+/* ===== RESPONSIVE (Actualizado) ===== */
 @media (max-width: 768px) {
     :root {
-        --sidebar-width: 240px;
+        --sidebar-width: 260px; /* Mantiene un buen ancho al abrirse */
+    }
+    
+    .mobile-header {
+        display: flex; /* Muestra la cabecera en móvil */
+    }
+
+    .sidebar {
+        transform: translateX(-100%); /* Oculta la barra hacia la izquierda */
+    }
+
+    .sidebar.show {
+        transform: translateX(0); /* Muestra la barra al darle la clase .show */
+    }
+
+    .sidebar-overlay.show {
+        display: block; /* Muestra el fondo oscuro */
+    }
+
+    .main-wrapper {
+        margin-left: 0; /* El contenido toma el 100% del ancho */
+        padding-top: 60px; /* Deja espacio para que la cabecera móvil no tape el contenido */
     }
     
     .main-content {
         padding: 20px 15px;
     }
-    
-    .menu-link {
-        padding: 10px 18px;
-        font-size: 13px;
-    }
-    
-    .submenu .menu-link {
-        padding-left: 42px;
-    }
-}
-
-/* ===== UTILIDADES ===== */
-.text-muted {
-    color: #6c757d !important;
-}
-
-.badge {
-    padding: 5px 10px;
-    font-weight: 500;
-    border-radius: 6px;
 }
 </style>
 </head>
 
 <body>
 
-<nav class="sidebar">
+<div class="mobile-header">
+    <div class="mobile-logo-text">
+        <img src="{{ asset('img/logo.png') }}" alt="Logo CIP">
+        <span>Panel Admin</span>
+    </div>
+    <button class="btn-mobile-toggle" id="mobileMenuBtn">
+        <i class="fas fa-bars"></i>
+    </button>
+</div>
+
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+<nav class="sidebar" id="sidebar">
     <div class="sidebar-header">
         <img src="{{ asset('img/logo.png') }}" alt="Logo CIP">
     </div>
@@ -306,7 +322,6 @@ body {
         <strong><i class="fas fa-user-circle me-1"></i> {{ Auth::user()->name ?? 'Administrador' }}</strong>
         <span>{{ Auth::user()->email ?? 'admin@cip.org.pe' }}</span>
 
-        <!-- BOTÓN QUE ABRE MODAL -->
         <button type="button" class="btn-logout" data-bs-toggle="modal" data-bs-target="#logoutModal">
             <i class="fas fa-sign-out-alt"></i> Cerrar Sesión
         </button>
@@ -319,7 +334,6 @@ body {
     </main>
 </div>
 
-<!-- ✅ MODAL LOGOUT -->
 <div class="modal fade" id="logoutModal" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
@@ -353,6 +367,25 @@ body {
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
 <script>
+// FUNCIONALIDAD PARA ABRIR/CERRAR MENÚ EN MÓVILES
+const mobileBtn = document.getElementById('mobileMenuBtn');
+const sidebar = document.getElementById('sidebar');
+const overlay = document.getElementById('sidebarOverlay');
+
+if (mobileBtn && sidebar && overlay) {
+    mobileBtn.addEventListener('click', () => {
+        sidebar.classList.add('show');
+        overlay.classList.add('show');
+        document.body.style.overflow = 'hidden'; // Evita que el fondo haga scroll
+    });
+
+    overlay.addEventListener('click', () => {
+        sidebar.classList.remove('show');
+        overlay.classList.remove('show');
+        document.body.style.overflow = 'auto'; // Restaura el scroll
+    });
+}
+
 // SUBMENÚS
 document.querySelectorAll('.toggle-menu').forEach(menu => {
     menu.addEventListener('click', function(e) {
@@ -381,7 +414,6 @@ if(logoutForm) {
 
 // Abrir submenú activo si existe en localStorage
 document.addEventListener('DOMContentLoaded', function() {
-    // Opcional: mantener el submenú abierto según la página actual
     const currentPath = window.location.pathname;
     const menuItems = document.querySelectorAll('.menu-item');
     
