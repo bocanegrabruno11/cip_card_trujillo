@@ -14,7 +14,10 @@ class Arbitraje extends Model
         'fecha_inicio',
         'fecha_finalizacion',
         'nombre_materia',
-        'descripcion',
+        'pretenciones', // 👈 corregido (antes tenías 'descripcion')
+        'cuantia',
+        'designacion_arbitral',
+        'tasa_solicitud',
         'estado'
     ];
     
@@ -25,19 +28,24 @@ class Arbitraje extends Model
     
     public $timestamps = false;
     
-    // Relaciones
+    // 🔥 RELACIONES CORREGIDAS
+
+// DESPUÉS
     public function procesos()
     {
-        return $this->hasMany(ProcesoArbitraje::class, 'arbitraje_id', 'id_arbitraje');
+        return $this->hasMany(ProcesoDeArbitraje::class, 'id_arbitraje', 'id_arbitraje')
+                    ->orderBy('fecha_creacion', 'desc'); // 👈 Procesos más recientes primero
     }
     
+    // 2. Personas del arbitraje
     public function personas()
     {
         return $this->hasMany(ProcesoArbitrajePersona::class, 'arbitraje_id', 'id_arbitraje');
     }
     
+    // 3. Usuario dueño del arbitraje
     public function user()
     {
-        return $this->belongsTo(User::class, 'user_id');
+        return $this->belongsTo(User::class, 'user_id', 'id');
     }
 }

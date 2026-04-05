@@ -4,7 +4,9 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use App\Models\Arbitraje;
+use Illuminate\Support\Facades\Log;
 
 class ArbitrajeController extends Controller
 {
@@ -12,108 +14,185 @@ class ArbitrajeController extends Controller
     {
         return view('mesa-partes.arbitrajes.control');
     }
-    
+
+    // ─── Helper: determinar quién subió el documento ──────────────────────────
+    private function determinarRolSubidor($documento, $arbitraje): array
+    {
+        if (!$documento->user) {
+            return ['label' => 'Sistema', 'color' => 'secondary', 'icono' => 'fa-robot'];
+        }
+
+        $userPersonaDni = optional($documento->user->persona)->dni;
+
+        // ¿El DNI del uploader coincide con alguna persona del arbitraje?
+        if ($userPersonaDni) {
+            $personaArbitraje = $arbitraje->personas->firstWhere('dni', $userPersonaDni);
+            if ($personaArbitraje) {
+                return $personaArbitraje->tipo === 'Demandante'
+                    ? ['label' => 'Demandante', 'color' => 'success',  'icono' => 'fa-user-check']
+                    : ['label' => 'Demandado',  'color' => 'warning',  'icono' => 'fa-user-shield'];
+            }
+        }
+
+        // No coincide → fue subido por el administrador / gestor
+        return ['label' => 'Administrador', 'color' => 'danger', 'icono' => 'fa-user-tie'];
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
+
     public function obtenerArbitrajes()
     {
         try {
-            $user = Auth::user();
+            $user   = Auth::user();
             $userId = $user->id;
-            
-            // Obtener el DNI desde la tabla persona
+
             $persona = $user->persona;
             $userDni = $persona ? $persona->dni : null;
-            
-            \Log::info('Buscando arbitrajes para:', [
-                'user_id' => $userId,
-                'dni' => $userDni
-            ]);
-            
-            // 1️⃣ BUSCAR ARBITRAJES CREADOS POR EL USUARIO
+
+            Log::info('Buscando arbitrajes para:', ['user_id' => $userId, 'dni' => $userDni]);
+
+            // 1. Arbitrajes creados por el usuario
             $arbitrajesCreados = Arbitraje::with([
-                'procesos' => function($query) {
-                    $query->orderBy('fecha', 'desc');
-                },
-                'procesos.documentos',
-                'personas'
-            ])
-            ->where('user_id', $userId)
-            ->get();
-            
-            \Log::info('Arbitrajes creados encontrados: ' . $arbitrajesCreados->count());
-            
-            // 2️⃣ BUSCAR ARBITRAJES DONDE EL USUARIO ES DEMANDANTE/DEMANDADO (POR DNI)
+                'personas',
+                'procesos' => fn($q) => $q->orderBy('fecha_creacion', 'desc'),
+                'procesos.documentos' => fn($q) => $q->orderBy('fecha_subida', 'desc'),
+                'procesos.documentos.user.persona', // ← para subido_por
+                'procesos.etapa',
+            ])->where('user_id', $userId)->get();
+
+            Log::info('Arbitrajes creados: ' . $arbitrajesCreados->count());
+
+            // 2. Arbitrajes donde el usuario es demandante/demandado (por DNI)
             $arbitrajesPorDni = collect();
-            
             if ($userDni) {
                 $arbitrajesPorDni = Arbitraje::with([
-                    'procesos' => function($query) {
-                        $query->orderBy('fecha', 'desc');
-                    },
-                    'procesos.documentos',
-                    'personas'
+                    'personas',
+                    'procesos' => fn($q) => $q->orderBy('fecha_creacion', 'desc'),
+                    'procesos.documentos' => fn($q) => $q->orderBy('fecha_subida', 'desc'),
+                    'procesos.documentos.user.persona', // ← para subido_por
+                    'procesos.etapa',
                 ])
-                ->whereHas('personas', function($query) use ($userDni) {
-                    $query->where('dni', $userDni);
-                })
-                ->where('user_id', '!=', $userId) // Excluir los que ya tiene como creador
+                ->whereHas('personas', fn($q) => $q->where('dni', $userDni))
+                ->where('user_id', '!=', $userId)
                 ->get();
-                
-                \Log::info('Arbitrajes por DNI encontrados: ' . $arbitrajesPorDni->count());
+
+                Log::info('Arbitrajes por DNI: ' . $arbitrajesPorDni->count());
             }
-            
-            // 3️⃣ COMBINAR AMBAS COLECCIONES Y ELIMINAR DUPLICADOS
-            $arbitrajes = $arbitrajesCreados->merge($arbitrajesPorDni)->unique('id_arbitraje');
-            
-            // 4️⃣ ORDENAR POR FECHA MÁS RECIENTE
-            $arbitrajes = $arbitrajes->sortByDesc('fecha_inicio')->values();
-            
-            \Log::info('Total de arbitrajes: ' . $arbitrajes->count());
-            
-            // 5️⃣ AGREGAR METADATA PARA IDENTIFICAR ROL DEL USUARIO EN CADA ARBITRAJE
-            $arbitrajes = $arbitrajes->map(function($arbitraje) use ($userId, $userDni) {
-                $esCreador = $arbitraje->user_id === $userId;
-                
-                $rolEnProceso = null;
+
+            // 3. Combinar y deduplicar
+            $arbitrajes = $arbitrajesCreados->merge($arbitrajesPorDni)
+                ->unique('id_arbitraje')
+                ->sortByDesc('fecha_inicio')
+                ->values();
+
+            // 4. Formatear con subido_por en cada documento
+            $arbitrajesFormateados = $arbitrajes->map(function ($arbitraje) use ($userId, $userDni) {
+                $esCreador     = $arbitraje->user_id === $userId;
+                $rolEnProceso  = null;
+
                 if (!$esCreador && $userDni) {
                     $personaEncontrada = $arbitraje->personas->firstWhere('dni', $userDni);
-                    if ($personaEncontrada) {
-                        $rolEnProceso = $personaEncontrada->tipo; // 'Demandante' o 'Demandado'
-                    }
+                    if ($personaEncontrada) $rolEnProceso = $personaEncontrada->tipo;
                 }
-                
-                // Agregar metadata al objeto
-                $arbitraje->es_creador = $esCreador;
-                $arbitraje->rol_usuario = $esCreador ? 'Creador' : $rolEnProceso;
-                
-                return $arbitraje;
+
+                $procesosFormateados = $arbitraje->procesos->map(function ($proceso) use ($arbitraje) {
+                    return [
+                        'id_proceso_de_arbitraje' => $proceso->id_proceso_de_arbitraje,
+                        'fecha_creacion'           => $proceso->fecha_creacion,
+                        'fecha_finalizacion'       => $proceso->fecha_finalizacion,
+                        'estado'                   => $proceso->estado,
+                        'etapa'                    => $proceso->etapa ? [
+                            'id'     => $proceso->etapa->id,
+                            'nombre' => $proceso->etapa->nombre,
+                        ] : null,
+                        'documentos' => $proceso->documentos->map(function ($doc) use ($arbitraje) {
+                            $rol = $this->determinarRolSubidor($doc, $arbitraje);
+                            return [
+                                'id_proceso_arbitraje_documento' => $doc->id_proceso_arbitraje_documento,
+                                'tipo_documento'  => $doc->tipo_documento,
+                                'nombre_original' => $doc->nombre_original,
+                                'ruta_archivo'    => $doc->ruta_archivo,
+                                'observaciones'   => $doc->observaciones,
+                                'fecha_subida'    => $doc->fecha_subida,
+                                'subido_por'      => [
+                                    'nombre' => optional($doc->user)->name ?? 'N/A',
+                                    'label'  => $rol['label'],
+                                    'color'  => $rol['color'],
+                                    'icono'  => $rol['icono'],
+                                ],
+                            ];
+                        }),
+                    ];
+                });
+
+                $personasFormateadas = $arbitraje->personas->map(fn($p) => [
+                    'id_proceso_arbitraje_persona' => $p->id_proceso_arbitraje_persona,
+                    'dni'       => $p->dni,
+                    'nombres'   => $p->nombres,
+                    'apellidos' => $p->apellidos,
+                    'correo'    => $p->correo,
+                    'telefono'  => $p->telefono,
+                    'ruc'       => $p->ruc,
+                    'tipo'      => $p->tipo,
+                ]);
+
+                return [
+                    'id_arbitraje'         => $arbitraje->id_arbitraje,
+                    'nombre_materia'        => $arbitraje->nombre_materia,
+                    'pretenciones'          => $arbitraje->pretenciones,
+                    'cuantia'               => $arbitraje->cuantia,
+                    'tasa_solicitud'        => $arbitraje->tasa_solicitud,
+                    'designacion_arbitral'  => $arbitraje->designacion_arbitral,
+                    'fecha_inicio'          => $arbitraje->fecha_inicio,
+                    'fecha_finalizacion'    => $arbitraje->fecha_finalizacion,
+                    'estado'                => $arbitraje->estado,
+                    'es_creador'            => $esCreador,
+                    'rol_usuario'           => $esCreador ? 'Creador' : ($rolEnProceso ?? 'Observador'),
+                    'personas'              => $personasFormateadas,
+                    'procesos'              => $procesosFormateados,
+                ];
             });
-            
+
             return response()->json([
-                'success' => true,
-                'arbitrajes' => $arbitrajes,
-                'info' => [
+                'success'    => true,
+                'arbitrajes' => $arbitrajesFormateados,
+                'info'       => [
                     'creados_por_usuario' => $arbitrajesCreados->count(),
-                    'como_parte' => $arbitrajesPorDni->count(),
-                    'total' => $arbitrajes->count(),
-                    'dni_usuario' => $userDni
-                ]
+                    'como_parte'          => $arbitrajesPorDni->count(),
+                    'total'               => $arbitrajes->count(),
+                    'dni_usuario'         => $userDni,
+                ],
             ]);
-            
+
         } catch (\Exception $e) {
-            \Log::error('Error al obtener arbitrajes:', [
+            Log::error('Error al obtener arbitrajes:', [
                 'message' => $e->getMessage(),
-                'file' => $e->getFile(),
-                'line' => $e->getLine(),
-                'trace' => $e->getTraceAsString()
+                'file'    => $e->getFile(),
+                'line'    => $e->getLine(),
             ]);
-            
             return response()->json([
                 'success' => false,
                 'message' => 'Error al obtener los arbitrajes',
-                'error' => $e->getMessage()
+                'error'   => $e->getMessage(),
             ], 500);
         }
     }
 
-    
+    public function archivar(Request $request, $id)
+    {
+        try {
+            DB::beginTransaction();
+            $arbitraje = Arbitraje::findOrFail($id);
+            if (in_array($arbitraje->estado, ['archivado', 'terminado'])) {
+                return response()->json(['success' => false, 'message' => 'El arbitraje ya está ' . $arbitraje->estado], 400);
+            }
+            $arbitraje->update(['estado' => 'archivado', 'fecha_finalizacion' => now()]);
+            DB::commit();
+            return response()->json(['success' => true, 'message' => 'El arbitraje ha sido archivado correctamente']);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            \Log::error('Error en archivar:', ['message' => $e->getMessage()]);
+            return response()->json(['success' => false, 'message' => 'Error interno: ' . $e->getMessage()], 500);
+        }
+    }
 }

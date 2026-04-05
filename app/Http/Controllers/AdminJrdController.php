@@ -9,119 +9,184 @@ use Illuminate\Support\Facades\Log;
 use App\Models\Jrd;
 use App\Models\ProcesoJrd;
 use App\Models\ProcesoJrdPersona;
+use App\Models\ProcesoJrdDocumento;
+use App\Models\EtapaJrd;
 use App\Models\User;
-use App\Models\Persona;
 
 class AdminJrdController extends Controller
 {
-    // Vista principal con listado de JRD
     public function index()
     {
         return view('Admin.Jrd');
     }
-    
-    // Obtener todos los JRD (para AJAX)
+
     public function obtenerJrd(Request $request)
     {
         try {
-            $query = Jrd::with(['user', 'personas']);
-            
-            // Filtro por DNI si se proporciona
-            if ($request->has('dni') && !empty($request->dni)) {
+            $query = Jrd::with([
+                'user.persona',
+                'personas',
+                'procesos' => function($q) {
+                    $q->orderBy('fecha_creacion', 'asc')->with('etapa');
+                },
+                'procesos.documentos' => function($q) {
+                    $q->orderBy('fecha_subida', 'desc');
+                },
+                'procesos.documentos.user.persona'
+            ]);
+
+            if ($request->filled('dni')) {
                 $dni = $request->dni;
-                
                 $query->where(function($q) use ($dni) {
-                    // Buscar por DNI en personas relacionadas
                     $q->whereHas('personas', function($subQ) use ($dni) {
                         $subQ->where('dni', 'LIKE', "%{$dni}%");
-                    })
-                    // O buscar por DNI del creador
-                    ->orWhereHas('user.persona', function($subQ) use ($dni) {
+                    })->orWhereHas('user.persona', function($subQ) use ($dni) {
                         $subQ->where('dni', 'LIKE', "%{$dni}%");
                     });
                 });
             }
-            
+
             $jrdList = $query->orderBy('fecha_inicio', 'desc')->get();
-            
-            // Agregar información del DNI del creador
-            $jrdList = $jrdList->map(function($jrd) {
-                $creador = $jrd->user;
+
+            $formattedJrd = $jrdList->map(function($jrd) {
+                $creador        = $jrd->user;
                 $personaCreador = $creador ? $creador->persona : null;
-                
-                $jrd->creador_nombre = $creador ? $creador->name : 'N/A';
-                $jrd->creador_dni = $personaCreador ? $personaCreador->dni : 'N/A';
-                
-                return $jrd;
+
+                // Proceso activo → etapa actual
+                $procesoActivo = $jrd->procesos->firstWhere('estado', 'activo');
+                $etapaActual   = ($procesoActivo && $procesoActivo->etapa)
+                    ? $procesoActivo->etapa->nombre
+                    : 'Sin etapa';
+
+                return [
+                    'id_jrd'                     => $jrd->id_jrd,
+                    'nombre_materia'             => $jrd->nombre_materia,
+                    'pretenciones'               => $jrd->pretenciones,
+                    'cuantia'                    => $jrd->cuantia,
+                    'tasa_solicitud'             => $jrd->tasa_solicitud,
+                    'designacion_adjudicadores'  => $jrd->designacion_adjudicadores,
+                    'fecha_inicio'               => $jrd->fecha_inicio,
+                    'fecha_finalizacion'         => $jrd->fecha_finalizacion,
+                    'estado'                     => $jrd->estado,
+                    'creador_nombre'             => $creador ? $creador->name : 'Usuario #' . $jrd->user_id,
+                    'creador_dni'                => $personaCreador ? $personaCreador->dni : 'N/A',
+                    'etapa_actual'               => $etapaActual,
+                    'personas' => $jrd->personas->map(fn($p) => [
+                        'id_proceso_jrd_persona' => $p->id_proceso_jrd_persona,
+                        'dni'       => $p->dni,
+                        'nombres'   => $p->nombres,
+                        'apellidos' => $p->apellidos,
+                        'correo'    => $p->correo,
+                        'telefono'  => $p->telefono,
+                        'ruc'       => $p->ruc,
+                        'tipo'      => $p->tipo,
+                    ]),
+                    'procesos' => $jrd->procesos->map(function($proceso) use ($jrd) {
+                        return [
+                            'id_proceso_jrd'     => $proceso->id_proceso_jrd,
+                            'fecha_creacion'     => $proceso->fecha_creacion,
+                            'fecha_finalizacion' => $proceso->fecha_finalizacion,
+                            'estado'             => $proceso->estado,
+                            'etapa'              => $proceso->etapa ? [
+                                'id'     => $proceso->etapa->id,
+                                'nombre' => $proceso->etapa->nombre,
+                            ] : null,
+                            'documentos' => $proceso->documentos->map(function($doc) use ($jrd) {
+                                $uploaderDni  = optional(optional($doc->user)->persona)->dni;
+                                $personaMatch = $uploaderDni
+                                    ? $jrd->personas->firstWhere('dni', $uploaderDni)
+                                    : null;
+
+                                if ($personaMatch) {
+                                    $rolLabel = $personaMatch->tipo;
+                                    $rolColor = $personaMatch->tipo === 'Solicitante' ? 'success' : 'warning';
+                                    $rolIcono = $personaMatch->tipo === 'Solicitante' ? 'fa-user-check' : 'fa-user-shield';
+                                } else {
+                                    $rolLabel = 'Administrador';
+                                    $rolColor = 'danger';
+                                    $rolIcono = 'fa-user-tie';
+                                }
+
+                                return [
+                                    'id_proceso_jrd_documento' => $doc->id_proceso_jrd_documento,
+                                    'tipo_documento'  => $doc->tipo_documento,
+                                    'nombre_original' => $doc->nombre_original,
+                                    'ruta_archivo'    => $doc->ruta_archivo,
+                                    'observaciones'   => $doc->observaciones,
+                                    'fecha_subida'    => $doc->fecha_subida,
+                                    'subido_por'      => [
+                                        'nombre' => optional($doc->user)->name ?? 'N/A',
+                                        'label'  => $rolLabel,
+                                        'color'  => $rolColor,
+                                        'icono'  => $rolIcono,
+                                    ],
+                                ];
+                            }),
+                        ];
+                    }),
+                ];
             });
-            
+
             return response()->json([
                 'success' => true,
-                'jrd' => $jrdList,
-                'total' => $jrdList->count()
+                'jrd'     => $formattedJrd,
+                'total'   => $formattedJrd->count()
             ]);
-            
+
         } catch (\Exception $e) {
             Log::error('Error al obtener JRD (Admin):', [
                 'message' => $e->getMessage(),
-                'line' => $e->getLine()
+                'line'    => $e->getLine(),
+                'file'    => $e->getFile(),
             ]);
-            
+
             return response()->json([
                 'success' => false,
-                'message' => 'Error al obtener los JRD',
-                'error' => $e->getMessage()
+                'message' => 'Error al obtener los JRD: ' . $e->getMessage(),
             ], 500);
         }
     }
-    
-    // Vista de detalle de un JRD específico
+
     public function detalle($id)
     {
         try {
             $jrd = Jrd::with([
                 'procesos' => function($query) {
-                    $query->orderBy('fecha', 'desc');
+                    $query->orderBy('fecha_creacion', 'asc')->with('etapa');
                 },
-                'procesos.documentos',
+                'procesos.documentos.user',
                 'personas',
-                'user',
-                'user.persona'
+                'user.persona',
+                'procesoActivoConEtapa'
             ])->findOrFail($id);
-            
-            return view('Admin.Jrd-detalle', compact('jrd'));
-            
+
+            $etapasActivas = EtapaJrd::activos()->get();
+
+            return view('Admin.Jrd-detalle', compact('jrd', 'etapasActivas'));
+
         } catch (\Exception $e) {
             Log::error('Error al obtener detalle de JRD:', [
-                'id' => $id,
+                'id'      => $id,
                 'message' => $e->getMessage()
             ]);
-            
+
             return redirect()->route('admin.jrd.index')
                 ->with('error', 'JRD no encontrado');
         }
     }
 
-  public function aceptar(Request $request, $id_jrd)
+    public function aceptarVoucher(Request $request, $id_jrd)
     {
         try {
             $request->validate([
                 'comentario' => 'nullable|string|max:500'
             ]);
 
-            $jrd = Jrd::find($id_jrd);
-            
-            if (!$jrd) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'JRD no encontrado.'
-                ], 404);
-            }
+            $jrd = Jrd::findOrFail($id_jrd);
 
-            // Obtener el proceso actual (validación de voucher)
             $procesoActual = ProcesoJrd::where('jrd_id', $id_jrd)
-                ->where('estado', '!=', 'Finalizado')
-                ->orderBy('fecha', 'desc')
+                ->where('estado', 'activo')
+                ->with('etapa')
                 ->first();
 
             if (!$procesoActual) {
@@ -131,44 +196,55 @@ class AdminJrdController extends Controller
                 ], 404);
             }
 
-            // Verificar que sea el proceso de validación de voucher
-            if (!str_contains(strtolower($procesoActual->nombre), 'validacion') || 
-                !(str_contains(strtolower($procesoActual->nombre), 'voucher') || 
-                  str_contains(strtolower($procesoActual->nombre), 'pago'))) {
+            $tieneVoucher = ProcesoJrdDocumento::where('proceso_jrd_id', $procesoActual->id_proceso_jrd)
+                ->where('tipo_documento', 'voucher')
+                ->exists();
+
+            if (!$tieneVoucher) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Este no es un proceso de validación de voucher/pago.'
+                    'message' => 'Este proceso no tiene voucher para validar.'
                 ], 400);
             }
 
-            // Finalizar proceso actual
-            $procesoActual->estado = 'Finalizado';
+            $procesoActual->estado             = 'finalizado';
+            $procesoActual->fecha_finalizacion = now();
             $procesoActual->save();
 
-            // Cambiar estado del JRD
-            $jrd->estado = 'en proceso';
-            $jrd->save();
+            $siguienteEtapa = EtapaJrd::where('estado', 1)
+                ->where('id', '>', $procesoActual->id_etapa_jrd)
+                ->orderBy('id', 'asc')
+                ->first();
 
-            // Crear siguiente proceso (Reunion de asignacion de adjudicadores)
-            $nuevoProceso = ProcesoJrd::create([
-                'jrd_id'      => $id_jrd,
-                'fecha'       => now(),
-                'nombre'      => 'Reunion de asignacion de adjudicadores',
-                'descripcion' => 'Reunión para asignar los adjudicadores responsables del caso.',
-                'estado'      => 'activo'
-            ]);
+            if ($siguienteEtapa) {
+                ProcesoJrd::create([
+                    'jrd_id'             => $id_jrd,
+                    'fecha_creacion'     => now(),
+                    'fecha_finalizacion' => null,
+                    'id_etapa_jrd'       => $siguienteEtapa->id,
+                    'estado'             => 'activo'
+                ]);
+
+                $jrd->estado = 'en proceso';
+                $jrd->save();
+
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Voucher aprobado. Ahora en etapa: ' . $siguienteEtapa->nombre,
+                ]);
+            }
+
+            $jrd->estado             = 'terminado';
+            $jrd->fecha_finalizacion = now();
+            $jrd->save();
 
             return response()->json([
                 'success' => true,
-                'message' => 'Voucher aprobado correctamente. Se ha creado el siguiente proceso: Reunion de asignacion de adjudicadores.',
-                'data' => [
-                    'jrd_estado' => $jrd->estado,
-                    'nuevo_proceso' => $nuevoProceso->nombre,
-                    'comentario' => $request->comentario
-                ]
+                'message' => 'Voucher aprobado y JRD finalizado (última etapa completada).',
             ]);
 
         } catch (\Exception $e) {
+            Log::error('Error al aceptar voucher:', ['error' => $e->getMessage()]);
             return response()->json([
                 'success' => false,
                 'message' => 'Error al aceptar el voucher: ' . $e->getMessage()
@@ -176,53 +252,64 @@ class AdminJrdController extends Controller
         }
     }
 
-    /**
-     * Rechazar JRD completo
-     */
-    public function rechazar(Request $request, $id_jrd)
+    public function rechazarVoucher(Request $request, $id_jrd)
     {
         try {
             $request->validate([
                 'motivo' => 'required|string|max:500'
             ]);
 
-            $jrd = Jrd::find($id_jrd);
-            
-            if (!$jrd) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'JRD no encontrado.'
-                ], 404);
-            }
-
-            // Rechazar JRD
-            $jrd->estado = 'rechazado';
-            $jrd->fecha_finalizacion = now();
+            $jrd = Jrd::findOrFail($id_jrd);
+            $jrd->estado = 'observado';
             $jrd->save();
 
-            // Finalizar todos los procesos activos
             ProcesoJrd::where('jrd_id', $id_jrd)
-                ->where('estado', '!=', 'Finalizado')
-                ->update(['estado' => 'Finalizado']);
+                ->where('estado', 'activo')
+                ->update(['estado' => 'observado']);
 
             return response()->json([
                 'success' => true,
-                'message' => 'JRD rechazado correctamente.',
-                'data' => [
-                    'jrd_estado' => $jrd->estado,
-                    'motivo' => $request->motivo
-                ]
+                'message' => 'Voucher rechazado. JRD marcado como observado.',
             ]);
 
         } catch (\Exception $e) {
+            Log::error('Error al rechazar voucher:', ['error' => $e->getMessage()]);
             return response()->json([
                 'success' => false,
-                'message' => 'Error al rechazar el JRD: ' . $e->getMessage()
+                'message' => 'Error al rechazar el voucher: ' . $e->getMessage()
             ], 500);
         }
     }
 
-    // Obtener un JRD específico (para AJAX)
+    public function archivar(Request $request, $id_jrd)
+    {
+        try {
+            $jrd = Jrd::findOrFail($id_jrd);
+            $jrd->estado             = 'archivado';
+            $jrd->fecha_finalizacion = now();
+            $jrd->save();
+
+            ProcesoJrd::where('jrd_id', $id_jrd)
+                ->where('estado', 'activo')
+                ->update([
+                    'estado'             => 'finalizado',
+                    'fecha_finalizacion' => now()
+                ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'JRD archivado correctamente.',
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Error al archivar JRD:', ['error' => $e->getMessage()]);
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al archivar el JRD: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
     public function obtenerUno($id)
     {
         try {
@@ -230,22 +317,22 @@ class AdminJrdController extends Controller
                 'user.persona',
                 'personas',
                 'procesos' => function($query) {
-                    $query->orderBy('fecha', 'desc');
+                    $query->orderBy('fecha_creacion', 'desc')->with('etapa', 'documentos');
                 },
-                'procesos.documentos'
+                'procesoActivoConEtapa'
             ])->findOrFail($id);
-            
+
             return response()->json([
                 'success' => true,
-                'jrd' => $jrd
+                'jrd'     => $jrd
             ]);
-            
+
         } catch (\Exception $e) {
             Log::error('Error al obtener JRD individual:', [
-                'id' => $id,
+                'id'      => $id,
                 'message' => $e->getMessage()
             ]);
-            
+
             return response()->json([
                 'success' => false,
                 'message' => 'JRD no encontrado'

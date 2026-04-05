@@ -10,11 +10,13 @@ class ProcesoArbitrajeDocumento extends Model
     protected $primaryKey = 'id_proceso_arbitraje_documento';
     
     protected $fillable = [
-        'proceso_arbitraje_id',
         'fecha_subida',
         'tipo_documento',
         'nombre_original',
-        'ruta_archivo'
+        'ruta_archivo',
+        'id_proceso_de_arbitraje', // 👈 FK correcta
+        'observaciones',           // 👈 nuevo campo
+        'user_id'                  // 👈 nuevo campo
     ];
     
     protected $casts = [
@@ -23,8 +25,35 @@ class ProcesoArbitrajeDocumento extends Model
     
     public $timestamps = false;
     
+    // 🔥 Relación con proceso
     public function proceso()
     {
-        return $this->belongsTo(ProcesoArbitraje::class, 'proceso_arbitraje_id', 'id_proceso_arbitraje');
+        return $this->belongsTo(
+            ProcesoDeArbitraje::class,
+            'id_proceso_de_arbitraje',
+            'id_proceso_de_arbitraje'
+        );
     }
+
+    // 🔥 Relación con usuario
+    public function user()
+    {
+        return $this->belongsTo(
+            User::class,
+            'user_id',
+            'id'
+        );
+    }
+    // En ProcesoArbitrajeDocumento.php
+
+public function scopeVouchers($query)
+{
+    return $query->where('tipo_documento', 'voucher');
+}
+
+public function scopePendientes($query)
+{
+    return $query->where('observaciones', 'not like', '%[ACEPTADO]%')
+                 ->where('observaciones', 'not like', '%[RECHAZADO]%');
+}
 }

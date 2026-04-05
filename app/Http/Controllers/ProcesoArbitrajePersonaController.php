@@ -8,58 +8,82 @@ use Illuminate\Http\Request;
 class ProcesoArbitrajePersonaController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * Listar personas por arbitraje
      */
-    public function index()
+    public function index($arbitraje_id)
     {
-        //
+        $personas = ProcesoArbitrajePersona::where('arbitraje_id', $arbitraje_id)
+            ->get();
+
+        return response()->json($personas);
     }
 
     /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
+     * Registrar persona
      */
     public function store(Request $request)
     {
-        //
+        $request->validate([
+            'arbitraje_id' => 'required|exists:arbitraje,id_arbitraje',
+            'dni' => 'required',
+            'nombres' => 'required',
+            'apellidos' => 'required',
+            'tipo' => 'required'
+        ]);
+
+        $persona = ProcesoArbitrajePersona::create([
+            'arbitraje_id' => $request->arbitraje_id,
+            'dni' => $request->dni,
+            'nombres' => $request->nombres,
+            'apellidos' => $request->apellidos,
+            'correo' => $request->correo,
+            'telefono' => $request->telefono,
+            'ruc' => $request->ruc,
+            'tipo' => $request->tipo
+        ]);
+
+        return response()->json($persona, 201);
     }
 
     /**
-     * Display the specified resource.
+     * Mostrar una persona
      */
-    public function show(ProcesoArbitrajePersona $procesoArbitrajePersona)
+    public function show($id)
     {
-        //
+        $persona = ProcesoArbitrajePersona::findOrFail($id);
+        return response()->json($persona);
     }
 
     /**
-     * Show the form for editing the specified resource.
+     * Actualizar persona
      */
-    public function edit(ProcesoArbitrajePersona $procesoArbitrajePersona)
+    public function update(Request $request, $id)
     {
-        //
+        $persona = ProcesoArbitrajePersona::findOrFail($id);
+
+        $persona->update($request->only([
+            'dni',
+            'nombres',
+            'apellidos',
+            'correo',
+            'telefono',
+            'ruc',
+            'tipo'
+        ]));
+
+        return response()->json($persona);
     }
 
     /**
-     * Update the specified resource in storage.
+     * Eliminar persona
      */
-    public function update(Request $request, ProcesoArbitrajePersona $procesoArbitrajePersona)
+    public function destroy($id)
     {
-        //
-    }
+        $persona = ProcesoArbitrajePersona::findOrFail($id);
+        $persona->delete();
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(ProcesoArbitrajePersona $procesoArbitrajePersona)
-    {
-        //
+        return response()->json([
+            'message' => 'Persona eliminada correctamente'
+        ]);
     }
 }
