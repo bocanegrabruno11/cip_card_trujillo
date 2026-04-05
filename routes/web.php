@@ -265,7 +265,7 @@ Route::get('/procesos/arbitraje/{id_arbitraje}/completo', [ProcesoDeArbitrajeCon
         ->name('admin.arbitrajes.rechazar');
     Route::post('/arbitrajes/{id}/aceptar', [AdminArbitrajeController::class, 'aceptar'])
     ->name('admin.arbitrajes.aceptar');
-    Route::post('/arbitraje/{id_arbitraje}/documentos',[ProcesoArbitrajeDocumentoController::class, 'store'])->name('arbitraje.documentos.store');
+    Route::post('/arbitraje/{id_arbitraje}/documentos',[ProcesoArbitrajeDocumentoController::class, 'store'])->name('admin.arbitraje.documentos.store');
    
     Route::post('/arbitraje/{id_arbitraje}/siguiente-proceso', [AdminArbitrajeController::class, 'pasarSiguienteProceso'])
         ->name('arbitraje.siguiente.proceso');
