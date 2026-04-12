@@ -19,7 +19,8 @@ use App\Http\Controllers\ProcesoArbitrajeDocumentoController;
 use App\Http\Controllers\JrdRegistroController;
  use App\Http\Controllers\JrdController;
  use App\Http\Controllers\AdminJrdController;
- use App\Http\Controllers\JrdDocumentoController;
+use App\Http\Controllers\CasillaElectronicaController;
+use App\Http\Controllers\JrdDocumentoController;
   use App\Http\Controllers\JrdProcesoController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\RepoSolicitudController;
@@ -28,7 +29,7 @@ use App\Http\Controllers\DocumentoController;
 use App\Http\Controllers\VoucherController;
 use App\Http\Controllers\ProcesoDeArbitrajeController;
 use App\Http\Controllers\EtapaJrdController;
-
+use App\Http\Controllers\UsuariosController;
 
 Route::post('/solicitudes-repo', [RepoSolicitudController::class, 'store'])->name('solicitudes.store');
 Route::get('/', [PageController::class, 'welcome'])->name('welcome');
@@ -153,6 +154,8 @@ Route::get('/jrd/registrar', [JrdRegistroController::class, 'create'])->name('jr
 Route::post('/jrd', [JrdRegistroController::class, 'store'])->name('jrd.store');
 
     Route::get('/jrd/mis-jrd', [JrdController::class, 'misJrd'])->name('jrd.mis');
+
+    Route::resource('casilla', CasillaElectronicaController::class)->only(['index', 'show', 'destroy']);
 });
 
 Route::middleware('auth')->group(function () {
@@ -302,6 +305,8 @@ Route::get('/procesos/arbitraje/{id_arbitraje}/completo', [ProcesoDeArbitrajeCon
         Route::delete('/{id}', [RepoSolicitudController::class, 'destroy'])->name('destroy');
         Route::get('/{id}', [RepoSolicitudController::class, 'show'])->name('show');
     });
+
+    Route::resource('admin-usuarios', UsuariosController::class);
 
 });
 

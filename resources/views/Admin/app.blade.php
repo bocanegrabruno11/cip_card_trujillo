@@ -316,6 +316,20 @@ body {
                 </li>
             </ul>
         </li>
+         <li class="menu-item">
+            <a href="#" class="menu-link toggle-menu">
+                <i class="fas fa-users-cog"></i> <span>Usuarios</span>
+                <i class="fas fa-chevron-down"></i>
+            </a>
+            <ul class="submenu">
+                <li>
+                    <a href="{{ route('admin-usuarios.index') }}" class="menu-link">
+                        <i class="fas fa-layer-group"></i> Lista de usuarios
+                    </a>
+                </li>
+            
+            </ul>
+        </li>
     </ul>
 
     <div class="user-footer">

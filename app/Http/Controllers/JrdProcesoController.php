@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\ProcesoJrd;
 use App\Models\Jrd;
 use App\Models\EtapaJrd;
+use App\Services\NotificacionService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 
@@ -72,6 +73,12 @@ public function pasarSiguienteProceso(Request $request, $id_jrd)
             $jrd->estado = 'en proceso';
             $jrd->save();
 
+            NotificacionService::notificarInvolucrados(
+                    $jrd, 
+                    'jrd', 
+                    'Avance de Etapa en JRD', 
+                    "El expediente JRD ha avanzado de la etapa '" . ($procesoActual->etapa->nombre ?? 'Anterior') . "' a la etapa: '{$siguienteEtapa->nombre}'."
+                );
             return response()->json([
                 'success' => true,
                 'message' => 'Proceso avanzado a: ' . $siguienteEtapa->nombre,

@@ -7,6 +7,7 @@ use App\Models\Arbitraje;
 use App\Models\ProcesoDeArbitraje;
 use App\Models\ProcesoArbitrajeDocumento;
 use App\Models\EtapaArbitral;
+use App\Services\NotificacionService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
@@ -67,6 +68,12 @@ class VoucherController extends Controller
                         ]);
                     }
                 }
+                NotificacionService::notificarTitular(
+                    $arbitraje, 
+                    'arbitraje', 
+                    'Voucher de Pago Aprobado', 
+                    'Su comprobante de pago ha sido validado correctamente por la administración. El proceso de arbitraje ha sido iniciado formalmente.'
+                );
                 
                 DB::commit();
                 
@@ -88,7 +95,12 @@ class VoucherController extends Controller
                 // 2. Cambiar estado del arbitraje a 'observado'
                 $arbitraje->estado = 'observado';
                 $arbitraje->save();
-                
+                NotificacionService::notificarTitular(
+                    $arbitraje, 
+                    'arbitraje', 
+                    'Pago Observado / Rechazado', 
+                    "Su comprobante de pago ha sido observado por la administración. Motivo: {$motivo}. Por favor, verifique su registro y vuelva a subir el voucher correcto."
+                );
                 DB::commit();
                 
                 return response()->json([

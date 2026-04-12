@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Jrd;
 use App\Models\ProcesoJrd;
 use App\Models\ProcesoJrdDocumento;
+use App\Services\NotificacionService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
@@ -102,6 +103,12 @@ class JrdDocumentoController extends Controller
                 'proceso_id'   => $proceso->id_proceso_jrd,
                 'documento_id' => $documento->id_proceso_jrd_documento,
             ]);
+            NotificacionService::notificarInvolucrados(
+                $jrd, 
+                'jrd', 
+                'Nuevo Documento Adjuntado', 
+                "Se ha adjuntado un nuevo documento al expediente JRD: {$request->nombre_documento}. Ingrese al sistema para revisarlo."
+            );
 
             return response()->json([
                 'success'   => true,
@@ -201,6 +208,12 @@ class JrdDocumentoController extends Controller
                     $jrd->estado = 'en proceso';
                     $jrd->save();
                 }
+                NotificacionService::notificarInvolucrados(
+                    $jrd, 
+                    'jrd', 
+                    'Nuevo Documento Adjuntado', 
+                    "Una de las partes involucradas ha adjuntado un nuevo documento al expediente JRD: {$request->nombre_documento}."
+                );
             return response()->json([
                 'success'   => true,
                 'message'   => 'Documento subido correctamente',

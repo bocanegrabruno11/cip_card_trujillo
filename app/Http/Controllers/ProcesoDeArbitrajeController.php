@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\ProcesoDeArbitraje;
 use App\Models\Arbitraje;
 use App\Models\EtapaArbitral;
+use App\Services\NotificacionService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -106,7 +107,12 @@ class ProcesoDeArbitrajeController extends Controller
                 ]);
                 
                 $mensaje = "Proceso '{$procesoActual->etapa->nombre}' finalizado. Se ha creado el siguiente proceso: '{$siguienteEtapa->nombre}'";
-                
+                NotificacionService::notificarInvolucrados(
+                    $arbitraje, 
+                    'arbitraje', 
+                    'Avance de Etapa', 
+                    "El expediente ha avanzado a la etapa: '{$siguienteEtapa->nombre}'."
+                );
                 DB::commit();
                 
                 return response()->json([
@@ -124,7 +130,12 @@ class ProcesoDeArbitrajeController extends Controller
                 ]);
                 
                 $mensaje = "Proceso '{$procesoActual->etapa->nombre}' finalizado. ¡El arbitraje ha sido completado exitosamente!";
-                
+                NotificacionService::notificarInvolucrados(
+                    $arbitraje, 
+                    'arbitraje', 
+                    'Arbitraje Concluido', 
+                    "Se han completado todas las etapas procesales. El arbitraje ha finalizado exitosamente."
+                );
                 DB::commit();
                 
                 return response()->json([
@@ -191,6 +202,12 @@ class ProcesoDeArbitrajeController extends Controller
             $arbitraje->update([
                 'estado' => 'iniciado'
             ]);
+            NotificacionService::notificarTitular(
+                $arbitraje, 
+                'arbitraje', 
+                'Inicio de Proceso Arbitral', 
+                "Se ha dado inicio formal a su proceso de arbitraje en la etapa: '{$primeraEtapa->nombre}'."
+            );
             
             return response()->json([
                 'success' => true,

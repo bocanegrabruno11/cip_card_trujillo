@@ -11,6 +11,7 @@ use App\Models\ProcesoArbitrajePersona;
 use App\Models\ProcesoDeArbitraje;
 use App\Models\EtapaArbitral;
 use App\Models\ProcesoArbitrajeDocumento;
+use App\Services\NotificacionService;
 
 class AdminArbitrajeController extends Controller
 {
@@ -212,6 +213,12 @@ class AdminArbitrajeController extends Controller
                 if ($arbitraje->estado === 'iniciado') {
                     $arbitraje->update(['estado' => 'en proceso']);
                 }
+                NotificacionService::notificarInvolucrados(
+                    $arbitraje, 
+                    'arbitraje', 
+                    'Avance de Etapa en Expediente', 
+                    "El proceso de arbitraje ha avanzado a la etapa: {$siguienteEtapa->nombre}."
+                );
                 DB::commit();
                 return response()->json([
                     'success'        => true,
@@ -222,6 +229,12 @@ class AdminArbitrajeController extends Controller
                 ]);
             } else {
                 $arbitraje->update(['estado' => 'terminado', 'fecha_finalizacion' => now()]);
+                NotificacionService::notificarInvolucrados(
+                    $arbitraje, 
+                    'arbitraje', 
+                    'Proceso Finalizado', 
+                    "El proceso de arbitraje correspondiente a este expediente ha sido concluido formalmente."
+                );
                 DB::commit();
                 return response()->json([
                     'success'            => true,
@@ -259,6 +272,12 @@ class AdminArbitrajeController extends Controller
                     ]);
                 }
             }
+            NotificacionService::notificarTitular(
+                $arbitraje, 
+                'arbitraje', 
+                'Solicitud de Arbitraje Aprobada', 
+                'Su solicitud y voucher de pago han sido validados exitosamente. El proceso de arbitraje ha iniciado.'
+            );
             DB::commit();
             return response()->json(['success' => true, 'message' => 'Arbitraje aceptado correctamente']);
         } catch (\Exception $e) {
@@ -286,6 +305,12 @@ class AdminArbitrajeController extends Controller
                         . "[RECHAZADO] Motivo: {$motivo} - Fecha: " . now(),
                 ]);
             }
+            NotificacionService::notificarTitular(
+                $arbitraje, 
+                'arbitraje', 
+                'Solicitud de Arbitraje Observada', 
+                "Su solicitud de arbitraje ha sido observada. Motivo detallado: {$motivo}. Por favor, revise y actualice su información."
+            );
             DB::commit();
             return response()->json(['success' => true, 'message' => 'Arbitraje rechazado y marcado como observado']);
         } catch (\Exception $e) {
@@ -303,6 +328,12 @@ class AdminArbitrajeController extends Controller
                 return response()->json(['success' => false, 'message' => 'El arbitraje ya está ' . $arbitraje->estado], 400);
             }
             $arbitraje->update(['estado' => 'archivado', 'fecha_finalizacion' => now()]);
+            NotificacionService::notificarInvolucrados(
+                $arbitraje, 
+                'arbitraje', 
+                'Expediente Archivado', 
+                'El proceso de arbitraje ha sido archivado por la administración. No se realizarán más acciones sobre este expediente.'
+            );
             DB::commit();
             return response()->json(['success' => true, 'message' => 'El arbitraje ha sido archivado correctamente']);
         } catch (\Exception $e) {

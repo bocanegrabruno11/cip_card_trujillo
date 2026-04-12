@@ -275,6 +275,22 @@
                     <i class="fas fa-user-edit"></i> Actualizar Información
                 </a>
             </li>
+
+            <li>
+                <a href="{{ route('casilla.index') }}" class="menu-link {{ request()->routeIs('casilla.index') ? 'active' : '' }}">
+                    <span class="position-relative">
+                        <i class="fas fa-envelope"></i>
+                        
+                        @if(isset($notificaciones_sin_leer) && $notificaciones_sin_leer > 0)
+                            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" 
+                                style="font-size: 0.6rem; padding: 0.25em 0.5em; margin-left: -5px; border: 2px solid var(--cip-red);">
+                                {{ $notificaciones_sin_leer > 9 ? '9+' : $notificaciones_sin_leer }}
+                            </span>
+                        @endif
+                    </span>
+                    <span class="ms-2">Casilla electrónica</span>
+                </a>
+            </li>
             
             <!-- Menú Desplegable de Arbitraje -->
             <li class="menu-item-dropdown">

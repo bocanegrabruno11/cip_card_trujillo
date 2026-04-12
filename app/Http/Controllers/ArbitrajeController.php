@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use App\Models\Arbitraje;
+use App\Services\NotificacionService;
 use Illuminate\Support\Facades\Log;
 
 class ArbitrajeController extends Controller
@@ -188,6 +189,12 @@ class ArbitrajeController extends Controller
             }
             $arbitraje->update(['estado' => 'archivado', 'fecha_finalizacion' => now()]);
             DB::commit();
+            NotificacionService::notificarInvolucrados(
+                $arbitraje, 
+                'arbitraje', 
+                'Expediente Archivado', 
+                'El proceso de arbitraje ha sido archivado por la administración. No se realizarán más acciones sobre este expediente.'
+            );
             return response()->json(['success' => true, 'message' => 'El arbitraje ha sido archivado correctamente']);
         } catch (\Exception $e) {
             DB::rollBack();

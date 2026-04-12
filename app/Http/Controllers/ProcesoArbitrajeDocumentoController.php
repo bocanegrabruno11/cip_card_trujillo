@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\ProcesoDeArbitraje;
 use App\Models\ProcesoArbitrajeDocumento;
 use App\Models\Arbitraje;
+use App\Services\NotificacionService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Auth;
@@ -117,6 +118,12 @@ class ProcesoArbitrajeDocumentoController extends Controller
                     'documento_id' => $documento->id_proceso_arbitraje_documento
                 ]);
             }
+            $asuntoNoti = $esResubirVoucher ? 'Voucher Re-subido' : 'Nuevo Documento Adjuntado';
+            $textoNoti = $esResubirVoucher 
+                ? "Se ha vuelto a subir el voucher de pago del expediente. El caso ha retornado al estado de Validación."
+                : "Se ha adjuntado un nuevo documento al expediente de arbitraje: {$request->nombre_documento}.";
+
+            NotificacionService::notificarInvolucrados($arbitraje, 'arbitraje', $asuntoNoti, $textoNoti);
 
             DB::commit();
 
@@ -173,6 +180,15 @@ class ProcesoArbitrajeDocumentoController extends Controller
                 : "[" . now() . "] " . $nuevoComentario;
 
             $documento->save();
+            $arbitraje = $documento->proceso->arbitraje;
+            if ($arbitraje) {
+                NotificacionService::notificarInvolucrados(
+                    $arbitraje, 
+                    'arbitraje', 
+                    'Nueva Observación en Documento', 
+                    "Se ha agregado un comentario u observación al documento: {$documento->nombre_original}. Por favor, revise los detalles en su casilla."
+                );
+            }
 
             return response()->json([
                 'success' => true,

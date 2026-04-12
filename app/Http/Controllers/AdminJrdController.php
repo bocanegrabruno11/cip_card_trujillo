@@ -12,6 +12,7 @@ use App\Models\ProcesoJrdPersona;
 use App\Models\ProcesoJrdDocumento;
 use App\Models\EtapaJrd;
 use App\Models\User;
+use App\Services\NotificacionService;
 
 class AdminJrdController extends Controller
 {
@@ -211,6 +212,12 @@ class AdminJrdController extends Controller
             $procesoActual->fecha_finalizacion = now();
             $procesoActual->save();
 
+            NotificacionService::notificarTitular(
+                $jrd, 
+                'jrd', 
+                'Voucher Validado', 
+                'Su comprobante de pago ha sido aprobado exitosamente por la administración.'
+            );
             $siguienteEtapa = EtapaJrd::where('estado', 1)
                 ->where('id', '>', $procesoActual->id_etapa_jrd)
                 ->orderBy('id', 'asc')
@@ -227,6 +234,12 @@ class AdminJrdController extends Controller
 
                 $jrd->estado = 'en proceso';
                 $jrd->save();
+                NotificacionService::notificarInvolucrados(
+                    $jrd, 
+                    'jrd', 
+                    'Avance de Etapa en JRD', 
+                    "El expediente JRD ha avanzado a la etapa: {$siguienteEtapa->nombre}."
+                );
 
                 return response()->json([
                     'success' => true,
@@ -237,6 +250,12 @@ class AdminJrdController extends Controller
             $jrd->estado             = 'terminado';
             $jrd->fecha_finalizacion = now();
             $jrd->save();
+            NotificacionService::notificarInvolucrados(
+                $jrd, 
+                'jrd', 
+                'Proceso JRD Finalizado', 
+                'El expediente correspondiente a esta Junta de Resolución de Disputas ha sido concluido formalmente.'
+            );
 
             return response()->json([
                 'success' => true,
@@ -267,6 +286,12 @@ class AdminJrdController extends Controller
                 ->where('estado', 'activo')
                 ->update(['estado' => 'observado']);
 
+                NotificacionService::notificarTitular(
+                $jrd, 
+                'jrd', 
+                'Solicitud Observada - Voucher Rechazado', 
+                "El voucher subido ha sido observado por la administración. Motivo: {$request->motivo}."
+            );
             return response()->json([
                 'success' => true,
                 'message' => 'Voucher rechazado. JRD marcado como observado.',
@@ -295,6 +320,13 @@ class AdminJrdController extends Controller
                     'estado'             => 'finalizado',
                     'fecha_finalizacion' => now()
                 ]);
+
+                NotificacionService::notificarInvolucrados(
+                    $jrd, 
+                    'jrd', 
+                    'Expediente JRD Archivado', 
+                    'El proceso correspondiente a esta Junta de Resolución de Disputas ha sido archivado por la administración.'
+                );
 
             return response()->json([
                 'success' => true,
