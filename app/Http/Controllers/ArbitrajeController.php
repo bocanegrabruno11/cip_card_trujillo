@@ -102,6 +102,7 @@ class ArbitrajeController extends Controller
                         'fecha_creacion'           => $proceso->fecha_creacion,
                         'fecha_finalizacion'       => $proceso->fecha_finalizacion,
                         'estado'                   => $proceso->estado,
+                        'controversia'             => $arbitraje->controversia,
                         'etapa'                    => $proceso->etapa ? [
                             'id'     => $proceso->etapa->id,
                             'nombre' => $proceso->etapa->nombre,
@@ -142,6 +143,8 @@ class ArbitrajeController extends Controller
                     'nombre_materia'        => $arbitraje->nombre_materia,
                     'pretenciones'          => $arbitraje->pretenciones,
                     'cuantia'               => $arbitraje->cuantia,
+                    'controversia'          => $arbitraje->controversia,
+                    'fundamentos_hecho'          => $arbitraje->fundamentos_hecho,
                     'tasa_solicitud'        => $arbitraje->tasa_solicitud,
                     'designacion_arbitral'  => $arbitraje->designacion_arbitral,
                     'fecha_inicio'          => $arbitraje->fecha_inicio,

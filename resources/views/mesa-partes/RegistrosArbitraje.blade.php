@@ -401,6 +401,8 @@ function generarCardHTML(arb) {
                     <div class="col-md-12">
                         <h6 class="text-danger border-bottom pb-2 mb-3"><i class="fas fa-info-circle me-2"></i>Información General</h6>
                         <p><strong>Pretensiones:</strong> ${arb.pretenciones||'No especificadas'}</p>
+                        <p><strong>Controversia:</strong> ${arb.controversia||'No especificadas'}</p>
+                        <p><strong>Fundamentos de hecho:</strong> ${arb.fundamentos_hecho||'No especificadas'}</p>
                         ${arb.cuantia?`<p><strong>Cuantía:</strong> ${arb.cuantia}</p>`:''}
                         ${arb.tasa_solicitud?`<p><strong>Tasa de Solicitud:</strong> ${arb.tasa_solicitud}</p>`:''}
                         ${arb.designacion_arbitral?`<p><strong>Designación Arbitral:</strong> ${arb.designacion_arbitral}</p>`:''}

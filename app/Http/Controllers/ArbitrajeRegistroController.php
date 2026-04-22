@@ -32,7 +32,7 @@ class ArbitrajeRegistroController extends Controller
                 'cuantia'        => 'nullable|string|max:550',
                 'tasa_solicitud' => 'nullable|string|max:550',
                 'designacion_arbitral' => 'nullable|string|max:255',
-
+                'controversia' => 'nullable|string|max:550',
                 // Personas
                 'personas'               => 'required|array|min:2',
                 'personas.*.dni'         => 'required|string|size:8',
@@ -71,6 +71,8 @@ class ArbitrajeRegistroController extends Controller
                 'cuantia'              => $request->cuantia ?? null,
                 'tasa_solicitud'       => $request->tasa_solicitud ?? null,
                 'designacion_arbitral' => $request->designacion_arbitral ?? null,
+                'controversia'         => $request->controversia ?? null, // 👈 AGREGAR ESTA LÍNEA
+                'fundamentos_hecho'         => $request->fundamentos_hecho ?? null, // 👈 AGREGAR ESTA LÍNEA
                 'estado'               => 'validando',
             ]);
 

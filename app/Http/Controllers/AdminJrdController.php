@@ -64,6 +64,8 @@ class AdminJrdController extends Controller
                     'nombre_materia'             => $jrd->nombre_materia,
                     'pretenciones'               => $jrd->pretenciones,
                     'cuantia'                    => $jrd->cuantia,
+                    'controversia'                    => $jrd->controversia,
+                    'fundamentos_hecho'                    => $jrd->fundamentos_hecho,
                     'tasa_solicitud'             => $jrd->tasa_solicitud,
                     'designacion_adjudicadores'  => $jrd->designacion_adjudicadores,
                     'fecha_inicio'               => $jrd->fecha_inicio,

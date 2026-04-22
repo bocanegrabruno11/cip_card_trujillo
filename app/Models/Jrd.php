@@ -19,7 +19,9 @@ class Jrd extends Model
         'cuantia',
         'designacion_adjudicadores',
         'tasa_solicitud',
-        'estado'
+        'estado',
+        'controversia',
+        'fundamentos_hecho'
     ];
 
     protected $casts = [

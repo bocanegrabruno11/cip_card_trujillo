@@ -48,6 +48,8 @@ class JrdRegistroController extends Controller
                 'fecha_finalizacion'        => null,
                 'nombre_materia'            => $request->nombre_materia,
                 'pretenciones'              => $request->pretenciones,
+                'controversia'              => $request->controversia,
+                'fundamentos_hecho'         => $request->fundamentos_hecho,
                 'cuantia'                   => $request->cuantia,
                 'designacion_adjudicadores' => $request->designacion_adjudicadores,
                 'tasa_solicitud'            => $request->tasa_solicitud,

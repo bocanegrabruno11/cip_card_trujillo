@@ -88,6 +88,8 @@ class AdminArbitrajeController extends Controller
                     'fecha_inicio'          => $arbitraje->fecha_inicio,
                     'fecha_finalizacion'    => $arbitraje->fecha_finalizacion,
                     'estado'                => $arbitraje->estado,
+                    'controversia'         => $arbitraje->controversia,
+                    'fundamentos_hecho'         => $arbitraje->fundamentos_hecho,
                     'creador_nombre'        => $creador ? $creador->name : 'Usuario #' . $arbitraje->user_id,
                     'creador_dni'           => $personaCreador ? $personaCreador->dni : 'N/A',
                     'personas'              => $arbitraje->personas->map(fn($p) => [

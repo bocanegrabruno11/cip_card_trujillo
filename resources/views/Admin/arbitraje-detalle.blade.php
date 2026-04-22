@@ -64,8 +64,10 @@
                     <table class="table table-sm">
                         <tr><th width="40%">Pretensiones:</th><td>{{ $arbitraje->pretenciones ?? 'No especificadas' }}</td></tr>
                         <tr><th>Cuantía:</th><td>{{ $arbitraje->cuantia ?? 'No especificada' }}</td></tr>
+                        <tr><th>Controversia:</th><td>{{ $arbitraje->controversia ?? 'No especificada' }}</td></tr>
                         <tr><th>Tasa de Solicitud:</th><td>{{ $arbitraje->tasa_solicitud ?? 'No especificada' }}</td></tr>
                         <tr><th>Designación Arbitral:</th><td>{{ $arbitraje->designacion_arbitral ?? 'No especificada' }}</td></tr>
+                        <tr><th>Fundamentos de hecho:</th><td>{{ $arbitraje->fundamentos_hecho ?? 'No especificada' }}</td></tr>
                         <tr><th>Fecha de Inicio:</th><td><i class="fas fa-calendar me-1"></i>{{ $arbitraje->fecha_inicio ? \Carbon\Carbon::parse($arbitraje->fecha_inicio)->format('d/m/Y H:i') : 'No especificada' }}</td></tr>
                         <tr><th>Fecha de Finalización:</th><td>
                             @if($arbitraje->fecha_finalizacion)

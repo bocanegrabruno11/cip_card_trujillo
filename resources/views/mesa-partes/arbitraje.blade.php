@@ -133,7 +133,16 @@
                     <textarea class="form-control" name="pretenciones" rows="3"
                               placeholder="Describa las pretensiones del arbitraje..." required></textarea>
                 </div>
-
+                <div class="col-md-12">
+                    <label class="form-label">Controversia <span class="text-danger">*</span></label>
+                    <textarea class="form-control" name="controversia" rows="3"
+                              placeholder="Describa la controversia del arbitraje..." required></textarea>
+                </div>
+                <div class="col-md-12">
+                    <label class="form-label">Fundamentos de hecho <span class="text-danger">*</span></label>
+                    <textarea class="form-control" name="fundamentos_hecho" rows="3"
+                              placeholder="Describa los fundamentos de hecho del arbitraje..." required></textarea>
+                </div>
             </div>
         </div>
 
@@ -526,6 +535,8 @@ document.getElementById('arbitrajeForm').addEventListener('submit', function (e)
     console.group('%c📄 Metadatos del formulario', 'color: #0dcaf0; font-weight: bold;');
     console.log('nombre_materia:',        document.querySelector('[name="nombre_materia"]').value);
     console.log('pretenciones:',          document.querySelector('[name="pretenciones"]').value);
+    console.log('controversia:',          document.querySelector('[name="controversia"]').value);
+    console.log('fundamentos_hecho:',          document.querySelector('[name="fundamentos_hecho"]').value);
     console.log('cuantia:',               document.querySelector('[name="cuantia"]').value);
     console.log('tasa_solicitud:',        document.querySelector('[name="tasa_solicitud"]').value);
     console.log('designacion_arbitral:',  document.querySelector('[name="designacion_arbitral"]').value);
@@ -544,6 +555,8 @@ document.getElementById('arbitrajeForm').addEventListener('submit', function (e)
 
     formData.append('nombre_materia',       document.querySelector('[name="nombre_materia"]').value);
     formData.append('pretenciones',         document.querySelector('[name="pretenciones"]').value);
+    formData.append('controversia',         document.querySelector('[name="controversia"]').value);
+    formData.append('fundamentos_hecho',         document.querySelector('[name="fundamentos_hecho"]').value);
     formData.append('cuantia',              document.querySelector('[name="cuantia"]').value);
     formData.append('tasa_solicitud',       document.querySelector('[name="tasa_solicitud"]').value);
     formData.append('designacion_arbitral', document.querySelector('[name="designacion_arbitral"]').value);

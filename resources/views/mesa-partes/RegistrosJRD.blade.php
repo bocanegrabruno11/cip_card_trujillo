@@ -463,6 +463,9 @@ const rolBadge = `<span class="badge ${cfg.color} ms-2"><i class="fas ${cfg.icon
                             </h6>
                             <p><strong>Materia:</strong> ${jrd.nombre_materia || 'No especificada'}</p>
                             <p><strong>Pretensiones:</strong> ${jrd.pretenciones || 'No especificadas'}</p>
+                            <p><strong>Cuantia:</strong> ${jrd.cuantia || 'No especificadas'}</p>
+                            <p><strong>Controversia:</strong> ${jrd.controversia || 'No especificadas'}</p>
+                            <p><strong>Fundamentos de hecho:</strong> ${jrd.fundamentos_hecho || 'No especificadas'}</p>
                             <p><strong>ID JPRD:</strong> #${jrd.id_jrd}</p>
                             <p><strong>Tu rol:</strong>
                               <span class="badge ${cfg.color}">

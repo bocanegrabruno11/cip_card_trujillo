@@ -73,29 +73,32 @@
                         </tr>
                         @if($jrd->cuantia)
                         <tr>
-                            <th>Cuantía:</th>
-                            <td>
-                                @php
-                                    $cuantiaLimpia = preg_replace('/[^0-9.]/', '', $jrd->cuantia);
-                                @endphp
-                                @if(is_numeric($cuantiaLimpia) && $cuantiaLimpia !== '')
-                                    S/ {{ number_format((float) $cuantiaLimpia, 2) }}
-                                @else
-                                    {{ $jrd->cuantia }}
-                                @endif
-                            </td>
+                            <th>Cuantia:</th>
+                            <td>{{ $jrd->cuantia }}</td>
                         </tr>
                         @endif
-                        @if($jrd->tasa_solicitud)
+                        @if($jrd->cuantia)
                         <tr>
                             <th>Tasa de Solicitud:</th>
                             <td>{{ $jrd->tasa_solicitud }}</td>
+                        </tr>
+                        @endif
+                        @if($jrd->controversia)
+                        <tr>
+                            <th>Controversia:</th>
+                            <td>{{ $jrd->controversia }}</td>
                         </tr>
                         @endif
                         @if($jrd->designacion_adjudicadores)
                         <tr>
                             <th>Designación Adjudicadores:</th>
                             <td>{{ $jrd->designacion_adjudicadores }}</td>
+                        </tr>
+                        @endif
+                        @if($jrd->fundamentos_hecho)
+                        <tr>
+                            <th>Fundamentos de hecho:</th>
+                            <td>{{ $jrd->fundamentos_hecho }}</td>
                         </tr>
                         @endif
                     </table>

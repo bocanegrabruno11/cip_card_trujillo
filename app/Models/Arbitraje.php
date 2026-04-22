@@ -18,7 +18,9 @@ class Arbitraje extends Model
         'cuantia',
         'designacion_arbitral',
         'tasa_solicitud',
-        'estado'
+        'estado',
+        'controversia',
+        'fundamentos_hecho'
     ];
     
     protected $casts = [
