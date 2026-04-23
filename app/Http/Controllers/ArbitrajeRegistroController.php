@@ -42,6 +42,7 @@ class ArbitrajeRegistroController extends Controller
                 'personas.*.correo'      => 'nullable|email|max:255',
                 'personas.*.telefono'    => 'nullable|string|max:20',
                 'personas.*.ruc'         => 'nullable|string|max:11',
+                'personas.*.direccion'   => 'nullable|string|max:550',
 
                 // Documentos
                 'voucher'               => 'required|file|mimes:jpg,jpeg,png,pdf|max:20480', // Aumentado a 20MB y añadido PNG, PDF
@@ -89,6 +90,7 @@ class ArbitrajeRegistroController extends Controller
                     'telefono'     => $persona['telefono'] ?? null,
                     'ruc'          => $persona['ruc']      ?? null,
                     'tipo'         => $persona['tipo'],
+                    'direccion'    => $persona['direccion']?? null,
                 ]);
             }
 

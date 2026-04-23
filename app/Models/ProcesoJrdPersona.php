@@ -18,7 +18,8 @@ class ProcesoJrdPersona extends Model
         'apellidos',
         'correo',
         'telefono',
-        'ruc'
+        'ruc',
+        'direccion'
     ];
 
     public function jrd()

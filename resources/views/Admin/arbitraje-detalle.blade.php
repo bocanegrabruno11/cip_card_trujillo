@@ -119,7 +119,9 @@
                                             <span class="badge {{ $persona->tipo === 'Demandante' ? 'bg-success' : 'bg-warning text-dark' }} mb-2">{{ $persona->tipo }}</span>
                                             <h6 class="mb-1">{{ $persona->nombres }} {{ $persona->apellidos }}</h6>
                                             <p class="mb-0 text-muted small"><i class="fas fa-id-card me-1"></i>DNI: {{ $persona->dni }}</p>
+                                            <p class="mb-0 text-muted small"><i class="fas fa-phone-alt me-1"></i>Telefono: {{ $persona->telefono }}</p>
                                             @if($persona->correo)<p class="mb-0 text-muted small"><i class="fas fa-envelope me-1"></i>{{ $persona->correo }}</p>@endif
+                                            @if($persona->direccion)<p class="mb-0 text-muted small"><i class="fas fa-home me-1"></i>{{ $persona->direccion }}</p>@endif
                                         </div>
                                         <i class="fas fa-user fa-2x text-muted"></i>
                                     </div>

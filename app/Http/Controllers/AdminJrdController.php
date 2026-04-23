@@ -83,6 +83,7 @@ class AdminJrdController extends Controller
                         'telefono'  => $p->telefono,
                         'ruc'       => $p->ruc,
                         'tipo'      => $p->tipo,
+                        'direccion'      => $p->direccion,
                     ]),
                     'procesos' => $jrd->procesos->map(function($proceso) use ($jrd) {
                         return [

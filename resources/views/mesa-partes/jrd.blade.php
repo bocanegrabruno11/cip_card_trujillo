@@ -177,7 +177,11 @@
                     <input type="text" class="form-control" id="solicitante-telefono"
                            placeholder="987654321" maxlength="9" oninput="soloNumeros(this, 9)">
                 </div>
-
+                <div class="col-md-3">
+                            <label class="form-label">Dirección <span class="text-muted small">(opcional)</span></label>
+                            <input type="text" class="form-control" id="solicitante-direccion"
+                                placeholder="Av. Ejemplo 123">
+                </div>
             </div>
         </div>
 
@@ -219,10 +223,10 @@
         <div class="mb-4">
             <div class="row">
                 <div class="col-md-6 mb-3">
-                    <label for="drive_link" class="form-label">Enlace de Google Drive (Opcional)</label>
+                    <label for="drive_link" class="form-label">Google Drive Para Anexos</label>
                     <input type="url" class="form-control" id="drive_link" name="drive_link"
                            placeholder="https://drive.google.com/...">
-                    <small class="text-muted">Enlace a documento adicional en Drive</small>
+                    <small class="text-muted">Enlace a documento adicional en Drive para anexos</small>
                 </div>
                 <div class="col-md-6 mb-3">
                     <label for="nombre_documento_link" class="form-label">Nombre del Documento en Drive</label>
@@ -394,6 +398,10 @@ function agregarParte() {
                 <input type="text" class="form-control campo-telefono" placeholder="987654321"
                        maxlength="9" data-id="${id}" oninput="soloNumeros(this, 9)">
             </div>
+            <div class="col-md-3">
+                <label class="form-label">Dirección <span class="text-muted small">(opcional)</span></label>
+                <input type="text" class="form-control campo-direccion" placeholder="Av. Ejemplo 123" data-id="${id}">
+            </div>
         </div>
     `;
 
@@ -416,6 +424,7 @@ document.getElementById('jrdForm').addEventListener('submit', function (e) {
     const correoS    = document.getElementById('solicitante-correo').value.trim();
     const telefonoS  = document.getElementById('solicitante-telefono').value.trim();
     const rucS       = document.getElementById('solicitante-ruc').value.trim();
+    const direccionS = document.getElementById('solicitante-direccion')?.value.trim() || '';
 
     if (!nombresS || !apellidosS) {
         showError('Los nombres y apellidos del solicitante son obligatorios.');
@@ -429,6 +438,7 @@ document.getElementById('jrdForm').addEventListener('submit', function (e) {
         correo: correoS,
         telefono: telefonoS,
         ruc: rucS,
+        direccion: direccionS, // 👈 Añadir dirección
         tipo: 'Solicitante'
     });
 
@@ -446,6 +456,7 @@ document.getElementById('jrdForm').addEventListener('submit', function (e) {
         const correoInput    = div.querySelector('.campo-correo');
         const telefonoInput  = div.querySelector('.campo-telefono');
         const rucInput       = div.querySelector('.campo-ruc');
+        const direccionInput = div.querySelector('.campo-direccion'); // 👈 Añadir
 
         const errorEl = document.getElementById(`error-dni-${id}`);
 
@@ -459,6 +470,7 @@ document.getElementById('jrdForm').addEventListener('submit', function (e) {
         const correo    = correoInput    ? correoInput.value.trim()   : '';
         const telefono  = telefonoInput  ? telefonoInput.value.trim() : '';
         const ruc       = rucInput       ? rucInput.value.trim()      : '';
+        const direccion = direccionInput ? direccionInput.value.trim() : ''; // 👈 Obtener dirección
 
         if (!dni) {
             return;
@@ -488,7 +500,7 @@ document.getElementById('jrdForm').addEventListener('submit', function (e) {
             return;
         }
 
-        personasArray.push({ dni, nombres, apellidos, correo, telefono, ruc, tipo });
+        personasArray.push({ dni, nombres, apellidos, correo, telefono, ruc, tipo,direccion });
     });
 
     if (hayError) {
@@ -585,6 +597,8 @@ document.getElementById('jrdForm').addEventListener('submit', function (e) {
         formData.append(`personas[${i}][telefono]`,  p.telefono  || '');
         formData.append(`personas[${i}][ruc]`,       p.ruc       || '');
         formData.append(`personas[${i}][tipo]`,      p.tipo);
+        formData.append(`personas[${i}][direccion]`, p.direccion || ''); // 👈 Añadir esta línea
+
     });
 
     // Log del FormData ya armado

@@ -39,7 +39,8 @@ class ProcesoArbitrajePersonaController extends Controller
             'correo' => $request->correo,
             'telefono' => $request->telefono,
             'ruc' => $request->ruc,
-            'tipo' => $request->tipo
+            'tipo' => $request->tipo,
+            'direccion' => $request->direccion
         ]);
 
         return response()->json($persona, 201);

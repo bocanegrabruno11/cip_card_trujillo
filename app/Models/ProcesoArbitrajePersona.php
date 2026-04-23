@@ -17,7 +17,8 @@ class ProcesoArbitrajePersona extends Model
         'correo',
         'telefono',
         'ruc',
-        'tipo'
+        'tipo',
+        'direccion'
     ];
     
     public $timestamps = false;

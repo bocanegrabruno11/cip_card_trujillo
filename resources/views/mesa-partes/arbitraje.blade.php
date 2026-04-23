@@ -183,7 +183,11 @@
                     <input type="text" class="form-control" id="demandante-telefono"
                            placeholder="987654321" maxlength="9" oninput="soloNumeros(this, 9)">
                 </div>
-
+                <div class="col-md-3">
+                    <label class="form-label">Domicilio</label>
+                    <input type="text" class="form-control" id="demandante-direccion"
+                           placeholder="Av Mansiche 250">
+                </div>
             </div>
         </div>
 
@@ -225,10 +229,10 @@
         <div class="mb-4">
             <div class="row">
                 <div class="col-md-6 mb-3">
-                    <label for="drive_link" class="form-label">Enlace de Google Drive (Opcional)</label>
+                    <label for="drive_link" class="form-label">Google Drive Para Anexos</label>
                     <input type="url" class="form-control" id="drive_link" name="drive_link"
                            placeholder="https://drive.google.com/...">
-                    <small class="text-muted">Enlace a documento adicional en Drive</small>
+                    <small class="text-muted">Enlace a documento adicional en Drive para anexos</small>
                 </div>
                 <div class="col-md-6 mb-3">
                     <label for="nombre_documento_link" class="form-label">Nombre del Documento en Drive</label>
@@ -388,6 +392,11 @@ function agregarDemandado() {
                 <input type="text" class="form-control campo-telefono" placeholder="987654321"
                        maxlength="9" data-id="${id}" oninput="soloNumeros(this, 9)">
             </div>
+            <div class="col-md-3">
+                <label class="form-label">Domicilio <span class="text-muted small">(opcional)</span></label>
+                <input type="text" class="form-control campo-direccion" placeholder="Av Maansiche 230"
+                     data-id="${id}"">
+            </div>
         </div>
     `;
 
@@ -409,6 +418,7 @@ document.getElementById('arbitrajeForm').addEventListener('submit', function (e)
     const correoD    = document.getElementById('demandante-correo').value.trim();
     const telefonoD  = document.getElementById('demandante-telefono').value.trim();
     const rucD       = document.getElementById('demandante-ruc').value.trim();
+    const DomicilioD       = document.getElementById('demandante-direccion').value.trim();
 
     if (!nombresD || !apellidosD) {
         showError('Los nombres y apellidos del demandante son obligatorios.');
@@ -422,6 +432,7 @@ document.getElementById('arbitrajeForm').addEventListener('submit', function (e)
         correo: correoD,
         telefono: telefonoD,
         ruc: rucD,
+        direccion: DomicilioD,
         tipo: 'Demandante'
     });
 
@@ -436,6 +447,7 @@ document.getElementById('arbitrajeForm').addEventListener('submit', function (e)
         const correoInput    = div.querySelector('.campo-correo');
         const telefonoInput  = div.querySelector('.campo-telefono');
         const rucInput       = div.querySelector('.campo-ruc');
+        const direccionInput = div.querySelector('.campo-direccion');
         const errorEl        = document.getElementById(`error-${id}`);
 
         errorEl.style.display = 'none';
@@ -447,6 +459,7 @@ document.getElementById('arbitrajeForm').addEventListener('submit', function (e)
         const correo    = correoInput    ? correoInput.value.trim()   : '';
         const telefono  = telefonoInput  ? telefonoInput.value.trim() : '';
         const ruc       = rucInput       ? rucInput.value.trim()      : '';
+        const direccion = direccionInput ? direccionInput.value.trim() : ''; // 👈 Obtener el VALOR
 
         if (dni.length !== 8) {
             errorEl.textContent = 'El DNI debe tener exactamente 8 dígitos.';
@@ -472,7 +485,7 @@ document.getElementById('arbitrajeForm').addEventListener('submit', function (e)
             return;
         }
 
-        personas.push({ dni, nombres, apellidos, correo, telefono, ruc, tipo: 'Demandado' });
+        personas.push({ dni, nombres, apellidos, correo, telefono, ruc, tipo: 'Demandado',direccion });
     });
 
     if (hayError) {
@@ -569,6 +582,8 @@ document.getElementById('arbitrajeForm').addEventListener('submit', function (e)
         formData.append(`personas[${i}][telefono]`,  p.telefono  || '');
         formData.append(`personas[${i}][ruc]`,       p.ruc       || '');
         formData.append(`personas[${i}][tipo]`,      p.tipo);
+        formData.append(`personas[${i}][direccion]`, p.direccion || ''); // 👈 AGREGAR ESTA LÍNEA
+
     });
 
     // Log del FormData ya armado

@@ -121,7 +121,6 @@
             <div class="table-responsive">
                 <table class="table table-hover mb-0" id="tablaArbitrajes">
                     <thead class="table-light">
-                        32
                             <th width="80">ID</th>
                             <th>Materia</th>
                             <th>Creador</th>

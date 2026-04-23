@@ -159,6 +159,9 @@
                                             @if($persona->telefono)
                                                 <br><small class="text-muted"><i class="fas fa-phone me-1"></i>{{ $persona->telefono }}</small>
                                             @endif
+                                             @if($persona->direccion)
+                                                <br><small class="text-muted"><i class="fas fa-home me-1"></i>{{ $persona->direccion }}</small>
+                                            @endif
                                         </div>
                                         <i class="fas fa-user fa-2x text-muted"></i>
                                     </div>

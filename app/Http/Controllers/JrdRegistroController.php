@@ -89,6 +89,7 @@ class JrdRegistroController extends Controller
                     'correo'    => $persona['correo']    ?? null,
                     'telefono'  => $persona['telefono']  ?? null,
                     'ruc'       => $persona['ruc']       ?? null,
+                    'direccion' => $persona['direccion'] ?? null, // 👈 Añadir esta línea
                 ];
 
                 Log::info("Guardando persona {$index}:", $datosPersona);

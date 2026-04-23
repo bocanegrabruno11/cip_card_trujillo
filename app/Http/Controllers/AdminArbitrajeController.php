@@ -101,6 +101,7 @@ class AdminArbitrajeController extends Controller
                         'telefono'  => $p->telefono,
                         'ruc'       => $p->ruc,
                         'tipo'      => $p->tipo,
+                        'direccion'      => $p->direccion,
                     ]),
                     'procesos' => $arbitraje->procesos->map(function ($proceso) use ($arbitraje) {
                         return [
