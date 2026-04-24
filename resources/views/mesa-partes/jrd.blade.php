@@ -117,7 +117,7 @@
                 </div>
 
                 <div class="col-md-6">
-                    <label class="form-label">Designación de Adjudicadores <span class="text-muted small">(opcional)</span></label>
+                    <label class="form-label">Designación de Adjudicadores</label>
                     <input type="text" class="form-control" name="designacion_adjudicadores"
                            placeholder="Ej: Adjudicador único, Tribunal, etc.">
                 </div>
@@ -309,7 +309,13 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             dniSolicitante = data.persona.dni;
+            direccionSolicitante = data.persona.direccion;
+            telefonoSolicitante =    data.persona.celular;
+            correoSolicitante =data.persona.correo_contacto;
             document.getElementById('solicitante-dni').value = dniSolicitante;
+            document.getElementById('solicitante-direccion').value = direccionSolicitante;
+            document.getElementById('solicitante-telefono').value = telefonoSolicitante;
+            document.getElementById('solicitante-correo').value = correoSolicitante;
 
             if (data.persona.nombres) {
                 document.getElementById('solicitante-nombres').value = data.persona.nombres;

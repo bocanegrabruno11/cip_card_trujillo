@@ -18,21 +18,20 @@ class ArbitrajeRegistroController extends Controller
 {
     public function store(Request $request)
     {
-        // Habilitar logging para debug
         Log::info('Iniciando registro de arbitraje', [
             'user_id' => Auth::id(),
-            'request_data' => $request->except(['voucher'])
+            'request_data' => $request->except(['voucher', 'escrito'])
         ]);
 
         try {
             // ── Validación ────────────────────────────────────────────────────────
             $validated = $request->validate([
-                'nombre_materia' => 'required|string|max:255',
-                'pretenciones'   => 'required|string',
-                'cuantia'        => 'nullable|string|max:550',
-                'tasa_solicitud' => 'nullable|string|max:550',
+                'nombre_materia'       => 'required|string|max:255',
+                'pretenciones'         => 'required|string',
+                'cuantia'              => 'nullable|string|max:550',
+                'tasa_solicitud'       => 'nullable|string|max:550',
                 'designacion_arbitral' => 'nullable|string|max:255',
-                'controversia' => 'nullable|string|max:550',
+                'controversia'         => 'nullable|string|max:550',
                 // Personas
                 'personas'               => 'required|array|min:2',
                 'personas.*.dni'         => 'required|string|size:8',
@@ -43,15 +42,15 @@ class ArbitrajeRegistroController extends Controller
                 'personas.*.telefono'    => 'nullable|string|max:20',
                 'personas.*.ruc'         => 'nullable|string|max:11',
                 'personas.*.direccion'   => 'nullable|string|max:550',
-
                 // Documentos
-                'voucher'               => 'required|file|mimes:jpg,jpeg,png,pdf|max:20480', // Aumentado a 20MB y añadido PNG, PDF
+                'voucher'               => 'required|file|mimes:jpg,jpeg,png,pdf|max:20480',
+                'escrito'               => 'nullable|file|mimes:pdf|max:20480',
                 'drive_link'            => 'nullable|url',
                 'nombre_documento_link' => 'nullable|string|max:255',
             ]);
 
             // Validar que si viene drive_link también venga el nombre y viceversa
-            $driveLink  = $request->input('drive_link', '');
+            $driveLink   = $request->input('drive_link', '');
             $driveNombre = $request->input('nombre_documento_link', '');
 
             if (($driveLink && !$driveNombre) || (!$driveLink && $driveNombre)) {
@@ -69,11 +68,11 @@ class ArbitrajeRegistroController extends Controller
                 'fecha_inicio'         => now(),
                 'nombre_materia'       => $request->nombre_materia,
                 'pretenciones'         => $request->pretenciones,
-                'cuantia'              => $request->cuantia ?? null,
-                'tasa_solicitud'       => $request->tasa_solicitud ?? null,
+                'cuantia'              => $request->cuantia              ?? null,
+                'tasa_solicitud'       => $request->tasa_solicitud       ?? null,
                 'designacion_arbitral' => $request->designacion_arbitral ?? null,
-                'controversia'         => $request->controversia ?? null, // 👈 AGREGAR ESTA LÍNEA
-                'fundamentos_hecho'         => $request->fundamentos_hecho ?? null, // 👈 AGREGAR ESTA LÍNEA
+                'controversia'         => $request->controversia         ?? null,
+                'fundamentos_hecho'    => $request->fundamentos_hecho    ?? null,
                 'estado'               => 'validando',
             ]);
 
@@ -86,11 +85,11 @@ class ArbitrajeRegistroController extends Controller
                     'dni'          => $persona['dni'],
                     'nombres'      => $persona['nombres'],
                     'apellidos'    => $persona['apellidos'],
-                    'correo'       => $persona['correo']   ?? null,
-                    'telefono'     => $persona['telefono'] ?? null,
-                    'ruc'          => $persona['ruc']      ?? null,
+                    'correo'       => $persona['correo']    ?? null,
+                    'telefono'     => $persona['telefono']  ?? null,
+                    'ruc'          => $persona['ruc']       ?? null,
                     'tipo'         => $persona['tipo'],
-                    'direccion'    => $persona['direccion']?? null,
+                    'direccion'    => $persona['direccion'] ?? null,
                 ]);
             }
 
@@ -119,32 +118,49 @@ class ArbitrajeRegistroController extends Controller
 
             // ── 4. Documentos ─────────────────────────────────────────────────
 
-            // 4a. VOUCHER - Guardar como tipo 'voucher' (no como 'imagen')
-            $file = $request->file('voucher');
-            $filename = time() . '_' . preg_replace('/[^a-zA-Z0-9._-]/', '', $file->getClientOriginalName());
-            $rutaRelativa = $file->storeAs('uploads/vouchers', $filename, 'public');
-            
-            if (!$rutaRelativa) {
+            // 4a. VOUCHER — nombre generado automáticamente
+            $voucher   = $request->file('voucher');
+            $vNombre   = time() . '_' . preg_replace('/[^a-zA-Z0-9._-]/', '', $voucher->getClientOriginalName());
+            $vRuta     = $voucher->storeAs('uploads/vouchers', $vNombre, 'public');
+
+            if (!$vRuta) {
                 DB::rollBack();
-                Log::error('Error al guardar el archivo');
                 return response()->json([
                     'error'   => true,
-                    'detalle' => 'Error al guardar el archivo. Verifica los permisos de la carpeta storage.'
+                    'detalle' => 'Error al guardar el voucher. Verifica los permisos de la carpeta storage.'
                 ], 500);
             }
 
-            // 🔥 CAMBIO IMPORTANTE: Guardar como tipo 'voucher'
             ProcesoArbitrajeDocumento::create([
                 'id_proceso_de_arbitraje' => $proceso->id_proceso_de_arbitraje,
                 'fecha_subida'            => now(),
-                'tipo_documento'          => 'voucher',  // 👈 Cambiado de 'imagen' a 'voucher'
-                'nombre_original'         => $request->input('nombre_documento', $file->getClientOriginalName()),
-                'ruta_archivo'            => '/storage/' . $rutaRelativa,
+                'tipo_documento'          => 'voucher',
+                'nombre_original'         => 'Voucher de Pago - ' . now()->format('d/m/Y'),
+                'ruta_archivo'            => '/storage/' . $vRuta,
                 'user_id'                 => Auth::id(),
-                'observaciones'           => $request->input('observaciones', 'Voucher de pago para tasa de solicitud')
+                'observaciones'           => 'Voucher de pago para tasa de solicitud',
             ]);
 
-            // 4b. Link de Google Drive (opcional)
+            // 4b. ESCRITO PDF (opcional)
+            if ($request->hasFile('escrito')) {
+                $escrito  = $request->file('escrito');
+                $eNombre  = time() . '_escrito_' . preg_replace('/[^a-zA-Z0-9._-]/', '', $escrito->getClientOriginalName());
+                $eRuta    = $escrito->storeAs('uploads/escritos', $eNombre, 'public');
+
+                if ($eRuta) {
+                    ProcesoArbitrajeDocumento::create([
+                        'id_proceso_de_arbitraje' => $proceso->id_proceso_de_arbitraje,
+                        'fecha_subida'            => now(),
+                        'tipo_documento'          => 'escrito',
+                        'nombre_original'         => $escrito->getClientOriginalName(),
+                        'ruta_archivo'            => '/storage/' . $eRuta,
+                        'user_id'                 => Auth::id(),
+                        'observaciones'           => 'Escrito de solicitud de arbitraje',
+                    ]);
+                }
+            }
+
+            // 4c. Link de Google Drive (opcional)
             if ($driveLink) {
                 ProcesoArbitrajeDocumento::create([
                     'id_proceso_de_arbitraje' => $proceso->id_proceso_de_arbitraje,
@@ -153,7 +169,7 @@ class ArbitrajeRegistroController extends Controller
                     'nombre_original'         => $driveNombre,
                     'ruta_archivo'            => $driveLink,
                     'user_id'                 => Auth::id(),
-                    'observaciones'           => 'Documento adicional de Google Drive'
+                    'observaciones'           => 'Documento adicional de Google Drive',
                 ]);
             }
 
@@ -181,7 +197,6 @@ class ArbitrajeRegistroController extends Controller
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString()
             ]);
-
             return response()->json([
                 'error'   => true,
                 'detalle' => 'Error interno: ' . $e->getMessage(),

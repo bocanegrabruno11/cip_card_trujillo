@@ -78,8 +78,8 @@
 </div>
 
 <!-- Spinner de carga -->
-<div id="loading-spinner" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 9999; justify-content: center; align-items: center;">
-    <div class="spinner-border text-light" role="status" style="width: 3rem; height: 3rem;">
+<div id="loading-spinner" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:9999; justify-content:center; align-items:center;">
+    <div class="spinner-border text-light" role="status" style="width:3rem; height:3rem;">
         <span class="visually-hidden">Cargando...</span>
     </div>
 </div>
@@ -99,31 +99,22 @@
 
                 <div class="col-md-6">
                     <label class="form-label">Materia <span class="text-danger">*</span></label>
-                    <input type="text" class="form-control" name="nombre_materia" placeholder="Ej: Incumplimiento de contrato" required>
+                    <input type="text" class="form-control" name="nombre_materia"
+                           placeholder="Ej: Incumplimiento de contrato" required>
                 </div>
 
                 <div class="col-md-3">
-                    <label class="form-label">
-                        Cuantía
-                    </label>
-                    <div class="input-group">
-                        <input type="text" class="form-control" name="cuantia">
-                    </div>
+                    <label class="form-label">Cuantía</label>
+                    <input type="text" class="form-control" name="cuantia">
                 </div>
 
                 <div class="col-md-3">
-                    <label class="form-label">
-                        Tasa de Solicitud
-                    </label>
-                    <div class="input-group">
-                        <input type="text" class="form-control" name="tasa_solicitud">
-                    </div>
+                    <label class="form-label">Tasa de Solicitud</label>
+                    <input type="text" class="form-control" name="tasa_solicitud">
                 </div>
 
                 <div class="col-md-6">
-                    <label class="form-label">
-                        Designación Arbitral <span class="text-muted small">(opcional)</span>
-                    </label>
+                    <label class="form-label">Designación Arbitral</label>
                     <input type="text" class="form-control" name="designacion_arbitral"
                            placeholder="Ej: Árbitro único, Tribunal arbitral, etc.">
                 </div>
@@ -133,11 +124,13 @@
                     <textarea class="form-control" name="pretenciones" rows="3"
                               placeholder="Describa las pretensiones del arbitraje..." required></textarea>
                 </div>
+
                 <div class="col-md-12">
                     <label class="form-label">Controversia <span class="text-danger">*</span></label>
                     <textarea class="form-control" name="controversia" rows="3"
                               placeholder="Describa la controversia del arbitraje..." required></textarea>
                 </div>
+
                 <div class="col-md-12">
                     <label class="form-label">Fundamentos de hecho <span class="text-danger">*</span></label>
                     <textarea class="form-control" name="fundamentos_hecho" rows="3"
@@ -183,10 +176,10 @@
                     <input type="text" class="form-control" id="demandante-telefono"
                            placeholder="987654321" maxlength="9" oninput="soloNumeros(this, 9)">
                 </div>
+
                 <div class="col-md-3">
                     <label class="form-label">Domicilio</label>
-                    <input type="text" class="form-control" id="demandante-direccion"
-                           placeholder="Av Mansiche 250">
+                    <input type="text" class="form-control" id="demandante-direccion" placeholder="Av Mansiche 250">
                 </div>
             </div>
         </div>
@@ -203,29 +196,74 @@
         <!-- ====== DOCUMENTACIÓN ====== -->
         <h5 class="mt-2 mb-3">Documentación</h5>
 
-        <!-- Voucher (obligatorio) -->
+        <!-- ── MEDIOS DE PAGO ─────────────────────────────────────────────── -->
+        <div class="card mb-4 border-0" style="background:#fffbeb; border-left:4px solid #f59e0b !important; border-radius:8px;">
+            <div class="card-body py-3">
+                <h6 class="fw-bold mb-3" style="color:#92400e;">
+                    <i class="fas fa-university me-2" style="color:#f59e0b;"></i>MEDIOS DE PAGO
+                </h6>
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <div class="pago-item p-2 rounded" style="background:#fff; border:1px solid #fde68a;">
+                            <div class="text-muted small fw-semibold mb-1">CAJA TRUJILLO</div>
+                            <div class="fw-bold">000137172-001</div>
+                            <div class="text-muted small">CCI: 80200100013717200180</div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="pago-item p-2 rounded" style="background:#fff; border:1px solid #fde68a;">
+                            <div class="text-muted small fw-semibold mb-1">INTERBANK — CUENTA EN SOLES</div>
+                            <div class="fw-bold">616-300756418-7</div>
+                            <div class="text-muted small">CCI: 00361600300756418705</div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="pago-item p-2 rounded" style="background:#fff; border:1px solid #fde68a;">
+                            <div class="text-muted small fw-semibold mb-1">BANCO DE COMERCIO — CUENTA EN SOLES</div>
+                            <div class="fw-bold">110-010476413</div>
+                            <div class="text-muted small">CCI: 02304511001047641386</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- ──────────────────────────────────────────────────────────────── -->
+
+        <!-- Voucher de pago (obligatorio) -->
         <div class="mb-4">
-            <label for="voucher" class="form-label">Voucher de Pago <span class="text-danger">*</span></label>
-            <div class="file-upload-area p-3 border rounded" onclick="document.getElementById('voucher').click()" style="cursor: pointer;">
+            <label class="form-label">Voucher de Pago <span class="text-danger">*</span></label>
+            <div class="file-upload-area p-3 border rounded"
+                 onclick="document.getElementById('voucher').click()" style="cursor:pointer;">
                 <div class="text-center">
                     <i class="fas fa-cloud-upload-alt fa-2x text-muted mb-2"></i>
                     <p class="mb-1">Haz clic para subir el voucher</p>
-                    <p class="text-muted small mb-2">Formatos aceptados: JPG, JPEG, PNG, PDF (Máx. 20MB)</p>
+                    <p class="text-muted small mb-2">Formatos aceptados: JPG, JPEG, PNG, PDF &nbsp;(Máx. 20 MB)</p>
                     <div id="voucherFileName" class="text-primary fw-bold">Ningún archivo seleccionado</div>
                 </div>
             </div>
-            <input type="file" class="form-control d-none" id="voucher" name="voucher" accept=".jpg,.jpeg,.png,.pdf" required>
+            <input type="file" class="form-control d-none" id="voucher" name="voucher"
+                   accept=".jpg,.jpeg,.png,.pdf" required>
         </div>
 
-        <!-- Nombre descriptivo para el voucher -->
-        <div class="mb-3">
-            <label for="nombre_documento" class="form-label">Nombre del Voucher <span class="text-danger">*</span></label>
-            <input type="text" class="form-control" id="nombre_documento" name="nombre_documento"
-                   placeholder="Ej: Voucher de pago - Tasa de solicitud" value="Voucher de Pago" required>
-            <small class="text-muted">Nombre que identificará este voucher en el sistema</small>
+        <!-- Escrito PDF (opcional) -->
+        <div class="mb-4">
+            <label class="form-label">
+                Archivo de Escrito
+                <span class="text-muted small">(opcional)</span>
+            </label>
+            <div class="file-upload-area file-upload-escrito p-3 border rounded"
+                 onclick="document.getElementById('escrito').click()" style="cursor:pointer;">
+                <div class="text-center">
+                    <i class="fas fa-file-pdf fa-2x mb-2" style="color:#dc3545;"></i>
+                    <p class="mb-1">Haz clic para subir el escrito</p>
+                    <p class="text-muted small mb-2">Solo PDF &nbsp;(Máx. 20 MB)</p>
+                    <div id="escritoFileName" class="text-primary fw-bold">Ningún archivo seleccionado</div>
+                </div>
+            </div>
+            <input type="file" class="form-control d-none" id="escrito" name="escrito" accept=".pdf">
         </div>
 
-        <!-- Link de Google Drive (Opcional) -->
+        <!-- Link de Google Drive (opcional) -->
         <div class="mb-4">
             <div class="row">
                 <div class="col-md-6 mb-3">
@@ -246,7 +284,7 @@
         <div class="alert alert-info">
             <small>
                 <i class="fas fa-info-circle me-1"></i>
-                <strong>Nota:</strong> El voucher de pago es obligatorio y se guardará como tipo "voucher" para su posterior verificación.
+                <strong>Nota:</strong> El voucher de pago es obligatorio y será verificado por el personal del centro de arbitraje.
             </small>
         </div>
 
@@ -262,7 +300,7 @@
 @push('scripts')
 <script>
 
-let dniDemandante = '';
+let dniDemandante     = '';
 let contadorDemandados = 0;
 
 function toggleSpinner(show) {
@@ -313,20 +351,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
             dniDemandante = data.persona.dni;
-            document.getElementById('demandante-dni').value = dniDemandante;
+            document.getElementById('demandante-dni').value      = dniDemandante;
+            document.getElementById('demandante-direccion').value = data.persona.direccion      || '';
+            document.getElementById('demandante-telefono').value  = data.persona.celular        || '';
+            document.getElementById('demandante-correo').value    = data.persona.correo_contacto || '';
 
-            if (data.persona.nombres) {
-                document.getElementById('demandante-nombres').value = data.persona.nombres;
-            }
-            if (data.persona.apellidos) {
-                document.getElementById('demandante-apellidos').value = data.persona.apellidos;
-            }
-            if (data.persona.email) {
-                document.getElementById('demandante-correo').value = data.persona.email;
-            }
-            if (data.persona.telefono) {
-                document.getElementById('demandante-telefono').value = data.persona.telefono;
-            }
+            if (data.persona.nombres)   document.getElementById('demandante-nombres').value   = data.persona.nombres;
+            if (data.persona.apellidos) document.getElementById('demandante-apellidos').value  = data.persona.apellidos;
+            if (data.persona.email)     document.getElementById('demandante-correo').value     = data.persona.email;
+            if (data.persona.telefono)  document.getElementById('demandante-telefono').value   = data.persona.telefono;
         })
         .catch(() => {
             toggleSpinner(false);
@@ -336,14 +369,25 @@ document.addEventListener('DOMContentLoaded', () => {
             );
         });
 
+    // Listener voucher
     document.getElementById('voucher').addEventListener('change', function () {
         const file = this.files[0];
         document.getElementById('voucherFileName').textContent = file ? file.name : 'Ningún archivo seleccionado';
-
         if (file && file.size > 20 * 1024 * 1024) {
-            showError('El archivo supera los 20MB permitidos.');
+            showError('El archivo supera los 20 MB permitidos.');
             this.value = '';
             document.getElementById('voucherFileName').textContent = 'Ningún archivo seleccionado';
+        }
+    });
+
+    // Listener escrito
+    document.getElementById('escrito').addEventListener('change', function () {
+        const file = this.files[0];
+        document.getElementById('escritoFileName').textContent = file ? file.name : 'Ningún archivo seleccionado';
+        if (file && file.size > 20 * 1024 * 1024) {
+            showError('El archivo de escrito supera los 20 MB permitidos.');
+            this.value = '';
+            document.getElementById('escritoFileName').textContent = 'Ningún archivo seleccionado';
         }
     });
 });
@@ -394,8 +438,7 @@ function agregarDemandado() {
             </div>
             <div class="col-md-3">
                 <label class="form-label">Domicilio <span class="text-muted small">(opcional)</span></label>
-                <input type="text" class="form-control campo-direccion" placeholder="Av Maansiche 230"
-                     data-id="${id}"">
+                <input type="text" class="form-control campo-direccion" placeholder="Av Mansiche 230" data-id="${id}">
             </div>
         </div>
     `;
@@ -418,7 +461,7 @@ document.getElementById('arbitrajeForm').addEventListener('submit', function (e)
     const correoD    = document.getElementById('demandante-correo').value.trim();
     const telefonoD  = document.getElementById('demandante-telefono').value.trim();
     const rucD       = document.getElementById('demandante-ruc').value.trim();
-    const DomicilioD       = document.getElementById('demandante-direccion').value.trim();
+    const domicilioD = document.getElementById('demandante-direccion').value.trim();
 
     if (!nombresD || !apellidosD) {
         showError('Los nombres y apellidos del demandante son obligatorios.');
@@ -432,7 +475,7 @@ document.getElementById('arbitrajeForm').addEventListener('submit', function (e)
         correo: correoD,
         telefono: telefonoD,
         ruc: rucD,
-        direccion: DomicilioD,
+        direccion: domicilioD,
         tipo: 'Demandante'
     });
 
@@ -456,10 +499,10 @@ document.getElementById('arbitrajeForm').addEventListener('submit', function (e)
         const dni       = dniInput.value.trim();
         const nombres   = nombresInput.value.trim();
         const apellidos = apellidosInput.value.trim();
-        const correo    = correoInput    ? correoInput.value.trim()   : '';
-        const telefono  = telefonoInput  ? telefonoInput.value.trim() : '';
-        const ruc       = rucInput       ? rucInput.value.trim()      : '';
-        const direccion = direccionInput ? direccionInput.value.trim() : ''; // 👈 Obtener el VALOR
+        const correo    = correoInput    ? correoInput.value.trim()    : '';
+        const telefono  = telefonoInput  ? telefonoInput.value.trim()  : '';
+        const ruc       = rucInput       ? rucInput.value.trim()       : '';
+        const direccion = direccionInput ? direccionInput.value.trim() : '';
 
         if (dni.length !== 8) {
             errorEl.textContent = 'El DNI debe tener exactamente 8 dígitos.';
@@ -485,7 +528,7 @@ document.getElementById('arbitrajeForm').addEventListener('submit', function (e)
             return;
         }
 
-        personas.push({ dni, nombres, apellidos, correo, telefono, ruc, tipo: 'Demandado',direccion });
+        personas.push({ dni, nombres, apellidos, correo, telefono, ruc, tipo: 'Demandado', direccion });
     });
 
     if (hayError) {
@@ -504,12 +547,6 @@ document.getElementById('arbitrajeForm').addEventListener('submit', function (e)
         return;
     }
 
-    const nombreDocumento = document.getElementById('nombre_documento').value.trim();
-    if (!nombreDocumento) {
-        showError('Debe ingresar un nombre para el voucher.');
-        return;
-    }
-
     const driveLink = document.getElementById('drive_link').value.trim();
     const driveName = document.getElementById('nombre_documento_link').value.trim();
 
@@ -523,45 +560,6 @@ document.getElementById('arbitrajeForm').addEventListener('submit', function (e)
         return;
     }
 
-    // ============================================================
-    // 🔍 LOG DE DIAGNÓSTICO — datos antes de armar el FormData
-    // ============================================================
-    console.group('%c📋 DIAGNÓSTICO — Datos a enviar', 'color: #0d6efd; font-weight: bold; font-size: 14px;');
-
-    console.group('%c👤 Demandante', 'color: #198754; font-weight: bold;');
-    console.table([personas[0]]);
-    console.groupEnd();
-
-    const demandados = personas.filter(p => p.tipo === 'Demandado');
-    console.group(`%c⚖️ Demandados (${demandados.length})`, 'color: #dc3545; font-weight: bold;');
-    if (demandados.length > 0) {
-        console.table(demandados);
-    } else {
-        console.warn('⚠️ No hay demandados en el array');
-    }
-    console.groupEnd();
-
-    console.group('%c📦 Todas las personas (array completo)', 'color: #6610f2; font-weight: bold;');
-    console.table(personas);
-    console.groupEnd();
-
-    console.group('%c📄 Metadatos del formulario', 'color: #0dcaf0; font-weight: bold;');
-    console.log('nombre_materia:',        document.querySelector('[name="nombre_materia"]').value);
-    console.log('pretenciones:',          document.querySelector('[name="pretenciones"]').value);
-    console.log('controversia:',          document.querySelector('[name="controversia"]').value);
-    console.log('fundamentos_hecho:',          document.querySelector('[name="fundamentos_hecho"]').value);
-    console.log('cuantia:',               document.querySelector('[name="cuantia"]').value);
-    console.log('tasa_solicitud:',        document.querySelector('[name="tasa_solicitud"]').value);
-    console.log('designacion_arbitral:',  document.querySelector('[name="designacion_arbitral"]').value);
-    console.log('nombre_documento:',      nombreDocumento);
-    console.log('drive_link:',            driveLink || '(vacío)');
-    console.log('nombre_documento_link:', driveName || '(vacío)');
-    console.log('voucher archivo:',       file ? `${file.name} (${(file.size / 1024).toFixed(1)} KB)` : '⚠️ SIN ARCHIVO');
-    console.groupEnd();
-
-    console.groupEnd(); // cierra grupo principal
-    // ============================================================
-
     toggleSpinner(true);
 
     const formData = new FormData();
@@ -569,7 +567,7 @@ document.getElementById('arbitrajeForm').addEventListener('submit', function (e)
     formData.append('nombre_materia',       document.querySelector('[name="nombre_materia"]').value);
     formData.append('pretenciones',         document.querySelector('[name="pretenciones"]').value);
     formData.append('controversia',         document.querySelector('[name="controversia"]').value);
-    formData.append('fundamentos_hecho',         document.querySelector('[name="fundamentos_hecho"]').value);
+    formData.append('fundamentos_hecho',    document.querySelector('[name="fundamentos_hecho"]').value);
     formData.append('cuantia',              document.querySelector('[name="cuantia"]').value);
     formData.append('tasa_solicitud',       document.querySelector('[name="tasa_solicitud"]').value);
     formData.append('designacion_arbitral', document.querySelector('[name="designacion_arbitral"]').value);
@@ -582,27 +580,16 @@ document.getElementById('arbitrajeForm').addEventListener('submit', function (e)
         formData.append(`personas[${i}][telefono]`,  p.telefono  || '');
         formData.append(`personas[${i}][ruc]`,       p.ruc       || '');
         formData.append(`personas[${i}][tipo]`,      p.tipo);
-        formData.append(`personas[${i}][direccion]`, p.direccion || ''); // 👈 AGREGAR ESTA LÍNEA
-
+        formData.append(`personas[${i}][direccion]`, p.direccion || '');
     });
-
-    // Log del FormData ya armado
-    console.group('%c📤 FormData armado (personas)', 'color: #fd7e14; font-weight: bold;');
-    personas.forEach((p, i) => {
-        console.log(`personas[${i}]:`, {
-            dni:       formData.get(`personas[${i}][dni]`),
-            nombres:   formData.get(`personas[${i}][nombres]`),
-            apellidos: formData.get(`personas[${i}][apellidos]`),
-            correo:    formData.get(`personas[${i}][correo]`),
-            telefono:  formData.get(`personas[${i}][telefono]`),
-            ruc:       formData.get(`personas[${i}][ruc]`),
-            tipo:      formData.get(`personas[${i}][tipo]`),
-        });
-    });
-    console.groupEnd();
 
     formData.append('voucher', file);
-    formData.append('nombre_documento', nombreDocumento);
+
+    // Escrito (si se seleccionó)
+    const escritoFile = document.getElementById('escrito').files[0];
+    if (escritoFile) {
+        formData.append('escrito', escritoFile);
+    }
 
     if (driveLink) {
         formData.append('drive_link', driveLink);
@@ -617,10 +604,6 @@ document.getElementById('arbitrajeForm').addEventListener('submit', function (e)
     .then(r => r.json())
     .then(data => {
         toggleSpinner(false);
-        console.group('%c📥 Respuesta del servidor', 'color: #6c757d; font-weight: bold;');
-        console.log(data);
-        console.groupEnd();
-
         if (data.error) {
             showError(data.detalle || data.message || 'Error al registrar');
         } else if (data.success) {
@@ -631,7 +614,6 @@ document.getElementById('arbitrajeForm').addEventListener('submit', function (e)
     })
     .catch(err => {
         toggleSpinner(false);
-        console.error('❌ Error de red:', err);
         showError('Error de red: ' + err.message);
     });
 });
@@ -668,6 +650,10 @@ document.getElementById('arbitrajeForm').addEventListener('submit', function (e)
     background-color: #e9ecef;
 }
 
+.file-upload-escrito:hover {
+    border-color: #dc3545 !important;
+}
+
 .demandado-item {
     animation: fadeIn 0.3s ease;
 }
@@ -675,6 +661,13 @@ document.getElementById('arbitrajeForm').addEventListener('submit', function (e)
 @keyframes fadeIn {
     from { opacity: 0; transform: translateY(-10px); }
     to   { opacity: 1; transform: translateY(0); }
+}
+
+.pago-item {
+    transition: box-shadow 0.2s;
+}
+.pago-item:hover {
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
 }
 </style>
 @endpush
