@@ -90,6 +90,7 @@ class AdminArbitrajeController extends Controller
                     'estado'                => $arbitraje->estado,
                     'controversia'         => $arbitraje->controversia,
                     'fundamentos_hecho'         => $arbitraje->fundamentos_hecho,
+                    'tipo_arbitraje'        => $arbitraje->tipo_arbitraje ?? 'normal', // ✅ AGREGAR ESTA LÍNEA
                     'creador_nombre'        => $creador ? $creador->name : 'Usuario #' . $arbitraje->user_id,
                     'creador_dni'           => $personaCreador ? $personaCreador->dni : 'N/A',
                     'personas'              => $arbitraje->personas->map(fn($p) => [

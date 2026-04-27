@@ -103,6 +103,7 @@ class ArbitrajeController extends Controller
                         'fecha_finalizacion'       => $proceso->fecha_finalizacion,
                         'estado'                   => $proceso->estado,
                         'controversia'             => $arbitraje->controversia,
+                        'tipo_arbitraje' => $arbitraje->tipo_arbitraje ?? 'normal',
                         'etapa'                    => $proceso->etapa ? [
                             'id'     => $proceso->etapa->id,
                             'nombre' => $proceso->etapa->nombre,
@@ -149,6 +150,7 @@ class ArbitrajeController extends Controller
                     'designacion_arbitral'  => $arbitraje->designacion_arbitral,
                     'fecha_inicio'          => $arbitraje->fecha_inicio,
                     'fecha_finalizacion'    => $arbitraje->fecha_finalizacion,
+                    'tipo_arbitraje' => $arbitraje->tipo_arbitraje ?? 'normal',
                     'estado'                => $arbitraje->estado,
                     'es_creador'            => $esCreador,
                     'rol_usuario'           => $esCreador ? 'Creador' : ($rolEnProceso ?? 'Observador'),

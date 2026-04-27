@@ -42,29 +42,12 @@
     </div>
 </div>
 
-<!-- Modal de éxito -->
-<div class="modal fade" id="successModal" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header bg-success text-white">
-                <h5 class="modal-title">✓ Registro Exitoso</h5>
-            </div>
-            <div class="modal-body">
-                <p>El arbitraje se ha registrado correctamente.</p>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-success" id="btn-success-ok">Aceptar</button>
-            </div>
-        </div>
-    </div>
-</div>
-
 <!-- Modal de error -->
 <div class="modal fade" id="errorModal" tabindex="-1">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header bg-danger text-white">
-                <h5 class="modal-title">⚠ Error</h5>
+                <h5 class="modal-title">&#9888; Error</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
@@ -86,7 +69,10 @@
 
 <div class="container mt-4">
 
-    <form id="arbitrajeForm">
+    {{-- novalidate: desactiva validacion nativa del browser para evitar el error
+         "invalid form control is not focusable" en inputs ocultos. Toda la
+         validacion la maneja el JS del submit. --}}
+    <form id="arbitrajeForm" novalidate>
         @csrf
 
         <h4 class="mb-4">Registrar Arbitraje</h4>
@@ -100,11 +86,11 @@
                 <div class="col-md-6">
                     <label class="form-label">Materia <span class="text-danger">*</span></label>
                     <input type="text" class="form-control" name="nombre_materia"
-                           placeholder="Ej: Incumplimiento de contrato" required>
+                           placeholder="Ej: Incumplimiento de contrato">
                 </div>
 
                 <div class="col-md-3">
-                    <label class="form-label">Cuantía</label>
+                    <label class="form-label">Cuantia</label>
                     <input type="text" class="form-control" name="cuantia">
                 </div>
 
@@ -114,28 +100,37 @@
                 </div>
 
                 <div class="col-md-6">
-                    <label class="form-label">Designación Arbitral</label>
+                    <label class="form-label">Designacion Arbitral</label>
                     <input type="text" class="form-control" name="designacion_arbitral"
-                           placeholder="Ej: Árbitro único, Tribunal arbitral, etc.">
+                           placeholder="Ej: Arbitro unico, Tribunal arbitral, etc.">
+                </div>
+
+                <div class="col-md-3">
+                    <label class="form-label">Tipo de Arbitraje <span class="text-danger">*</span></label>
+                    <select class="form-select" name="tipo_arbitraje">
+                        <option value="normal" selected>Normal</option>
+                        <option value="emergencia">Emergencia</option>
+                    </select>
                 </div>
 
                 <div class="col-md-12">
                     <label class="form-label">Pretensiones <span class="text-danger">*</span></label>
                     <textarea class="form-control" name="pretenciones" rows="3"
-                              placeholder="Describa las pretensiones del arbitraje..." required></textarea>
+                              placeholder="Describa las pretensiones del arbitraje..."></textarea>
                 </div>
 
                 <div class="col-md-12">
                     <label class="form-label">Controversia <span class="text-danger">*</span></label>
                     <textarea class="form-control" name="controversia" rows="3"
-                              placeholder="Describa la controversia del arbitraje..." required></textarea>
+                              placeholder="Describa la controversia del arbitraje..."></textarea>
                 </div>
 
                 <div class="col-md-12">
                     <label class="form-label">Fundamentos de hecho <span class="text-danger">*</span></label>
                     <textarea class="form-control" name="fundamentos_hecho" rows="3"
-                              placeholder="Describa los fundamentos de hecho del arbitraje..." required></textarea>
+                              placeholder="Describa los fundamentos de hecho del arbitraje..."></textarea>
                 </div>
+
             </div>
         </div>
 
@@ -152,12 +147,12 @@
 
                 <div class="col-md-3">
                     <label class="form-label">Nombres <span class="text-danger">*</span></label>
-                    <input type="text" class="form-control" id="demandante-nombres" placeholder="Nombres" required>
+                    <input type="text" class="form-control" id="demandante-nombres" placeholder="Nombres">
                 </div>
 
                 <div class="col-md-3">
                     <label class="form-label">Apellidos <span class="text-danger">*</span></label>
-                    <input type="text" class="form-control" id="demandante-apellidos" placeholder="Apellidos" required>
+                    <input type="text" class="form-control" id="demandante-apellidos" placeholder="Apellidos">
                 </div>
 
                 <div class="col-md-3">
@@ -172,7 +167,7 @@
                 </div>
 
                 <div class="col-md-3">
-                    <label class="form-label">Teléfono <span class="text-muted small">(opcional)</span></label>
+                    <label class="form-label">Telefono <span class="text-muted small">(opcional)</span></label>
                     <input type="text" class="form-control" id="demandante-telefono"
                            placeholder="987654321" maxlength="9" oninput="soloNumeros(this, 9)">
                 </div>
@@ -181,6 +176,7 @@
                     <label class="form-label">Domicilio</label>
                     <input type="text" class="form-control" id="demandante-direccion" placeholder="Av Mansiche 250">
                 </div>
+
             </div>
         </div>
 
@@ -193,10 +189,10 @@
             <i class="fas fa-user-plus me-1"></i> Agregar Demandado
         </button>
 
-        <!-- ====== DOCUMENTACIÓN ====== -->
-        <h5 class="mt-2 mb-3">Documentación</h5>
+        <!-- ====== DOCUMENTACION ====== -->
+        <h5 class="mt-2 mb-3">Documentacion</h5>
 
-        <!-- ── MEDIOS DE PAGO ─────────────────────────────────────────────── -->
+        <!-- MEDIOS DE PAGO -->
         <div class="card mb-4 border-0" style="background:#fffbeb; border-left:4px solid #f59e0b !important; border-radius:8px;">
             <div class="card-body py-3">
                 <h6 class="fw-bold mb-3" style="color:#92400e;">
@@ -212,14 +208,14 @@
                     </div>
                     <div class="col-md-4">
                         <div class="pago-item p-2 rounded" style="background:#fff; border:1px solid #fde68a;">
-                            <div class="text-muted small fw-semibold mb-1">INTERBANK — CUENTA EN SOLES</div>
+                            <div class="text-muted small fw-semibold mb-1">INTERBANK - CUENTA EN SOLES</div>
                             <div class="fw-bold">616-300756418-7</div>
                             <div class="text-muted small">CCI: 00361600300756418705</div>
                         </div>
                     </div>
                     <div class="col-md-4">
                         <div class="pago-item p-2 rounded" style="background:#fff; border:1px solid #fde68a;">
-                            <div class="text-muted small fw-semibold mb-1">BANCO DE COMERCIO — CUENTA EN SOLES</div>
+                            <div class="text-muted small fw-semibold mb-1">BANCO DE COMERCIO - CUENTA EN SOLES</div>
                             <div class="fw-bold">110-010476413</div>
                             <div class="text-muted small">CCI: 02304511001047641386</div>
                         </div>
@@ -227,22 +223,23 @@
                 </div>
             </div>
         </div>
-        <!-- ──────────────────────────────────────────────────────────────── -->
 
         <!-- Voucher de pago (obligatorio) -->
+        <!-- SIN required en el input: evita "invalid form control not focusable" -->
+        <!-- La validacion obligatoria la maneja el JS -->
         <div class="mb-4">
             <label class="form-label">Voucher de Pago <span class="text-danger">*</span></label>
-            <div class="file-upload-area p-3 border rounded"
+            <div class="file-upload-area p-3 border rounded" id="voucher-area"
                  onclick="document.getElementById('voucher').click()" style="cursor:pointer;">
                 <div class="text-center">
                     <i class="fas fa-cloud-upload-alt fa-2x text-muted mb-2"></i>
                     <p class="mb-1">Haz clic para subir el voucher</p>
-                    <p class="text-muted small mb-2">Formatos aceptados: JPG, JPEG, PNG, PDF &nbsp;(Máx. 20 MB)</p>
-                    <div id="voucherFileName" class="text-primary fw-bold">Ningún archivo seleccionado</div>
+                    <p class="text-muted small mb-2">Formatos aceptados: JPG, JPEG, PNG, PDF (Max. 20 MB)</p>
+                    <div id="voucherFileName" class="text-primary fw-bold">Ningun archivo seleccionado</div>
                 </div>
             </div>
             <input type="file" class="form-control d-none" id="voucher" name="voucher"
-                   accept=".jpg,.jpeg,.png,.pdf" required>
+                   accept=".jpg,.jpeg,.png,.pdf">
         </div>
 
         <!-- Escrito PDF (opcional) -->
@@ -256,8 +253,8 @@
                 <div class="text-center">
                     <i class="fas fa-file-pdf fa-2x mb-2" style="color:#dc3545;"></i>
                     <p class="mb-1">Haz clic para subir el escrito</p>
-                    <p class="text-muted small mb-2">Solo PDF &nbsp;(Máx. 20 MB)</p>
-                    <div id="escritoFileName" class="text-primary fw-bold">Ningún archivo seleccionado</div>
+                    <p class="text-muted small mb-2">Solo PDF (Max. 20 MB)</p>
+                    <div id="escritoFileName" class="text-primary fw-bold">Ningun archivo seleccionado</div>
                 </div>
             </div>
             <input type="file" class="form-control d-none" id="escrito" name="escrito" accept=".pdf">
@@ -276,7 +273,7 @@
                     <label for="nombre_documento_link" class="form-label">Nombre del Documento en Drive</label>
                     <input type="text" class="form-control" id="nombre_documento_link" name="nombre_documento_link"
                            placeholder="Ej: Contrato firmado, Acuerdo, etc.">
-                    <small class="text-muted">Nombre que identificará el documento</small>
+                    <small class="text-muted">Nombre que identificara el documento</small>
                 </div>
             </div>
         </div>
@@ -284,7 +281,7 @@
         <div class="alert alert-info">
             <small>
                 <i class="fas fa-info-circle me-1"></i>
-                <strong>Nota:</strong> El voucher de pago es obligatorio y será verificado por el personal del centro de arbitraje.
+                <strong>Nota:</strong> El voucher de pago es obligatorio y sera verificado por el personal del centro de arbitraje.
             </small>
         </div>
 
@@ -300,8 +297,10 @@
 @push('scripts')
 <script>
 
-let dniDemandante     = '';
+let dniDemandante      = '';
 let contadorDemandados = 0;
+
+// ── Utilidades UI ─────────────────────────────────────────────────────────────
 
 function toggleSpinner(show) {
     document.getElementById('loading-spinner').style.display = show ? 'flex' : 'none';
@@ -321,13 +320,6 @@ function showError(message) {
     new bootstrap.Modal(document.getElementById('errorModal')).show();
 }
 
-function showSuccess() {
-    new bootstrap.Modal(document.getElementById('successModal')).show();
-    document.getElementById('btn-success-ok').addEventListener('click', () => {
-        window.location.reload();
-    });
-}
-
 function soloNumeros(input, maxLen) {
     input.value = input.value.replace(/[^0-9]/g, '').substring(0, maxLen);
 }
@@ -335,6 +327,136 @@ function soloNumeros(input, maxLen) {
 function isDNIDuplicado(dni, lista) {
     return lista.some(p => p.dni === dni);
 }
+
+// ── Modal de resumen post-registro ────────────────────────────────────────────
+
+function showResumenRegistro(data, resumen) {
+    const hayAlertas = resumen.alertas.length > 0;
+
+    const itemsOk = resumen.ok.map(txt =>
+        `<li class="list-group-item list-group-item-success py-2">
+            <i class="fas fa-check-circle me-2 text-success"></i>${txt}
+        </li>`
+    ).join('');
+
+    const itemsAlerta = resumen.alertas.map(txt =>
+        `<li class="list-group-item list-group-item-warning py-2">
+            <i class="fas fa-exclamation-triangle me-2 text-warning"></i>${txt}
+        </li>`
+    ).join('');
+
+    const modalHtml = `
+        <div class="modal fade" id="resumenModal" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header ${hayAlertas ? 'bg-warning' : 'bg-success'} text-white">
+                        <h5 class="modal-title">
+                            <i class="fas ${hayAlertas ? 'fa-exclamation-circle' : 'fa-check-circle'} me-2"></i>
+                            ${hayAlertas ? 'Registrado con observaciones' : 'Arbitraje Registrado Correctamente'}
+                        </h5>
+                    </div>
+                    <div class="modal-body">
+                        ${hayAlertas ? `
+                        <div class="alert alert-warning mb-3">
+                            <i class="fas fa-info-circle me-1"></i>
+                            El arbitraje fue guardado, pero algunos campos opcionales estan incompletos.
+                        </div>` : ''}
+                        <p class="text-muted small mb-2">
+                            <strong>Expediente #${data.arbitraje}</strong> &mdash; Resumen de lo registrado:
+                        </p>
+                        <ul class="list-group list-group-flush mb-0">
+                            ${itemsOk}
+                            ${itemsAlerta}
+                        </ul>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn ${hayAlertas ? 'btn-warning' : 'btn-success'}" id="btn-resumen-ok">
+                            Aceptar
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+
+    const viejo = document.getElementById('resumenModal');
+    if (viejo) viejo.remove();
+
+    document.body.insertAdjacentHTML('beforeend', modalHtml);
+    const modal = new bootstrap.Modal(document.getElementById('resumenModal'));
+    modal.show();
+
+    document.getElementById('btn-resumen-ok').addEventListener('click', () => {
+        modal.hide();
+        window.location.reload();
+    });
+}
+
+function construirResumen() {
+    const resumen = { ok: [], alertas: [] };
+
+    const materia = document.querySelector('[name="nombre_materia"]').value.trim();
+    materia
+        ? resumen.ok.push(`Materia registrada: <strong>${materia}</strong>`)
+        : resumen.alertas.push('La materia no fue registrada.');
+
+    const pretenciones = document.querySelector('[name="pretenciones"]').value.trim();
+    pretenciones
+        ? resumen.ok.push('Pretensiones registradas.')
+        : resumen.alertas.push('Las pretensiones estan vacias.');
+
+    const controversia = document.querySelector('[name="controversia"]').value.trim();
+    controversia
+        ? resumen.ok.push('Controversia registrada.')
+        : resumen.alertas.push('La controversia esta vacia.');
+
+    const fundamentos = document.querySelector('[name="fundamentos_hecho"]').value.trim();
+    fundamentos
+        ? resumen.ok.push('Fundamentos de hecho registrados.')
+        : resumen.alertas.push('Los fundamentos de hecho estan vacios.');
+
+    const tipoArbitraje = document.querySelector('[name="tipo_arbitraje"]').value;
+    resumen.ok.push(`Tipo de arbitraje: <strong>${tipoArbitraje === 'emergencia' ? 'Emergencia' : 'Normal'}</strong>`);
+
+    const cuantia = document.querySelector('[name="cuantia"]').value.trim();
+    cuantia
+        ? resumen.ok.push(`Cuantia registrada: <strong>${cuantia}</strong>`)
+        : resumen.alertas.push('No se ingreso cuantia (campo opcional).');
+
+    const designacion = document.querySelector('[name="designacion_arbitral"]').value.trim();
+    designacion
+        ? resumen.ok.push(`Designacion arbitral: <strong>${designacion}</strong>`)
+        : resumen.alertas.push('No se ingreso designacion arbitral (campo opcional).');
+
+    const nombreDemandante   = document.getElementById('demandante-nombres').value.trim();
+    const apellidoDemandante = document.getElementById('demandante-apellidos').value.trim();
+    resumen.ok.push(`Demandante registrado: <strong>${nombreDemandante} ${apellidoDemandante}</strong>`);
+
+    const totalDemandados = document.querySelectorAll('.demandado-item').length;
+    totalDemandados > 0
+        ? resumen.ok.push(`${totalDemandados} demandado(s) registrado(s).`)
+        : resumen.alertas.push('No se registraron demandados.');
+
+    const voucher = document.getElementById('voucher').files[0];
+    voucher
+        ? resumen.ok.push(`Voucher de pago subido: <strong>${voucher.name}</strong>`)
+        : resumen.alertas.push('No se subio el voucher de pago.');
+
+    const escrito = document.getElementById('escrito').files[0];
+    escrito
+        ? resumen.ok.push(`Escrito subido: <strong>${escrito.name}</strong>`)
+        : resumen.alertas.push('No se adjunto escrito PDF (campo opcional).');
+
+    const driveLink = document.getElementById('drive_link').value.trim();
+    const driveName = document.getElementById('nombre_documento_link').value.trim();
+    driveLink
+        ? resumen.ok.push(`Enlace de Drive adjuntado: <strong>${driveName}</strong>`)
+        : resumen.alertas.push('No se adjunto enlace de Google Drive (campo opcional).');
+
+    return resumen;
+}
+
+// ── Init ──────────────────────────────────────────────────────────────────────
 
 document.addEventListener('DOMContentLoaded', () => {
     toggleSpinner(true);
@@ -351,10 +473,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
             dniDemandante = data.persona.dni;
-            document.getElementById('demandante-dni').value      = dniDemandante;
-            document.getElementById('demandante-direccion').value = data.persona.direccion      || '';
-            document.getElementById('demandante-telefono').value  = data.persona.celular        || '';
-            document.getElementById('demandante-correo').value    = data.persona.correo_contacto || '';
+            document.getElementById('demandante-dni').value       = dniDemandante;
+            document.getElementById('demandante-direccion').value  = data.persona.direccion       || '';
+            document.getElementById('demandante-telefono').value   = data.persona.celular         || '';
+            document.getElementById('demandante-correo').value     = data.persona.correo_contacto || '';
 
             if (data.persona.nombres)   document.getElementById('demandante-nombres').value   = data.persona.nombres;
             if (data.persona.apellidos) document.getElementById('demandante-apellidos').value  = data.persona.apellidos;
@@ -369,28 +491,35 @@ document.addEventListener('DOMContentLoaded', () => {
             );
         });
 
-    // Listener voucher
+    // Listener voucher — feedback visual en el area de carga
     document.getElementById('voucher').addEventListener('change', function () {
         const file = this.files[0];
-        document.getElementById('voucherFileName').textContent = file ? file.name : 'Ningún archivo seleccionado';
+        const area = document.getElementById('voucher-area');
+        document.getElementById('voucherFileName').textContent = file ? file.name : 'Ningun archivo seleccionado';
         if (file && file.size > 20 * 1024 * 1024) {
             showError('El archivo supera los 20 MB permitidos.');
             this.value = '';
-            document.getElementById('voucherFileName').textContent = 'Ningún archivo seleccionado';
+            document.getElementById('voucherFileName').textContent = 'Ningun archivo seleccionado';
+            area.style.borderColor = '#dc3545';
+            return;
         }
+        // Verde si OK, normal si vacio
+        area.style.borderColor = file ? '#198754' : '';
     });
 
     // Listener escrito
     document.getElementById('escrito').addEventListener('change', function () {
         const file = this.files[0];
-        document.getElementById('escritoFileName').textContent = file ? file.name : 'Ningún archivo seleccionado';
+        document.getElementById('escritoFileName').textContent = file ? file.name : 'Ningun archivo seleccionado';
         if (file && file.size > 20 * 1024 * 1024) {
             showError('El archivo de escrito supera los 20 MB permitidos.');
             this.value = '';
-            document.getElementById('escritoFileName').textContent = 'Ningún archivo seleccionado';
+            document.getElementById('escritoFileName').textContent = 'Ningun archivo seleccionado';
         }
     });
 });
+
+// ── Demandados ────────────────────────────────────────────────────────────────
 
 function agregarDemandado() {
     contadorDemandados++;
@@ -432,7 +561,7 @@ function agregarDemandado() {
                 <input type="email" class="form-control campo-correo" placeholder="correo@ejemplo.com" data-id="${id}">
             </div>
             <div class="col-md-3">
-                <label class="form-label">Teléfono <span class="text-muted small">(opcional)</span></label>
+                <label class="form-label">Telefono <span class="text-muted small">(opcional)</span></label>
                 <input type="text" class="form-control campo-telefono" placeholder="987654321"
                        maxlength="9" data-id="${id}" oninput="soloNumeros(this, 9)">
             </div>
@@ -451,9 +580,25 @@ function eliminarDemandado(id) {
     if (item) item.remove();
 }
 
+// ── Submit ────────────────────────────────────────────────────────────────────
+
 document.getElementById('arbitrajeForm').addEventListener('submit', function (e) {
     e.preventDefault();
 
+    // ── Validacion manual de campos obligatorios (novalidate activo) ──────────
+    const materia = document.querySelector('[name="nombre_materia"]').value.trim();
+    if (!materia) { showError('La materia del arbitraje es obligatoria.'); return; }
+
+    const pretenciones = document.querySelector('[name="pretenciones"]').value.trim();
+    if (!pretenciones) { showError('Las pretensiones son obligatorias.'); return; }
+
+    const controversia = document.querySelector('[name="controversia"]').value.trim();
+    if (!controversia) { showError('La controversia es obligatoria.'); return; }
+
+    const fundamentos = document.querySelector('[name="fundamentos_hecho"]').value.trim();
+    if (!fundamentos) { showError('Los fundamentos de hecho son obligatorios.'); return; }
+
+    // ── Demandante ────────────────────────────────────────────────────────────
     const personas = [];
 
     const nombresD   = document.getElementById('demandante-nombres').value.trim();
@@ -469,16 +614,17 @@ document.getElementById('arbitrajeForm').addEventListener('submit', function (e)
     }
 
     personas.push({
-        dni: dniDemandante,
-        nombres: nombresD,
+        dni:       dniDemandante,
+        nombres:   nombresD,
         apellidos: apellidosD,
-        correo: correoD,
-        telefono: telefonoD,
-        ruc: rucD,
+        correo:    correoD,
+        telefono:  telefonoD,
+        ruc:       rucD,
         direccion: domicilioD,
-        tipo: 'Demandante'
+        tipo:      'Demandante'
     });
 
+    // ── Demandados ────────────────────────────────────────────────────────────
     let hayError = false;
     const errores = [];
 
@@ -505,16 +651,16 @@ document.getElementById('arbitrajeForm').addEventListener('submit', function (e)
         const direccion = direccionInput ? direccionInput.value.trim() : '';
 
         if (dni.length !== 8) {
-            errorEl.textContent = 'El DNI debe tener exactamente 8 dígitos.';
+            errorEl.textContent   = 'El DNI debe tener exactamente 8 digitos.';
             errorEl.style.display = 'block';
             dniInput.classList.add('is-invalid');
             hayError = true;
-            errores.push('Hay DNI inválidos en los demandados.');
+            errores.push('Hay DNI invalidos en los demandados.');
             return;
         }
 
         if (isDNIDuplicado(dni, personas)) {
-            errorEl.textContent = 'Este DNI ya está registrado en el arbitraje.';
+            errorEl.textContent   = 'Este DNI ya esta registrado en el arbitraje.';
             errorEl.style.display = 'block';
             dniInput.classList.add('is-invalid');
             hayError = true;
@@ -541,17 +687,20 @@ document.getElementById('arbitrajeForm').addEventListener('submit', function (e)
         return;
     }
 
+    // ── Voucher obligatorio (sin required en el HTML, validado aqui) ──────────
     const file = document.getElementById('voucher').files[0];
     if (!file) {
+        document.getElementById('voucher-area').style.borderColor = '#dc3545';
         showError('Debe cargar el voucher de pago.');
         return;
     }
 
+    // ── Drive ─────────────────────────────────────────────────────────────────
     const driveLink = document.getElementById('drive_link').value.trim();
     const driveName = document.getElementById('nombre_documento_link').value.trim();
 
     if (driveLink && !driveLink.includes('drive.google.com')) {
-        showError('Por favor, ingresa un enlace válido de Google Drive.');
+        showError('Por favor, ingresa un enlace valido de Google Drive.');
         return;
     }
 
@@ -560,10 +709,12 @@ document.getElementById('arbitrajeForm').addEventListener('submit', function (e)
         return;
     }
 
+    // ── Capturar resumen ANTES del fetch (DOM aun tiene los datos) ────────────
+    const resumenPrevio = construirResumen();
+
     toggleSpinner(true);
 
     const formData = new FormData();
-
     formData.append('nombre_materia',       document.querySelector('[name="nombre_materia"]').value);
     formData.append('pretenciones',         document.querySelector('[name="pretenciones"]').value);
     formData.append('controversia',         document.querySelector('[name="controversia"]').value);
@@ -571,6 +722,7 @@ document.getElementById('arbitrajeForm').addEventListener('submit', function (e)
     formData.append('cuantia',              document.querySelector('[name="cuantia"]').value);
     formData.append('tasa_solicitud',       document.querySelector('[name="tasa_solicitud"]').value);
     formData.append('designacion_arbitral', document.querySelector('[name="designacion_arbitral"]').value);
+    formData.append('tipo_arbitraje',       document.querySelector('[name="tipo_arbitraje"]').value);
 
     personas.forEach((p, i) => {
         formData.append(`personas[${i}][dni]`,       p.dni);
@@ -585,21 +737,18 @@ document.getElementById('arbitrajeForm').addEventListener('submit', function (e)
 
     formData.append('voucher', file);
 
-    // Escrito (si se seleccionó)
     const escritoFile = document.getElementById('escrito').files[0];
-    if (escritoFile) {
-        formData.append('escrito', escritoFile);
-    }
+    if (escritoFile) formData.append('escrito', escritoFile);
 
     if (driveLink) {
-        formData.append('drive_link', driveLink);
+        formData.append('drive_link',            driveLink);
         formData.append('nombre_documento_link', driveName);
     }
 
     fetch('{{ route("arbitraje.store") }}', {
-        method: 'POST',
+        method:  'POST',
         headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
-        body: formData
+        body:    formData
     })
     .then(r => r.json())
     .then(data => {
@@ -607,7 +756,7 @@ document.getElementById('arbitrajeForm').addEventListener('submit', function (e)
         if (data.error) {
             showError(data.detalle || data.message || 'Error al registrar');
         } else if (data.success) {
-            showSuccess();
+            showResumenRegistro(data, resumenPrevio);
         } else {
             showError(data.message || 'Error desconocido');
         }
@@ -666,6 +815,7 @@ document.getElementById('arbitrajeForm').addEventListener('submit', function (e)
 .pago-item {
     transition: box-shadow 0.2s;
 }
+
 .pago-item:hover {
     box-shadow: 0 2px 8px rgba(0,0,0,0.08);
 }

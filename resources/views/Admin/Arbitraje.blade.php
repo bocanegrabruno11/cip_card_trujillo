@@ -121,6 +121,7 @@
             <div class="table-responsive">
                 <table class="table table-hover mb-0" id="tablaArbitrajes">
                     <thead class="table-light">
+                        <tr>
                             <th width="80">ID</th>
                             <th>Materia</th>
                             <th>Creador</th>
@@ -128,12 +129,13 @@
                             <th>Personas</th>
                             <th width="150">Fecha Inicio</th>
                             <th width="120">Estado</th>
+                            <th width="120">Tipo</th>
                             <th width="120" class="text-center">Acciones</th>
                         </tr>
                     </thead>
                     <tbody id="arbitrajesTableBody">
                         <tr>
-                            <td colspan="8" class="text-center py-5">
+                            <td colspan="9" class="text-center py-5">
                                 <div class="spinner-border text-danger" role="status">
                                     <span class="visually-hidden">Cargando...</span>
                                 </div>
@@ -312,7 +314,8 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 
-// Funciones
+
+
 function formatFecha(fecha) {
     if (!fecha) return 'No especificada';
     const date = new Date(fecha);
@@ -477,12 +480,41 @@ function subirDocumentoHandler(e) {
     });
 }
 
+// Función para obtener el badge de tipo de arbitraje
+function getTipoBadge(arbitraje) {
+    // Verificar diferentes formas en que podría venir el tipo
+    const tipo = arbitraje.tipo_arbitraje || arbitraje.tipo || 'normal';
+    
+    if (tipo === 'emergencia') {
+        return '<span class="badge bg-danger"><i class="fas fa-bolt me-1"></i>EMERGENCIA</span>';
+    }
+    return '<span class="badge bg-secondary"><i class="fas fa-gavel me-1"></i>NORMAL</span>';
+}
+
+// Función para ordenar arbitrajes (emergencia primero, luego normales)
+function ordenarArbitrajes(arbitrajes) {
+    return [...arbitrajes].sort((a, b) => {
+        // Obtener tipos con valores por defecto
+        const tipoA = a.tipo_arbitraje || a.tipo || 'normal';
+        const tipoB = b.tipo_arbitraje || b.tipo || 'normal';
+        
+        // Primero: todos los de emergencia van arriba
+        if (tipoA === 'emergencia' && tipoB !== 'emergencia') return -1;
+        if (tipoA !== 'emergencia' && tipoB === 'emergencia') return 1;
+        
+        // Si son del mismo tipo, ordenar por fecha de inicio (más recientes primero)
+        const fechaA = a.fecha_inicio ? new Date(a.fecha_inicio) : new Date(0);
+        const fechaB = b.fecha_inicio ? new Date(b.fecha_inicio) : new Date(0);
+        return fechaB - fechaA;
+    });
+}
+
 function renderArbitrajes(data) {
     const tbody = document.getElementById('arbitrajesTableBody');
     
     if (!data || data.length === 0) {
         document.getElementById('noResults').style.display = 'block';
-        tbody.innerHTML = '<tr><td colspan="8" class="text-center text-muted py-4">No hay arbitrajes registrados</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="9" class="text-center text-muted py-4">No hay arbitrajes registrados</td></tr>';
         actualizarEstadisticas([]);
         return;
     }
@@ -490,8 +522,21 @@ function renderArbitrajes(data) {
     document.getElementById('noResults').style.display = 'none';
     actualizarEstadisticas(data);
     
-    tbody.innerHTML = data.map(arb => `
-        <tr style="cursor: pointer;">
+    // Depuración: Ver qué datos están llegando
+    console.log('Primer arbitraje:', data[0]);
+    console.log('Tipos de arbitraje:', data.map(a => ({ id: a.id_arbitraje, tipo: a.tipo_arbitraje })));
+    
+    // Ordenar los arbitrajes: emergencia primero, luego normales
+    const arbitrajesOrdenados = ordenarArbitrajes(data);
+    
+    tbody.innerHTML = arbitrajesOrdenados.map(arb => {
+        // Determinar si es emergencia para aplicar clase especial
+        const tipo = arb.tipo_arbitraje || arb.tipo || 'normal';
+        const isEmergencia = tipo === 'emergencia';
+        const rowClass = isEmergencia ? 'emergencia-row' : '';
+        
+        return `
+        <tr style="cursor: pointer;" class="${rowClass}">
             <td><strong>#${arb.id_arbitraje}</strong></td>
             <td>
                 <strong>${arb.nombre_materia || 'Sin materia'}</strong><br>
@@ -502,13 +547,14 @@ function renderArbitrajes(data) {
             <td><small>${arb.personas?.map(p => `${p.dni} (${p.tipo})`).join('<br>') || 'Sin personas'}</small></td>
             <td><small>${formatFecha(arb.fecha_inicio)}</small></td>
             <td>${getEstadoBadge(arb.estado)}</td>
+            <td>${getTipoBadge(arb)}</td>
             <td class="text-center">
                 <button class="btn btn-sm btn-danger" onclick="irADetalle(${arb.id_arbitraje})" title="Ver detalles">
                     <i class="fas fa-eye"></i>
                 </button>
             </td>
-        </tr>
-    `).join('');
+        </tr>`;
+    }).join('');
     
     // Agregar evento de clic en la fila para redirigir también
     document.querySelectorAll('#arbitrajesTableBody tr').forEach(row => {
@@ -533,7 +579,7 @@ function cargarArbitrajes(dni = '') {
     if (noResults) noResults.style.display = 'none';
     
     if (tbody) {
-        tbody.innerHTML = '<tr><td colspan="8" class="text-center py-5"><div class="spinner-border text-danger" role="status"><span class="visually-hidden">Cargando...</span></div><p class="mt-2 mb-0">Cargando arbitrajes...</p></td></tr>';
+        tbody.innerHTML = '<tr><td colspan="9" class="text-center py-5"><div class="spinner-border text-danger" role="status"><span class="visually-hidden">Cargando...</span></div><p class="mt-2 mb-0">Cargando arbitrajes...</p></td></tr>';
     }
     
     let url = '/arbitrajes/obtener';
@@ -559,7 +605,7 @@ function cargarArbitrajes(dni = '') {
             } else {
                 console.log('No hay arbitrajes');
                 if (noResults) noResults.style.display = 'block';
-                if (tbody) tbody.innerHTML = '<tr><td colspan="8" class="text-center text-muted py-4">No hay arbitrajes registrados</td></tr>';
+                if (tbody) tbody.innerHTML = '<tr><td colspan="9" class="text-center text-muted py-4">No hay arbitrajes registrados</td></tr>';
                 actualizarEstadisticas([]);
             }
         })
@@ -567,7 +613,7 @@ function cargarArbitrajes(dni = '') {
             console.error('Error en fetch:', error);
             if (loading) loading.style.display = 'none';
             if (noResults) noResults.style.display = 'block';
-            if (tbody) tbody.innerHTML = `<tr><td colspan="8" class="text-center text-danger py-4">Error al cargar los datos: ${error.message}</td></tr>`;
+            if (tbody) tbody.innerHTML = `<tr><td colspan="9" class="text-center text-danger py-4">Error al cargar los datos: ${error.message}</td></tr>`;
             actualizarEstadisticas([]);
         });
 }
@@ -581,5 +627,20 @@ function cargarArbitrajes(dni = '') {
 .card:hover { transform: translateY(-2px); }
 .badge { font-size: 0.75rem; font-weight: 600; padding: 0.5em 0.75em; }
 .gap-2 { gap: 0.5rem; }
+
+/* Estilo para filas de arbitrajes de emergencia - rojo tenue */
+.emergencia-row {
+    background-color: #fff5f5 !important;
+    border-left: 4px solid #dc3545;
+}
+
+.emergencia-row:hover {
+    background-color: #ffe8e8 !important;
+}
+
+/* Opcional: animación suave para las filas */
+#arbitrajesTableBody tr {
+    transition: all 0.2s ease-in-out;
+}
 </style>
 @endpush
