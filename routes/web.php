@@ -30,6 +30,13 @@ use App\Http\Controllers\VoucherController;
 use App\Http\Controllers\ProcesoDeArbitrajeController;
 use App\Http\Controllers\EtapaJrdController;
 use App\Http\Controllers\UsuariosController;
+use App\Http\Controllers\CipcdllController;
+
+Route::get('/eventoscipcdll', [CipcdllController::class, 'verificarEvento']);
+
+Route::post('/validar-cip-dni', [CipcdllController::class, 'validarCipDni']);
+Route::post('/registrar-asistente', [CipcdllController::class, 'registrarAsistente']);
+Route::post('/cambiar-estado', [CipcdllController::class, 'cambiarEstado']);
 
 Route::post('/solicitudes-repo', [RepoSolicitudController::class, 'store'])->name('solicitudes.store');
 Route::get('/', [PageController::class, 'welcome'])->name('welcome');
