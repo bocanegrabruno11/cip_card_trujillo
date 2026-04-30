@@ -343,6 +343,11 @@ function generarCardHTML(arb) {
     else if(arb.rol_usuario==='Demandante') rolBadge='<span class="badge bg-success ms-2"><i class="fas fa-user-check me-1"></i>Demandante</span>';
     else if(arb.rol_usuario==='Demandado') rolBadge='<span class="badge bg-warning text-dark ms-2"><i class="fas fa-user-shield me-1"></i>Demandado</span>';
 
+    // ✅ CORREGIDO: declarar tipoBadge AQUÍ, fuera del template string
+    const tipoBadge = arb.tipo_arbitraje === 'emergencia'
+        ? '<span class="badge bg-danger ms-2"><i class="fas fa-bolt me-1"></i>Emergencia</span>'
+        : '<span class="badge bg-secondary ms-2"><i class="fas fa-gavel me-1"></i>Normal</span>';
+
     const esObservado = arb.estado==='observado';
     const puedeResub  = esObservado && arb.es_creador;
     const motivo      = puedeResub ? extraerMotivoRechazo(arb.procesos) : '';
@@ -378,7 +383,7 @@ function generarCardHTML(arb) {
         <div class="card-header bg-white ${esObservado?'border-bottom border-danger':''}">
             <div class="row align-items-center">
                 <div class="col-md-8">
-                    <h5 class="mb-1"><i class="fas fa-scale-balanced text-danger me-2"></i>${arb.nombre_materia||'Sin materia'}${rolBadge}</h5>
+                    <h5 class="mb-1"><i class="fas fa-scale-balanced text-danger me-2"></i>${arb.nombre_materia||'Sin materia'}${rolBadge}${tipoBadge}</h5>
                     <small class="text-muted"><i class="fas fa-calendar me-1"></i>Iniciado: ${formatFecha(arb.fecha_inicio)}</small>
                 </div>
                 <div class="col-md-4 text-end">
@@ -407,6 +412,11 @@ function generarCardHTML(arb) {
                         ${arb.tasa_solicitud?`<p><strong>Tasa de Solicitud:</strong> ${arb.tasa_solicitud}</p>`:''}
                         ${arb.designacion_arbitral?`<p><strong>Designación Arbitral:</strong> ${arb.designacion_arbitral}</p>`:''}
                         <p><strong>ID Arbitraje:</strong> #${arb.id_arbitraje}</p>
+                        <p><strong>Tipo de Arbitraje:</strong> 
+                            ${arb.tipo_arbitraje === 'emergencia'
+                                ? '<span class="badge bg-danger"><i class="fas fa-bolt me-1"></i>Emergencia</span>'
+                                : '<span class="badge bg-secondary"><i class="fas fa-gavel me-1"></i>Normal</span>'}
+                        </p>
                         <p><strong>Tu rol:</strong> <span class="badge ${arb.es_creador?'bg-info':'bg-success'}">${arb.rol_usuario||'Observador'}</span></p>
                     </div>
                 </div>

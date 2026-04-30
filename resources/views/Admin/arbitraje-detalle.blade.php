@@ -34,59 +34,73 @@
 
     <!-- Info principal -->
     <div class="card shadow-sm mb-4">
-        <div class="card-header bg-danger text-white">
-            <div class="row align-items-center">
-                <div class="col-md-8">
-                    <h4 class="mb-0"><i class="fas fa-scale-balanced me-2"></i>{{ $arbitraje->nombre_materia }}</h4>
-                    <small>ID: #{{ $arbitraje->id_arbitraje }}</small>
-                </div>
-                <div class="col-md-4 text-end">
-                    @php
-                        $estadoClass = match(strtolower($arbitraje->estado)) {
-                            'validando'  => 'bg-warning text-dark',
-                            'iniciado'   => 'bg-info',
-                            'observado'  => 'bg-danger',
-                            'en proceso' => 'bg-primary',
-                            'terminado'  => 'bg-success',
-                            'rechazado'  => 'bg-danger',
-                            'archivado'  => 'bg-secondary',
-                            default      => 'bg-secondary'
-                        };
-                    @endphp
-                    <span class="badge {{ $estadoClass }} px-3 py-2 fs-6">{{ strtoupper($arbitraje->estado) }}</span>
-                </div>
-            </div>
+<div class="card-header bg-danger text-white">
+    <div class="row align-items-center">
+        <div class="col-md-8">
+            <h4 class="mb-0">
+                <i class="fas fa-scale-balanced me-2"></i>{{ $arbitraje->nombre_materia }}
+                
+                <!-- ✅ AGREGAR BADGE DE TIPO EN EL ENCABEZADO -->
+                @if(($arbitraje->tipo_arbitraje ?? 'normal') === 'emergencia')
+                    <span class="badge bg-warning text-dark ms-2"><i class="fas fa-bolt me-1"></i>EMERGENCIA</span>
+                @else
+                    <span class="badge bg-light text-dark ms-2"><i class="fas fa-gavel me-1"></i>NORMAL</span>
+                @endif
+            </h4>
+            <small>ID: #{{ $arbitraje->id_arbitraje }}</small>
         </div>
+        <div class="col-md-4 text-end">
+            @php
+                $estadoClass = match(strtolower($arbitraje->estado)) {
+                    'validando'  => 'bg-warning text-dark',
+                    'iniciado'   => 'bg-info',
+                    'observado'  => 'bg-danger',
+                    'en proceso' => 'bg-primary',
+                    'terminado'  => 'bg-success',
+                    'rechazado'  => 'bg-danger',
+                    'archivado'  => 'bg-secondary',
+                    default      => 'bg-secondary'
+                };
+            @endphp
+            <span class="badge {{ $estadoClass }} px-3 py-2 fs-6">{{ strtoupper($arbitraje->estado) }}</span>
+        </div>
+    </div>
+</div>
         <div class="card-body">
-            <div class="row">
-                <div class="col-md-6">
-                    <h6 class="text-danger mb-3"><i class="fas fa-info-circle me-2"></i>Información General</h6>
-                    <table class="table table-sm">
-                        <tr><th width="40%">Pretensiones:</th><td>{{ $arbitraje->pretenciones ?? 'No especificadas' }}</td></tr>
-                        <tr><th>Cuantía:</th><td>{{ $arbitraje->cuantia ?? 'No especificada' }}</td></tr>
-                        <tr><th>Controversia:</th><td>{{ $arbitraje->controversia ?? 'No especificada' }}</td></tr>
-                        <tr><th>Tasa de Solicitud:</th><td>{{ $arbitraje->tasa_solicitud ?? 'No especificada' }}</td></tr>
-                        <tr><th>Designación Arbitral:</th><td>{{ $arbitraje->designacion_arbitral ?? 'No especificada' }}</td></tr>
-                        <tr><th>Fundamentos de hecho:</th><td>{{ $arbitraje->fundamentos_hecho ?? 'No especificada' }}</td></tr>
-                        <tr><th>Fecha de Inicio:</th><td><i class="fas fa-calendar me-1"></i>{{ $arbitraje->fecha_inicio ? \Carbon\Carbon::parse($arbitraje->fecha_inicio)->format('d/m/Y H:i') : 'No especificada' }}</td></tr>
-                        <tr><th>Fecha de Finalización:</th><td>
-                            @if($arbitraje->fecha_finalizacion)
-                                <i class="fas fa-calendar-check me-1"></i>{{ \Carbon\Carbon::parse($arbitraje->fecha_finalizacion)->format('d/m/Y H:i') }}
-                            @else
-                                <span class="text-muted">En proceso</span>
-                            @endif
-                        </td></tr>
-                    </table>
-                </div>
-                <div class="col-md-6">
-                    <h6 class="text-danger mb-3"><i class="fas fa-user-tie me-2"></i>Creador del Arbitraje</h6>
-                    <table class="table table-sm">
-                        <tr><th width="40%">Nombre:</th><td>{{ $arbitraje->user->name ?? 'N/A' }}</td></tr>
-                        <tr><th>Email:</th><td>{{ $arbitraje->user->email ?? 'N/A' }}</td></tr>
-                        <tr><th>DNI:</th><td><span class="badge bg-secondary">{{ $arbitraje->user->persona->dni ?? 'N/A' }}</span></td></tr>
-                    </table>
-                </div>
-            </div>
+<!-- En la sección de Información General, agregar después de "Designación Arbitral" o donde prefieras -->
+
+<div class="col-md-6">
+    <h6 class="text-danger mb-3"><i class="fas fa-info-circle me-2"></i>Información General</h6>
+    <table class="table table-sm">
+        <tr><th width="40%">Pretensiones:</th><td>{{ $arbitraje->pretenciones ?? 'No especificadas' }}</td></tr>
+        <tr><th>Cuantía:</th><td>{{ $arbitraje->cuantia ?? 'No especificada' }}</td></tr>
+        <tr><th>Controversia:</th><td>{{ $arbitraje->controversia ?? 'No especificada' }}</td></tr>
+        <tr><th>Tasa de Solicitud:</th><td>{{ $arbitraje->tasa_solicitud ?? 'No especificada' }}</td></tr>
+        <tr><th>Designación Arbitral:</th><td>{{ $arbitraje->designacion_arbitral ?? 'No especificada' }}</td></tr>
+        
+        <!-- ✅ AGREGAR ESTA LÍNEA PARA MOSTRAR EL TIPO DE ARBITRAJE -->
+        <tr>
+            <th>Tipo de Arbitraje:</th>
+            <td>
+                @if(($arbitraje->tipo_arbitraje ?? 'normal') === 'emergencia')
+                    <span class="badge bg-danger"><i class="fas fa-bolt me-1"></i>EMERGENCIA</span>
+                @else
+                    <span class="badge bg-secondary"><i class="fas fa-gavel me-1"></i>NORMAL</span>
+                @endif
+            </td>
+        </tr>
+        
+        <tr><th>Fundamentos de hecho:</th><td>{{ $arbitraje->fundamentos_hecho ?? 'No especificada' }}</td></tr>
+        <tr><th>Fecha de Inicio:</th><td><i class="fas fa-calendar me-1"></i>{{ $arbitraje->fecha_inicio ? \Carbon\Carbon::parse($arbitraje->fecha_inicio)->format('d/m/Y H:i') : 'No especificada' }}</td></tr>
+        <tr><th>Fecha de Finalización:</th><td>
+            @if($arbitraje->fecha_finalizacion)
+                <i class="fas fa-calendar-check me-1"></i>{{ \Carbon\Carbon::parse($arbitraje->fecha_finalizacion)->format('d/m/Y H:i') }}
+            @else
+                <span class="text-muted">En proceso</span>
+            @endif
+        </td></tr>
+    </table>
+</div>
             @if(!in_array($arbitraje->estado, ['archivado', 'terminado']))
             <div class="row mt-4">
                 <div class="col-md-12">

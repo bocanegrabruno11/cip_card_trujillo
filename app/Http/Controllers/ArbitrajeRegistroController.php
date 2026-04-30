@@ -42,6 +42,7 @@ class ArbitrajeRegistroController extends Controller
                 'personas.*.telefono'    => 'nullable|string|max:20',
                 'personas.*.ruc'         => 'nullable|string|max:11',
                 'personas.*.direccion'   => 'nullable|string|max:550',
+                'tipo_arbitraje' => 'required|in:normal,emergencia',
                 // Documentos
                 'voucher'               => 'required|file|mimes:jpg,jpeg,png,pdf|max:20480',
                 'escrito'               => 'nullable|file|mimes:pdf|max:20480',
@@ -73,6 +74,7 @@ class ArbitrajeRegistroController extends Controller
                 'designacion_arbitral' => $request->designacion_arbitral ?? null,
                 'controversia'         => $request->controversia         ?? null,
                 'fundamentos_hecho'    => $request->fundamentos_hecho    ?? null,
+                'tipo_arbitraje' => $request->tipo_arbitraje ?? 'normal',
                 'estado'               => 'validando',
             ]);
 

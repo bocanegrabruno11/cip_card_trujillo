@@ -19,6 +19,7 @@ class Arbitraje extends Model
         'designacion_arbitral',
         'tasa_solicitud',
         'estado',
+        'tipo_arbitraje',
         'controversia',
         'fundamentos_hecho'
     ];
