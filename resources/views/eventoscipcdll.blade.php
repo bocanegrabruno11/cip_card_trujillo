@@ -81,6 +81,14 @@
         .bg-rose:nth-child(23) { font-size:2rem;  top:40%;   right:45%;  opacity:.095; filter:blur(0px);   transform:rotate(-42deg); animation: floatB 7.5s ease-in-out infinite 1.4s; }
         .bg-rose:nth-child(24) { font-size:2.5rem;top:78%;   right:55%;  opacity:.085; filter:blur(0px);   transform:rotate(15deg);  animation: floatC 9s ease-in-out infinite 2.6s; }
         .bg-rose:nth-child(25) { font-size:2rem;  top:10%;   right:50%;  opacity:.1;   filter:blur(0px);   transform:rotate(-60deg); animation: floatA 6.5s ease-in-out infinite 0.4s; }
+        .info-row { 
+            display: flex; 
+            flex-wrap: nowrap; /* Fuerza a que estén en una sola fila */
+            gap: 1rem; /* Espacio entre los 3 elementos (aumentado) */
+            margin-bottom: 1.8rem; /* Margen inferior como lo tenías (ligeramente más grande) */
+            align-items: center; 
+            justify-content: center; /* Centra horizontalmente */
+        }
 
         @keyframes floatA {
             0%,100% { transform: translateY(0px) rotate(var(--rot, -25deg)); }
@@ -242,12 +250,75 @@
         .hero-title { font-family:'Playfair Display',serif; font-size:1.95rem; font-weight:800; color:var(--wine); line-height:1.1; margin-bottom:.2rem; }
         .hero-sub { font-size:.78rem; color:var(--ink-soft); font-weight:600; }
 
-        .info-row { display:flex; flex-wrap:wrap; gap:.6rem; margin-bottom:1.6rem; align-items:center; }
-        .pill { display:inline-flex; align-items:center; gap:.45rem; border-radius:50px; padding:.45rem 1.1rem; font-size:.82rem; font-weight:700; white-space:nowrap; }
-        .pill-wine { background:rgba(124,18,40,.08); border:1px solid rgba(124,18,40,.18); color:var(--wine); }
-        .pill-gold { background:rgba(196,149,96,.1); border:1px solid rgba(196,149,96,.3); color:#7a5222; text-decoration:none; transition:background .2s; }
-        .pill-gold:hover { background:rgba(196,149,96,.22); }
+        
+.info-row { 
+    display: flex; 
+    flex-wrap: nowrap; /* Fuerza a que estén en una sola fila */
+    gap: 1rem; /* Espacio entre los 3 elementos (aumentado) */
+    margin-bottom: 1.8rem; /* Margen inferior como lo tenías (ligeramente más grande) */
+    align-items: center; 
+    justify-content: center; /* Centra horizontalmente */
+}
 
+.pill { 
+    display: inline-flex; 
+    align-items: center; 
+    justify-content: center;
+    gap: .6rem; 
+    border-radius: 50px; 
+    padding: .5rem 1.3rem; /* Más padding horizontal para que sean más anchos */
+    font-size: .85rem; /* Texto ligeramente más grande */
+    font-weight: 700; 
+    white-space: nowrap; /* Evita que el texto se rompa */
+    flex: 0 0 auto; /* Evita que se estiren o encojan */
+}
+
+.pill-wine { 
+    background: rgba(124,18,40,.08); 
+    border: 1px solid rgba(124,18,40,.18); 
+    color: var(--wine); 
+}
+
+.pill-gold { 
+    background: rgba(196,149,96,.1); 
+    border: 1px solid rgba(196,149,96,.3); 
+    color: #7a5222; 
+    text-decoration: none; 
+    transition: all .2s ease; 
+}
+
+.pill-gold:hover { 
+    background: rgba(196,149,96,.22); 
+    transform: translateY(-1px);
+}
+
+/* Responsive: en móviles muy pequeños se ajustan */
+@media (max-width: 680px) {
+    .info-row {
+        gap: 0.7rem; /* Espacio reducido en móvil */
+        flex-wrap: wrap; /* En móviles sí se pueden apilar */
+    }
+    
+    .pill {
+        padding: 0.45rem 1rem;
+        font-size: 0.75rem;
+        white-space: nowrap; /* Sigue sin romperse en móvil */
+    }
+}
+
+@media (max-width: 550px) {
+    .info-row {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0.6rem;
+    }
+    
+    .pill {
+        justify-content: center;
+        white-space: normal;
+        text-align: center;
+    }
+}
         .event-alert {
             display:flex; gap:.9rem; align-items:flex-start;
             background: linear-gradient(120deg, rgba(250,234,237,.9), rgba(250,234,237,.5));
@@ -1012,6 +1083,33 @@
         }, 4500);
     }, 1600);
 })();
+function soloNumeros(input, maxLength) {
+
+    // Bloquear letras antes de que se escriban
+    input.addEventListener('keydown', function (e) {
+        // Permitir teclas especiales
+        const permitidas = [
+            'Backspace', 'Delete', 'ArrowLeft', 'ArrowRight', 'Tab'
+        ];
+
+        if (permitidas.includes(e.key)) return;
+
+        // Bloquear si no es número
+        if (!/^\d$/.test(e.key)) {
+            e.preventDefault();
+        }
+    });
+
+    // Limpiar por si pegan texto
+    input.addEventListener('input', function () {
+        this.value = this.value.replace(/\D/g, '').slice(0, maxLength);
+    });
+}
+
+// Aplicar a tus campos
+soloNumeros(document.getElementById('cipInput'), 6);
+soloNumeros(document.getElementById('dniInput'), 8);
+soloNumeros(document.getElementById('telefonoInput'), 9);
 </script>
 </body>
 </html>
