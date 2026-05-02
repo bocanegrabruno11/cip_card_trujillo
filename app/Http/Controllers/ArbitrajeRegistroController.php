@@ -19,19 +19,20 @@ class ArbitrajeRegistroController extends Controller
     public function store(Request $request)
     {
         Log::info('Iniciando registro de arbitraje', [
-            'user_id' => Auth::id(),
+            'user_id'      => Auth::id(),
             'request_data' => $request->except(['voucher', 'escrito'])
         ]);
 
         try {
             // ── Validación ────────────────────────────────────────────────────────
-            $validated = $request->validate([
-                'nombre_materia'       => 'required|string|max:255',
-                'pretenciones'         => 'required|string',
-                'cuantia'              => 'nullable|string|max:550',
-                'tasa_solicitud'       => 'nullable|string|max:550',
-                'designacion_arbitral' => 'nullable|string|max:255',
-                'controversia'         => 'nullable|string|max:550',
+            $request->validate([
+                'nombre_materia'         => 'required|string|max:255',
+                'pretenciones'           => 'required|string',
+                'cuantia'                => 'nullable|string|max:550',
+                'tasa_solicitud'         => 'nullable|string|max:550',
+                'designacion_arbitral'   => 'nullable|string|max:255',
+                'controversia'           => 'nullable|string|max:550',
+                'tipo_arbitraje'         => 'required|in:normal,emergencia',
                 // Personas
                 'personas'               => 'required|array|min:2',
                 'personas.*.dni'         => 'required|string|size:8',
@@ -42,15 +43,13 @@ class ArbitrajeRegistroController extends Controller
                 'personas.*.telefono'    => 'nullable|string|max:20',
                 'personas.*.ruc'         => 'nullable|string|max:11',
                 'personas.*.direccion'   => 'nullable|string|max:550',
-                'tipo_arbitraje' => 'required|in:normal,emergencia',
                 // Documentos
-                'voucher'               => 'required|file|mimes:jpg,jpeg,png,pdf|max:20480',
-                'escrito'               => 'nullable|file|mimes:pdf|max:20480',
-                'drive_link'            => 'nullable|url',
-                'nombre_documento_link' => 'nullable|string|max:255',
+                'voucher'                => 'required|file|mimes:jpg,jpeg,png,pdf|max:20480',
+                'escrito'                => 'nullable|file|mimes:pdf|max:20480',
+                'drive_link'             => 'nullable|url',
+                'nombre_documento_link'  => 'nullable|string|max:255',
             ]);
 
-            // Validar que si viene drive_link también venga el nombre y viceversa
             $driveLink   = $request->input('drive_link', '');
             $driveNombre = $request->input('nombre_documento_link', '');
 
@@ -63,7 +62,20 @@ class ArbitrajeRegistroController extends Controller
 
             DB::beginTransaction();
 
-            // ── 1. Crear Arbitraje ────────────────────────────────────────────
+            // ── 1. Generar número de expediente ───────────────────────────────
+            $year    = now()->year;
+            $tipoArb = $request->tipo_arbitraje;
+            $sufijo  = $tipoArb === 'emergencia' ? 'ARBEME' : 'ARB';
+
+            $count = Arbitraje::whereYear('fecha_inicio', $year)
+                ->where('tipo_arbitraje', $tipoArb)
+                ->lockForUpdate()
+                ->count() + 1;
+
+            $correlativo      = str_pad($count, 3, '0', STR_PAD_LEFT);
+            $numeroExpediente = "EXP {$correlativo}-{$year}-{$sufijo}-CARD-CIP-CDLL";
+
+            // ── 2. Crear Arbitraje ────────────────────────────────────────────
             $arbitraje = Arbitraje::create([
                 'user_id'              => Auth::id(),
                 'fecha_inicio'         => now(),
@@ -74,13 +86,17 @@ class ArbitrajeRegistroController extends Controller
                 'designacion_arbitral' => $request->designacion_arbitral ?? null,
                 'controversia'         => $request->controversia         ?? null,
                 'fundamentos_hecho'    => $request->fundamentos_hecho    ?? null,
-                'tipo_arbitraje' => $request->tipo_arbitraje ?? 'normal',
+                'tipo_arbitraje'       => $tipoArb,
+                'numero_expediente'    => $numeroExpediente,
                 'estado'               => 'validando',
             ]);
 
-            Log::info('Arbitraje creado', ['id' => $arbitraje->id_arbitraje]);
+            Log::info('Arbitraje creado', [
+                'id'                => $arbitraje->id_arbitraje,
+                'numero_expediente' => $numeroExpediente,
+            ]);
 
-            // ── 2. Registrar Personas ─────────────────────────────────────────
+            // ── 3. Registrar Personas ─────────────────────────────────────────
             foreach ($request->personas as $persona) {
                 ProcesoArbitrajePersona::create([
                     'arbitraje_id' => $arbitraje->id_arbitraje,
@@ -95,7 +111,7 @@ class ArbitrajeRegistroController extends Controller
                 ]);
             }
 
-            // ── 3. Proceso de Arbitraje (lógica de etapas) ───────────────────
+            // ── 4. Proceso de Arbitraje (etapas) ─────────────────────────────
             $etapa = EtapaArbitral::where('estado', 1)
                 ->orderBy('id', 'asc')
                 ->first();
@@ -118,12 +134,12 @@ class ArbitrajeRegistroController extends Controller
 
             Log::info('Proceso creado', ['id' => $proceso->id_proceso_de_arbitraje]);
 
-            // ── 4. Documentos ─────────────────────────────────────────────────
+            // ── 5. Documentos ─────────────────────────────────────────────────
 
-            // 4a. VOUCHER — nombre generado automáticamente
-            $voucher   = $request->file('voucher');
-            $vNombre   = time() . '_' . preg_replace('/[^a-zA-Z0-9._-]/', '', $voucher->getClientOriginalName());
-            $vRuta     = $voucher->storeAs('uploads/vouchers', $vNombre, 'public');
+            // 5a. VOUCHER
+            $voucher = $request->file('voucher');
+            $vNombre = time() . '_' . preg_replace('/[^a-zA-Z0-9._-]/', '', $voucher->getClientOriginalName());
+            $vRuta   = $voucher->storeAs('uploads/vouchers', $vNombre, 'public');
 
             if (!$vRuta) {
                 DB::rollBack();
@@ -143,11 +159,11 @@ class ArbitrajeRegistroController extends Controller
                 'observaciones'           => 'Voucher de pago para tasa de solicitud',
             ]);
 
-            // 4b. ESCRITO PDF (opcional)
+            // 5b. ESCRITO PDF (opcional)
             if ($request->hasFile('escrito')) {
-                $escrito  = $request->file('escrito');
-                $eNombre  = time() . '_escrito_' . preg_replace('/[^a-zA-Z0-9._-]/', '', $escrito->getClientOriginalName());
-                $eRuta    = $escrito->storeAs('uploads/escritos', $eNombre, 'public');
+                $escrito = $request->file('escrito');
+                $eNombre = time() . '_escrito_' . preg_replace('/[^a-zA-Z0-9._-]/', '', $escrito->getClientOriginalName());
+                $eRuta   = $escrito->storeAs('uploads/escritos', $eNombre, 'public');
 
                 if ($eRuta) {
                     ProcesoArbitrajeDocumento::create([
@@ -162,7 +178,7 @@ class ArbitrajeRegistroController extends Controller
                 }
             }
 
-            // 4c. Link de Google Drive (opcional)
+            // 5c. Link de Google Drive (opcional)
             if ($driveLink) {
                 ProcesoArbitrajeDocumento::create([
                     'id_proceso_de_arbitraje' => $proceso->id_proceso_de_arbitraje,
@@ -177,12 +193,16 @@ class ArbitrajeRegistroController extends Controller
 
             DB::commit();
 
-            Log::info('Arbitraje registrado exitosamente', ['id' => $arbitraje->id_arbitraje]);
+            Log::info('Arbitraje registrado exitosamente', [
+                'id'                => $arbitraje->id_arbitraje,
+                'numero_expediente' => $numeroExpediente,
+            ]);
 
             return response()->json([
-                'success'   => true,
-                'mensaje'   => 'Arbitraje registrado correctamente.',
-                'arbitraje' => $arbitraje->id_arbitraje,
+                'success'           => true,
+                'mensaje'           => 'Arbitraje registrado correctamente.',
+                'arbitraje'         => $arbitraje->id_arbitraje,
+                'numero_expediente' => $numeroExpediente,
             ], 201);
 
         } catch (\Illuminate\Validation\ValidationException $e) {
@@ -193,6 +213,7 @@ class ArbitrajeRegistroController extends Controller
                 'detalle' => 'Error de validación',
                 'errores' => $e->errors()
             ], 422);
+
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('Error al registrar arbitraje', [

@@ -17,7 +17,7 @@
                 <span class="input-group-text bg-white">
                     <i class="fas fa-search"></i>
                 </span>
-                <input type="text" class="form-control" id="searchJrd" placeholder="Buscar por materia, descripción o ID...">
+                <input type="text" class="form-control" id="searchJrd" placeholder="Buscar por expediente, materia o ID...">
             </div>
         </div>
     </div>
@@ -54,13 +54,11 @@
                     <input type="hidden" id="upload_proceso_id">
                     <input type="hidden" id="upload_modo">
 
-                    <!-- Alerta voucher rechazado -->
                     <div id="alerta-voucher-rechazado" class="alert alert-danger d-none">
                         <i class="fas fa-exclamation-triangle me-2"></i>
                         <strong>Voucher rechazado.</strong> Sube el nuevo comprobante de pago para continuar.
                     </div>
 
-                    <!-- MODO NORMAL: selector de tipo -->
                     <div id="bloque-tipo-normal">
                         <div class="mb-3">
                             <label class="form-label">Tipo de Documento <span class="text-danger">*</span></label>
@@ -76,7 +74,6 @@
                                 <input type="url" class="form-control" name="link" placeholder="https://drive.google.com/...">
                             </div>
                         </div>
-                        <!-- Archivo en modo normal -->
                         <div id="campo_archivo_normal" style="display:none;">
                             <div class="mb-3">
                                 <label class="form-label">Archivo <span class="text-danger">*</span></label>
@@ -86,7 +83,6 @@
                         </div>
                     </div>
 
-                    <!-- MODO VOUCHER: botón grande para seleccionar archivo -->
                     <div id="bloque-voucher" style="display:none;">
                         <div class="mb-3 text-center">
                             <label class="d-block mb-2 fw-semibold">Selecciona el comprobante de pago</label>
@@ -99,7 +95,6 @@
                         </div>
                     </div>
 
-                    <!-- Nombre del documento (solo en modo normal) -->
                     <div id="bloque-nombre-normal" class="mb-3">
                         <label class="form-label">Nombre del Documento <span class="text-danger">*</span></label>
                         <input type="text" class="form-control" id="nombre_documento_input" name="nombre_documento">
@@ -202,7 +197,6 @@ function getProcesoEstadoBadge(estado) {
 }
 
 function showMessage(title, msg, isError = false) {
-    // Cerrar cualquier modal abierto primero para evitar el warning de aria-hidden
     const uploadModalEl = document.getElementById('uploadDocumentModal');
     const uploadModal = bootstrap.Modal.getInstance(uploadModalEl);
     if (uploadModal) uploadModal.hide();
@@ -226,6 +220,54 @@ function badgeSubidoPor(doc) {
             <small class="text-muted ms-1" style="font-size:.68rem;">${nombre}</small>`;
 }
 
+// ─── FUNCIÓN SIMPLIFICADA PARA BUSCAR Y EXPANDIR EXPEDIENTE JRD ─────────────────
+function buscarYExpandirExpedienteJrd() {
+    const stored = sessionStorage.getItem('expediente_buscar');
+    if (!stored) return;
+    
+    try {
+        const data = JSON.parse(stored);
+        
+        // Limpiar inmediatamente para no reutilizar
+        sessionStorage.removeItem('expediente_buscar');
+        
+        if (data.tipo !== 'jrd') return;
+        
+        console.log('🔍 Buscando JRD:', data.id);
+        
+const ejecutarScroll = function(intento = 0) {
+const card = document.querySelector(`.jrd-card[data-id="${data.id}"]`);
+    if (card) {
+        setTimeout(() => {
+            card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            card.style.transition = 'all 0.3s ease';
+            card.style.boxShadow = '0 0 0 3px #dc3545, 0 0 0 6px rgba(220,53,69,0.3)';
+            setTimeout(() => { 
+                card.style.boxShadow = ''; 
+            }, 3000);
+        }, 100);
+        
+        const collapseId = `collapse${data.id}`;
+        const collapseElement = document.getElementById(collapseId);
+        if (collapseElement && !collapseElement.classList.contains('show')) {
+            new bootstrap.Collapse(collapseElement, { toggle: true }).show();
+        }
+        return true;
+    } else if (intento < 3) {
+        setTimeout(() => ejecutarScroll(intento + 1), 300);
+    }
+    return false;
+};
+        
+        if (!ejecutarScroll()) {
+            setTimeout(ejecutarScroll, 500);
+        }
+        
+    } catch(e) {
+        console.error('Error:', e);
+    }
+}
+
 // ── Modal: abrir ──────────────────────────────────────────────────────────────
 function subirDocumento(jrdId, procesoId, jrdEstado) {
     document.getElementById('upload_jrd_id').value     = jrdId;
@@ -236,7 +278,6 @@ function subirDocumento(jrdId, procesoId, jrdEstado) {
     const esObservado = jrdEstado === 'observado';
     document.getElementById('upload_modo').value = esObservado ? 'voucher' : 'normal';
 
-    // Mostrar/ocultar bloques según modo
     document.getElementById('alerta-voucher-rechazado').classList.toggle('d-none', !esObservado);
     document.getElementById('bloque-tipo-normal').style.display   = esObservado ? 'none' : 'block';
     document.getElementById('bloque-voucher').style.display       = esObservado ? 'block' : 'none';
@@ -266,7 +307,7 @@ document.getElementById('archivo-voucher').addEventListener('change', function()
         this.files[0] ? this.files[0].name : 'Haz clic para seleccionar archivo';
 });
 
-// ── Submit del form (UN SOLO LISTENER) ───────────────────────────────────────
+// ── Submit del form ───────────────────────────────────────────────────────────
 document.getElementById('uploadDocumentForm').addEventListener('submit', function(e) {
     e.preventDefault();
 
@@ -276,7 +317,6 @@ document.getElementById('uploadDocumentForm').addEventListener('submit', functio
     const formData  = new FormData();
 
     if (modo === 'voucher') {
-        // Modo voucher: solo archivo, nombre fijo
         const archivoVoucher = document.getElementById('archivo-voucher').files[0];
         if (!archivoVoucher) {
             showMessage('Error', 'Selecciona el archivo del voucher', true); return;
@@ -290,7 +330,6 @@ document.getElementById('uploadDocumentForm').addEventListener('submit', functio
         formData.append('archivo',          archivoVoucher);
 
     } else {
-        // Modo normal: validar tipo y nombre
         const tipo   = document.getElementById('tipo_documento').value;
         const nombre = document.getElementById('nombre_documento_input').value.trim();
 
@@ -334,7 +373,6 @@ document.getElementById('uploadDocumentForm').addEventListener('submit', functio
         btn.disabled  = false;
 
         if (ok && json.success) {
-            // Cerrar modal y recargar lista
             bootstrap.Modal.getInstance(document.getElementById('uploadDocumentModal')).hide();
             document.getElementById('uploadDocumentForm').reset();
 
@@ -366,7 +404,8 @@ function filterJrd() {
     let visibleCount = 0;
 
     document.querySelectorAll('.jrd-card').forEach(card => {
-        const matches = card.getAttribute('data-materia').includes(searchTerm)
+        const matches = card.getAttribute('data-expediente').includes(searchTerm)
+                     || card.getAttribute('data-materia').includes(searchTerm)
                      || card.getAttribute('data-id').includes(searchTerm)
                      || card.textContent.toLowerCase().includes(searchTerm);
         card.style.display = matches ? 'block' : 'none';
@@ -390,20 +429,21 @@ function renderJrd(data) {
     document.getElementById('noResults').style.display = 'none';
 
     container.innerHTML = data.map((jrd) => {
+        const tituloExpediente = jrd.titulo_expediente || jrd.numero_expediente 
+            ? `Expediente N° ${jrd.numero_expediente}`
+            : (jrd.nombre_materia || 'Sin expediente');
 
-
-// DESPUÉS:
-const rolConfig = {
-    'Creador':      { color: 'bg-info',                  icono: 'fa-user-tie' },
-    'Solicitante':  { color: 'bg-success',               icono: 'fa-user-check' },
-    'Demandado':    { color: 'bg-warning text-dark',     icono: 'fa-user-shield' },
-    'Contraparte':  { color: 'bg-danger',                icono: 'fa-user-slash' },
-    'Demandante':   { color: 'bg-primary',               icono: 'fa-user-plus' },
-    'Tercero':      { color: 'bg-secondary',             icono: 'fa-user-friends' },
-};
-const rolKey = jrd.es_creador ? 'Creador' : (jrd.rol_usuario || 'Observador');
-const cfg    = rolConfig[rolKey] || { color: 'bg-secondary', icono: 'fa-user' };
-const rolBadge = `<span class="badge ${cfg.color} ms-2"><i class="fas ${cfg.icono} me-1"></i>${rolKey}</span>`;
+        const rolConfig = {
+            'Creador':      { color: 'bg-info',                  icono: 'fa-user-tie' },
+            'Solicitante':  { color: 'bg-success',               icono: 'fa-user-check' },
+            'Demandado':    { color: 'bg-warning text-dark',     icono: 'fa-user-shield' },
+            'Contraparte':  { color: 'bg-danger',                icono: 'fa-user-slash' },
+            'Demandante':   { color: 'bg-primary',               icono: 'fa-user-plus' },
+            'Tercero':      { color: 'bg-secondary',             icono: 'fa-user-friends' },
+        };
+        const rolKey = jrd.es_creador ? 'Creador' : (jrd.rol_usuario || 'Observador');
+        const cfg    = rolConfig[rolKey] || { color: 'bg-secondary', icono: 'fa-user' };
+        const rolBadge = `<span class="badge ${cfg.color} ms-2"><i class="fas ${cfg.icono} me-1"></i>${rolKey}</span>`;
 
         const panelId          = `collapseJrd${jrd.id_jrd}`;
         const debeEstarAbierto = estaPanelAbierto(jrd.id_jrd);
@@ -419,6 +459,7 @@ const rolBadge = `<span class="badge ${cfg.color} ms-2"><i class="fas ${cfg.icon
 
         return `
         <div class="card mb-3 shadow-sm jrd-card"
+             data-expediente="${(jrd.numero_expediente || '').toLowerCase()}"
              data-materia="${(jrd.nombre_materia || '').toLowerCase()}"
              data-id="${jrd.id_jrd}">
 
@@ -427,9 +468,13 @@ const rolBadge = `<span class="badge ${cfg.color} ms-2"><i class="fas ${cfg.icon
                     <div class="col-md-8">
                         <h5 class="mb-1">
                             <i class="fas fa-gavel text-danger me-2"></i>
-                            ${jrd.nombre_materia || 'Sin materia'}
+                            ${tituloExpediente}
                             ${rolBadge}
                         </h5>
+                        <small class="text-muted">
+                            <i class="fas fa-tag me-1"></i>Materia: ${jrd.nombre_materia || 'No especificada'}
+                        </small>
+                        <br>
                         <small class="text-muted">
                             <i class="fas fa-calendar me-1"></i>
                             Iniciado: ${formatFecha(jrd.fecha_inicio)}
@@ -455,14 +500,14 @@ const rolBadge = `<span class="badge ${cfg.color} ms-2"><i class="fas ${cfg.icon
 
                     ${alertaObservado}
 
-                    <!-- Información General -->
                     <div class="row mb-4">
                         <div class="col-md-12">
                             <h6 class="text-danger border-bottom pb-2 mb-3">
                                 <i class="fas fa-info-circle me-2"></i>Información General
                             </h6>
+                            ${jrd.numero_expediente ? `<p><strong>Número de Expediente:</strong> ${jrd.numero_expediente}</p>` : ''}
                             <p><strong>Materia:</strong> ${jrd.nombre_materia || 'No especificada'}</p>
-                            <p><strong>Pretensiones:</strong> ${jrd.pretenciones || 'No especificadas'}</p>
+                            <p><strong>Peticiones:</strong> ${jrd.pretenciones || 'No especificadas'}</p>
                             <p><strong>Cuantia:</strong> ${jrd.cuantia || 'No especificadas'}</p>
                             <p><strong>Controversia:</strong> ${jrd.controversia || 'No especificadas'}</p>
                             <p><strong>Fundamentos de hecho:</strong> ${jrd.fundamentos_hecho || 'No especificadas'}</p>
@@ -476,7 +521,6 @@ const rolBadge = `<span class="badge ${cfg.color} ms-2"><i class="fas ${cfg.icon
                         </div>
                     </div>
 
-                    <!-- Personas Involucradas -->
                     <div class="row mb-4">
                         <div class="col-md-12">
                             <h6 class="text-danger border-bottom pb-2 mb-3">
@@ -502,7 +546,6 @@ const rolBadge = `<span class="badge ${cfg.color} ms-2"><i class="fas ${cfg.icon
                         </div>
                     </div>
 
-                    <!-- Procesos / Etapas -->
                     <div class="row">
                         <div class="col-md-12">
                             <h6 class="text-danger border-bottom pb-2 mb-3">
@@ -512,7 +555,6 @@ const rolBadge = `<span class="badge ${cfg.color} ms-2"><i class="fas ${cfg.icon
                             ${jrd.procesos && jrd.procesos.length > 0 ? `
                                 <div class="list-group">
                                     ${jrd.procesos.map(proceso => {
-
                                         const nombreEtapa = proceso.etapa
                                             ? proceso.etapa.nombre
                                             : 'Sin etapa';
@@ -624,13 +666,15 @@ const rolBadge = `<span class="badge ${cfg.color} ms-2"><i class="fas ${cfg.icon
         </div>`;
     }).join('');
 
-    // Event listeners para persistir estado de paneles
     document.querySelectorAll('.collapse').forEach(collapse => {
         if (!collapse.id.startsWith('collapseJrd')) return;
         const jrdId = collapse.id.replace('collapseJrd', '');
         collapse.addEventListener('shown.bs.collapse',  () => togglePanelState(jrdId, true));
         collapse.addEventListener('hidden.bs.collapse', () => togglePanelState(jrdId, false));
     });
+    
+    // ✅ Buscar y expandir expediente JRD desde casilla DESPUÉS de renderizar
+    buscarYExpandirExpedienteJrd();
 }
 
 // ── Carga inicial ─────────────────────────────────────────────────────────────

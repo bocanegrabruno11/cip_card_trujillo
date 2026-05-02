@@ -78,8 +78,8 @@
 </div>
 
 <!-- Spinner de carga -->
-<div id="loading-spinner" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 9999; justify-content: center; align-items: center;">
-    <div class="spinner-border text-light" role="status" style="width: 3rem; height: 3rem;">
+<div id="loading-spinner" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:9999; justify-content:center; align-items:center;">
+    <div class="spinner-border text-light" role="status" style="width:3rem; height:3rem;">
         <span class="visually-hidden">Cargando...</span>
     </div>
 </div>
@@ -91,7 +91,7 @@
 
         <h4 class="mb-4">Registrar JPRD</h4>
 
-        <!-- ====== DATOS DEL JRD ====== -->
+        <!-- ====== DATOS DEL JPRD ====== -->
         <h5 class="mb-3">Datos del JPRD</h5>
 
         <div class="card p-3 mb-4" style="background:#f8f9fa; border:1.5px solid #dee2e6; border-radius:8px;">
@@ -99,21 +99,18 @@
 
                 <div class="col-md-6">
                     <label class="form-label">Materia <span class="text-danger">*</span></label>
-                    <input type="text" class="form-control" name="nombre_materia" placeholder="Ej: Incumplimiento de contrato" required>
+                    <input type="text" class="form-control" name="nombre_materia"
+                           placeholder="Ej: Incumplimiento de contrato" required>
                 </div>
 
                 <div class="col-md-3">
                     <label class="form-label">Cuantía</label>
-                    <div class="input-group">
-                        <input type="text" class="form-control" name="cuantia">
-                    </div>
+                    <input type="text" class="form-control" name="cuantia">
                 </div>
 
                 <div class="col-md-3">
                     <label class="form-label">Tasa de Solicitud</label>
-                    <div class="input-group">
-                        <input type="text" class="form-control" name="tasa_solicitud">
-                    </div>
+                    <input type="text" class="form-control" name="tasa_solicitud">
                 </div>
 
                 <div class="col-md-6">
@@ -123,24 +120,26 @@
                 </div>
 
                 <div class="col-md-12">
-                    <label class="form-label">Pretensiones <span class="text-danger">*</span></label>
+                    <label class="form-label">Peticiones <span class="text-danger">*</span></label>
                     <textarea class="form-control" name="pretenciones" rows="3"
-                              placeholder="Describa las pretensiones del JPRD..." required></textarea>
+                              placeholder="Describa las peticiones del JPRD..." required></textarea>
                 </div>
+
                 <div class="col-md-12">
-                    <label class="form-label">Controversia<span class="text-danger">*</span></label>
+                    <label class="form-label">Controversia <span class="text-danger">*</span></label>
                     <textarea class="form-control" name="controversia" rows="3"
-                              placeholder="Describa la conroversia del JPRD..." required></textarea>
+                              placeholder="Describa la controversia del JPRD..." required></textarea>
                 </div>
+
                 <div class="col-md-12">
-                    <label class="form-label">Fundamentos de hecho<span class="text-danger">*</span></label>
+                    <label class="form-label">Fundamentos de hecho <span class="text-danger">*</span></label>
                     <textarea class="form-control" name="fundamentos_hecho" rows="3"
                               placeholder="Describa los fundamentos del JPRD..." required></textarea>
                 </div>
             </div>
         </div>
 
-        <!-- ====== SOLICITANTE (automático) ====== -->
+        <!-- ====== SOLICITANTE ====== -->
         <h5 class="mb-3">Solicitante</h5>
 
         <div class="card card-solicitante mb-4 p-3">
@@ -177,10 +176,10 @@
                     <input type="text" class="form-control" id="solicitante-telefono"
                            placeholder="987654321" maxlength="9" oninput="soloNumeros(this, 9)">
                 </div>
+
                 <div class="col-md-3">
-                            <label class="form-label">Dirección <span class="text-muted small">(opcional)</span></label>
-                            <input type="text" class="form-control" id="solicitante-direccion"
-                                placeholder="Av. Ejemplo 123">
+                    <label class="form-label">Dirección <span class="text-muted small">(opcional)</span></label>
+                    <input type="text" class="form-control" id="solicitante-direccion" placeholder="Av. Ejemplo 123">
                 </div>
             </div>
         </div>
@@ -197,29 +196,74 @@
         <!-- ====== DOCUMENTACIÓN ====== -->
         <h5 class="mt-2 mb-3">Documentación</h5>
 
-        <!-- Voucher (obligatorio) -->
+        <!-- ── MEDIOS DE PAGO ─────────────────────────────────────────────── -->
+        <div class="card mb-4 border-0" style="background:#fffbeb; border-left:4px solid #f59e0b !important; border-radius:8px;">
+            <div class="card-body py-3">
+                <h6 class="fw-bold mb-3" style="color:#92400e;">
+                    <i class="fas fa-university me-2" style="color:#f59e0b;"></i>MEDIOS DE PAGO
+                </h6>
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <div class="pago-item p-2 rounded" style="background:#fff; border:1px solid #fde68a;">
+                            <div class="text-muted small fw-semibold mb-1">CAJA TRUJILLO</div>
+                            <div class="fw-bold">000137172-001</div>
+                            <div class="text-muted small">CCI: 80200100013717200180</div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="pago-item p-2 rounded" style="background:#fff; border:1px solid #fde68a;">
+                            <div class="text-muted small fw-semibold mb-1">INTERBANK — CUENTA EN SOLES</div>
+                            <div class="fw-bold">616-300756418-7</div>
+                            <div class="text-muted small">CCI: 00361600300756418705</div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="pago-item p-2 rounded" style="background:#fff; border:1px solid #fde68a;">
+                            <div class="text-muted small fw-semibold mb-1">BANCO DE COMERCIO — CUENTA EN SOLES</div>
+                            <div class="fw-bold">110-010476413</div>
+                            <div class="text-muted small">CCI: 02304511001047641386</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- ──────────────────────────────────────────────────────────────── -->
+
+        <!-- Voucher de pago (obligatorio) -->
         <div class="mb-4">
-            <label for="voucher" class="form-label">Voucher de Pago <span class="text-danger">*</span></label>
-            <div class="file-upload-area p-3 border rounded" onclick="document.getElementById('voucher').click()" style="cursor: pointer;">
+            <label class="form-label">Voucher de Pago <span class="text-danger">*</span></label>
+            <div class="file-upload-area p-3 border rounded"
+                 onclick="document.getElementById('voucher').click()" style="cursor:pointer;">
                 <div class="text-center">
                     <i class="fas fa-cloud-upload-alt fa-2x text-muted mb-2"></i>
                     <p class="mb-1">Haz clic para subir el voucher</p>
-                    <p class="text-muted small mb-2">Formatos aceptados: JPG, JPEG, PNG, PDF (Máx. 20MB)</p>
+                    <p class="text-muted small mb-2">Formatos aceptados: JPG, JPEG, PNG, PDF &nbsp;(Máx. 20 MB)</p>
                     <div id="voucherFileName" class="text-primary fw-bold">Ningún archivo seleccionado</div>
                 </div>
             </div>
-            <input type="file" class="form-control d-none" id="voucher" name="voucher" accept=".jpg,.jpeg,.png,.pdf" required>
+            <input type="file" class="form-control d-none" id="voucher" name="voucher"
+                   accept=".jpg,.jpeg,.png,.pdf" required>
         </div>
 
-        <!-- Nombre descriptivo para el voucher -->
-        <div class="mb-3">
-            <label for="nombre_documento" class="form-label">Nombre del Voucher <span class="text-danger">*</span></label>
-            <input type="text" class="form-control" id="nombre_documento" name="nombre_documento"
-                   placeholder="Ej: Voucher de pago - Tasa de solicitud" value="Voucher de Pago" required>
-            <small class="text-muted">Nombre que identificará este voucher en el sistema</small>
+        <!-- Escrito PDF (opcional) -->
+        <div class="mb-4">
+            <label class="form-label">
+                Archivo de Escrito
+                <span class="text-muted small">(opcional)</span>
+            </label>
+            <div class="file-upload-area file-upload-escrito p-3 border rounded"
+                 onclick="document.getElementById('escrito').click()" style="cursor:pointer;">
+                <div class="text-center">
+                    <i class="fas fa-file-pdf fa-2x mb-2" style="color:#dc3545;"></i>
+                    <p class="mb-1">Haz clic para subir el escrito</p>
+                    <p class="text-muted small mb-2">Solo PDF &nbsp;(Máx. 20 MB)</p>
+                    <div id="escritoFileName" class="text-primary fw-bold">Ningún archivo seleccionado</div>
+                </div>
+            </div>
+            <input type="file" class="form-control d-none" id="escrito" name="escrito" accept=".pdf">
         </div>
 
-        <!-- Link de Google Drive (Opcional) -->
+        <!-- Link de Google Drive (opcional) -->
         <div class="mb-4">
             <div class="row">
                 <div class="col-md-6 mb-3">
@@ -240,7 +284,7 @@
         <div class="alert alert-info">
             <small>
                 <i class="fas fa-info-circle me-1"></i>
-                <strong>Nota:</strong> El voucher de pago es obligatorio y se guardará como tipo "voucher" para su posterior verificación.
+                <strong>Nota:</strong> El voucher de pago es obligatorio y será verificado por el personal del centro.
             </small>
         </div>
 
@@ -256,8 +300,8 @@
 @push('scripts')
 <script>
 
-let dniSolicitante = '';
-let contadorPartes = 0;
+let dniSolicitante  = '';
+let contadorPartes  = 0;
 
 function toggleSpinner(show) {
     document.getElementById('loading-spinner').style.display = show ? 'flex' : 'none';
@@ -292,7 +336,6 @@ function isDNIDuplicado(dni, lista) {
     return lista.some(p => p.dni === dni);
 }
 
-// CARGAR SOLICITANTE LOGUEADO
 document.addEventListener('DOMContentLoaded', () => {
     toggleSpinner(true);
 
@@ -309,29 +352,16 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             dniSolicitante = data.persona.dni;
-            direccionSolicitante = data.persona.direccion;
-            telefonoSolicitante =    data.persona.celular;
-            correoSolicitante =data.persona.correo_contacto;
-            document.getElementById('solicitante-dni').value = dniSolicitante;
-            document.getElementById('solicitante-direccion').value = direccionSolicitante;
-            document.getElementById('solicitante-telefono').value = telefonoSolicitante;
-            document.getElementById('solicitante-correo').value = correoSolicitante;
+            document.getElementById('solicitante-dni').value       = dniSolicitante;
+            document.getElementById('solicitante-direccion').value  = data.persona.direccion       || '';
+            document.getElementById('solicitante-telefono').value   = data.persona.celular         || '';
+            document.getElementById('solicitante-correo').value     = data.persona.correo_contacto || '';
 
-            if (data.persona.nombres) {
-                document.getElementById('solicitante-nombres').value = data.persona.nombres;
-            }
-            if (data.persona.apellidos) {
-                document.getElementById('solicitante-apellidos').value = data.persona.apellidos;
-            }
-            if (data.persona.email) {
-                document.getElementById('solicitante-correo').value = data.persona.email;
-            }
-            if (data.persona.telefono) {
-                document.getElementById('solicitante-telefono').value = data.persona.telefono;
-            }
-            if (data.persona.ruc) {
-                document.getElementById('solicitante-ruc').value = data.persona.ruc;
-            }
+            if (data.persona.nombres)   document.getElementById('solicitante-nombres').value   = data.persona.nombres;
+            if (data.persona.apellidos) document.getElementById('solicitante-apellidos').value  = data.persona.apellidos;
+            if (data.persona.email)     document.getElementById('solicitante-correo').value     = data.persona.email;
+            if (data.persona.telefono)  document.getElementById('solicitante-telefono').value   = data.persona.telefono;
+            if (data.persona.ruc)       document.getElementById('solicitante-ruc').value        = data.persona.ruc;
         })
         .catch(() => {
             toggleSpinner(false);
@@ -341,14 +371,25 @@ document.addEventListener('DOMContentLoaded', () => {
             );
         });
 
+    // Listener voucher
     document.getElementById('voucher').addEventListener('change', function () {
         const file = this.files[0];
         document.getElementById('voucherFileName').textContent = file ? file.name : 'Ningún archivo seleccionado';
-
         if (file && file.size > 20 * 1024 * 1024) {
-            showError('El archivo supera los 20MB permitidos.');
+            showError('El archivo supera los 20 MB permitidos.');
             this.value = '';
             document.getElementById('voucherFileName').textContent = 'Ningún archivo seleccionado';
+        }
+    });
+
+    // Listener escrito
+    document.getElementById('escrito').addEventListener('change', function () {
+        const file = this.files[0];
+        document.getElementById('escritoFileName').textContent = file ? file.name : 'Ningún archivo seleccionado';
+        if (file && file.size > 20 * 1024 * 1024) {
+            showError('El archivo de escrito supera los 20 MB permitidos.');
+            this.value = '';
+            document.getElementById('escritoFileName').textContent = 'Ningún archivo seleccionado';
         }
     });
 });
@@ -424,7 +465,6 @@ document.getElementById('jrdForm').addEventListener('submit', function (e) {
 
     const personasArray = [];
 
-    // Validar y guardar SOLICITANTE
     const nombresS   = document.getElementById('solicitante-nombres').value.trim();
     const apellidosS = document.getElementById('solicitante-apellidos').value.trim();
     const correoS    = document.getElementById('solicitante-correo').value.trim();
@@ -444,17 +484,15 @@ document.getElementById('jrdForm').addEventListener('submit', function (e) {
         correo: correoS,
         telefono: telefonoS,
         ruc: rucS,
-        direccion: direccionS, // 👈 Añadir dirección
+        direccion: direccionS,
         tipo: 'Solicitante'
     });
 
     let hayError = false;
     const errores = [];
 
-    // Validar PARTES
     document.querySelectorAll('.parte-item').forEach(div => {
-        const id = div.getAttribute('data-id');
-
+        const id             = div.getAttribute('data-id');
         const tipoSelect     = div.querySelector('.campo-tipo');
         const dniInput       = div.querySelector('.campo-dni');
         const nombresInput   = div.querySelector('.campo-nombres');
@@ -462,9 +500,8 @@ document.getElementById('jrdForm').addEventListener('submit', function (e) {
         const correoInput    = div.querySelector('.campo-correo');
         const telefonoInput  = div.querySelector('.campo-telefono');
         const rucInput       = div.querySelector('.campo-ruc');
-        const direccionInput = div.querySelector('.campo-direccion'); // 👈 Añadir
-
-        const errorEl = document.getElementById(`error-dni-${id}`);
+        const direccionInput = div.querySelector('.campo-direccion');
+        const errorEl        = document.getElementById(`error-dni-${id}`);
 
         errorEl.style.display = 'none';
         dniInput.classList.remove('is-invalid');
@@ -473,14 +510,12 @@ document.getElementById('jrdForm').addEventListener('submit', function (e) {
         const dni       = dniInput.value.trim();
         const nombres   = nombresInput.value.trim();
         const apellidos = apellidosInput.value.trim();
-        const correo    = correoInput    ? correoInput.value.trim()   : '';
-        const telefono  = telefonoInput  ? telefonoInput.value.trim() : '';
-        const ruc       = rucInput       ? rucInput.value.trim()      : '';
-        const direccion = direccionInput ? direccionInput.value.trim() : ''; // 👈 Obtener dirección
+        const correo    = correoInput    ? correoInput.value.trim()    : '';
+        const telefono  = telefonoInput  ? telefonoInput.value.trim()  : '';
+        const ruc       = rucInput       ? rucInput.value.trim()       : '';
+        const direccion = direccionInput ? direccionInput.value.trim() : '';
 
-        if (!dni) {
-            return;
-        }
+        if (!dni) return;
 
         if (dni.length !== 8) {
             errorEl.textContent = 'El DNI debe tener exactamente 8 dígitos.';
@@ -506,7 +541,7 @@ document.getElementById('jrdForm').addEventListener('submit', function (e) {
             return;
         }
 
-        personasArray.push({ dni, nombres, apellidos, correo, telefono, ruc, tipo,direccion });
+        personasArray.push({ dni, nombres, apellidos, correo, telefono, ruc, tipo, direccion });
     });
 
     if (hayError) {
@@ -525,12 +560,6 @@ document.getElementById('jrdForm').addEventListener('submit', function (e) {
         return;
     }
 
-    const nombreDocumento = document.getElementById('nombre_documento').value.trim();
-    if (!nombreDocumento) {
-        showError('Debe ingresar un nombre para el voucher.');
-        return;
-    }
-
     const driveLink = document.getElementById('drive_link').value.trim();
     const driveName = document.getElementById('nombre_documento_link').value.trim();
 
@@ -544,45 +573,6 @@ document.getElementById('jrdForm').addEventListener('submit', function (e) {
         return;
     }
 
-    // ============================================================
-    // 🔍 LOG DE DIAGNÓSTICO — datos antes de armar el FormData
-    // ============================================================
-    console.group('%c📋 DIAGNÓSTICO JPRD — Datos a enviar', 'color: #0d6efd; font-weight: bold; font-size: 14px;');
-
-    console.group('%c👤 Solicitante', 'color: #198754; font-weight: bold;');
-    console.table([personasArray[0]]);
-    console.groupEnd();
-
-    const partes = personasArray.filter(p => p.tipo !== 'Solicitante');
-    console.group(`%c⚖️ Partes Involucradas (${partes.length})`, 'color: #dc3545; font-weight: bold;');
-    if (partes.length > 0) {
-        console.table(partes);
-    } else {
-        console.warn('⚠️ No hay partes en el array');
-    }
-    console.groupEnd();
-
-    console.group('%c📦 Todas las personas (array completo)', 'color: #6610f2; font-weight: bold;');
-    console.table(personasArray);
-    console.groupEnd();
-
-    console.group('%c📄 Metadatos del formulario', 'color: #0dcaf0; font-weight: bold;');
-    console.log('nombre_materia:',           document.querySelector('[name="nombre_materia"]').value);
-    console.log('pretenciones:',             document.querySelector('[name="pretenciones"]').value);
-    console.log('controversia:',             document.querySelector('[name="controversia"]').value);
-    console.log('fundamentos_hecho:',             document.querySelector('[name="fundamentos_hecho"]').value);
-    console.log('cuantia:',                  document.querySelector('[name="cuantia"]').value);
-    console.log('tasa_solicitud:',           document.querySelector('[name="tasa_solicitud"]').value);
-    console.log('designacion_adjudicadores:', document.querySelector('[name="designacion_adjudicadores"]').value);
-    console.log('nombre_documento:',         nombreDocumento);
-    console.log('drive_link:',               driveLink || '(vacío)');
-    console.log('nombre_documento_link:',    driveName || '(vacío)');
-    console.log('voucher archivo:',          file ? `${file.name} (${(file.size / 1024).toFixed(1)} KB)` : '⚠️ SIN ARCHIVO');
-    console.groupEnd();
-
-    console.groupEnd(); // cierra grupo principal
-    // ============================================================
-
     toggleSpinner(true);
 
     const formData = new FormData();
@@ -590,7 +580,7 @@ document.getElementById('jrdForm').addEventListener('submit', function (e) {
     formData.append('nombre_materia',            document.querySelector('[name="nombre_materia"]').value);
     formData.append('pretenciones',              document.querySelector('[name="pretenciones"]').value);
     formData.append('controversia',              document.querySelector('[name="controversia"]').value);
-    formData.append('fundamentos_hecho',              document.querySelector('[name="fundamentos_hecho"]').value);
+    formData.append('fundamentos_hecho',         document.querySelector('[name="fundamentos_hecho"]').value);
     formData.append('cuantia',                   document.querySelector('[name="cuantia"]').value);
     formData.append('tasa_solicitud',            document.querySelector('[name="tasa_solicitud"]').value);
     formData.append('designacion_adjudicadores', document.querySelector('[name="designacion_adjudicadores"]').value);
@@ -603,27 +593,16 @@ document.getElementById('jrdForm').addEventListener('submit', function (e) {
         formData.append(`personas[${i}][telefono]`,  p.telefono  || '');
         formData.append(`personas[${i}][ruc]`,       p.ruc       || '');
         formData.append(`personas[${i}][tipo]`,      p.tipo);
-        formData.append(`personas[${i}][direccion]`, p.direccion || ''); // 👈 Añadir esta línea
-
+        formData.append(`personas[${i}][direccion]`, p.direccion || '');
     });
-
-    // Log del FormData ya armado
-    console.group('%c📤 FormData armado (personas)', 'color: #fd7e14; font-weight: bold;');
-    personasArray.forEach((p, i) => {
-        console.log(`personas[${i}]:`, {
-            dni:       formData.get(`personas[${i}][dni]`),
-            nombres:   formData.get(`personas[${i}][nombres]`),
-            apellidos: formData.get(`personas[${i}][apellidos]`),
-            correo:    formData.get(`personas[${i}][correo]`),
-            telefono:  formData.get(`personas[${i}][telefono]`),
-            ruc:       formData.get(`personas[${i}][ruc]`),
-            tipo:      formData.get(`personas[${i}][tipo]`),
-        });
-    });
-    console.groupEnd();
 
     formData.append('voucher', file);
-    formData.append('nombre_documento', nombreDocumento);
+
+    // Escrito (si se seleccionó)
+    const escritoFile = document.getElementById('escrito').files[0];
+    if (escritoFile) {
+        formData.append('escrito', escritoFile);
+    }
 
     if (driveLink) {
         formData.append('drive_link', driveLink);
@@ -637,31 +616,26 @@ document.getElementById('jrdForm').addEventListener('submit', function (e) {
     })
     .then(async response => {
         const text = await response.text();
-        console.group('%c📥 Respuesta del servidor', 'color: #6c757d; font-weight: bold;');
-        console.log('Raw response:', text);
-        console.groupEnd();
-
         try {
             return JSON.parse(text);
         } catch (e) {
-            console.error('❌ Error al parsear JSON. Respuesta completa:', text);
+            console.error('❌ Respuesta inválida del servidor:', text);
             throw new Error('El servidor devolvió una respuesta inválida. Revisa los logs.');
         }
     })
     .then(data => {
         toggleSpinner(false);
-        if (data.error) {
+        if (data.error || data.success === false) {
             showError(data.detalle || data.message || 'Error al registrar');
-        } else if (data.message) {
+        } else if (data.success || data.message) {
             showSuccess();
         } else {
-            showError(data.message || 'Error desconocido');
+            showError('Error desconocido');
         }
     })
     .catch(err => {
         toggleSpinner(false);
-        console.error('❌ Error de red:', err);
-        showError('Error de red: ' + err.message + '. Revisa la consola para más detalles.');
+        showError('Error de red: ' + err.message);
     });
 });
 
@@ -697,6 +671,10 @@ document.getElementById('jrdForm').addEventListener('submit', function (e) {
     background-color: #e9ecef;
 }
 
+.file-upload-escrito:hover {
+    border-color: #dc3545 !important;
+}
+
 .parte-item {
     animation: fadeIn 0.3s ease;
 }
@@ -706,8 +684,11 @@ document.getElementById('jrdForm').addEventListener('submit', function (e) {
     to   { opacity: 1; transform: translateY(0); }
 }
 
-.input-group-text {
-    background-color: #e9ecef;
+.pago-item {
+    transition: box-shadow 0.2s;
+}
+.pago-item:hover {
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
 }
 </style>
 @endpush

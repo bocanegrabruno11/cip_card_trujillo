@@ -292,6 +292,11 @@
                 </a>
             </li>
             
+            <li>
+                <a href="{{ route('mesa.virtual') }}" class="menu-link {{ request()->routeIs('mesa.virtual') ? 'active' : '' }}">
+                    <i class="fas fa-laptop"></i> Mesa de Partes Virtual
+                </a>
+            </li>
             <!-- Menú Desplegable de Arbitraje -->
             <li class="menu-item-dropdown">
                 <div class="menu-link-dropdown {{ request()->routeIs('arbitraje') || request()->routeIs('RegistrosArbitraje') ? 'active' : '' }}" onclick="toggleSubmenu(this)">

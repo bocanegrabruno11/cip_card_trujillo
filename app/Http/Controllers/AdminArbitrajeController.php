@@ -24,7 +24,6 @@ class AdminArbitrajeController extends Controller
 
         $userPersonaDni = optional($documento->user->persona)->dni;
 
-        // Buscar si el DNI del uploader coincide con alguna persona del arbitraje
         if ($userPersonaDni) {
             $personaArbitraje = $arbitraje->personas->firstWhere('dni', $userPersonaDni);
             if ($personaArbitraje) {
@@ -34,7 +33,6 @@ class AdminArbitrajeController extends Controller
             }
         }
 
-        // Si no coincide con ninguna persona → es Administrador / Gestor
         return ['label' => 'Administrador', 'color' => 'danger', 'icono' => 'fa-user-tie'];
     }
 
@@ -57,7 +55,7 @@ class AdminArbitrajeController extends Controller
                 'procesos.documentos' => function ($query) {
                     $query->orderBy('fecha_subida', 'desc');
                 },
-                'procesos.documentos.user.persona', // ← necesario para subido_por
+                'procesos.documentos.user.persona',
                 'user.persona'
             ]);
 
@@ -78,22 +76,29 @@ class AdminArbitrajeController extends Controller
                 $creador        = $arbitraje->user;
                 $personaCreador = $creador ? $creador->persona : null;
 
+                // ✅ Título formateado para usar en la vista
+                $tituloExpediente = $arbitraje->numero_expediente 
+                    ? "Expediente N° {$arbitraje->numero_expediente}"
+                    : ($arbitraje->nombre_materia ?? 'Sin expediente');
+
                 return [
                     'id_arbitraje'         => $arbitraje->id_arbitraje,
-                    'nombre_materia'        => $arbitraje->nombre_materia,
-                    'pretenciones'          => $arbitraje->pretenciones,
-                    'cuantia'               => $arbitraje->cuantia,
-                    'tasa_solicitud'        => $arbitraje->tasa_solicitud,
-                    'designacion_arbitral'  => $arbitraje->designacion_arbitral,
-                    'fecha_inicio'          => $arbitraje->fecha_inicio,
-                    'fecha_finalizacion'    => $arbitraje->fecha_finalizacion,
-                    'estado'                => $arbitraje->estado,
+                    'numero_expediente'    => $arbitraje->numero_expediente, // ✅ AGREGADO
+                    'titulo_expediente'    => $tituloExpediente, // ✅ TÍTULO FORMATEADO
+                    'nombre_materia'       => $arbitraje->nombre_materia,
+                    'pretenciones'         => $arbitraje->pretenciones,
+                    'cuantia'              => $arbitraje->cuantia,
+                    'tasa_solicitud'       => $arbitraje->tasa_solicitud,
+                    'designacion_arbitral' => $arbitraje->designacion_arbitral,
+                    'fecha_inicio'         => $arbitraje->fecha_inicio,
+                    'fecha_finalizacion'   => $arbitraje->fecha_finalizacion,
+                    'estado'               => $arbitraje->estado,
                     'controversia'         => $arbitraje->controversia,
-                    'fundamentos_hecho'         => $arbitraje->fundamentos_hecho,
-                    'tipo_arbitraje'        => $arbitraje->tipo_arbitraje ?? 'normal', // ✅ AGREGAR ESTA LÍNEA
-                    'creador_nombre'        => $creador ? $creador->name : 'Usuario #' . $arbitraje->user_id,
-                    'creador_dni'           => $personaCreador ? $personaCreador->dni : 'N/A',
-                    'personas'              => $arbitraje->personas->map(fn($p) => [
+                    'fundamentos_hecho'    => $arbitraje->fundamentos_hecho,
+                    'tipo_arbitraje'       => $arbitraje->tipo_arbitraje ?? 'normal',
+                    'creador_nombre'       => $creador ? $creador->name : 'Usuario #' . $arbitraje->user_id,
+                    'creador_dni'          => $personaCreador ? $personaCreador->dni : 'N/A',
+                    'personas'             => $arbitraje->personas->map(fn($p) => [
                         'id_proceso_arbitraje_persona' => $p->id_proceso_arbitraje_persona,
                         'dni'       => $p->dni,
                         'nombres'   => $p->nombres,
@@ -102,7 +107,7 @@ class AdminArbitrajeController extends Controller
                         'telefono'  => $p->telefono,
                         'ruc'       => $p->ruc,
                         'tipo'      => $p->tipo,
-                        'direccion'      => $p->direccion,
+                        'direccion' => $p->direccion,
                     ]),
                     'procesos' => $arbitraje->procesos->map(function ($proceso) use ($arbitraje) {
                         return [
@@ -159,7 +164,7 @@ class AdminArbitrajeController extends Controller
                 'procesos.documentos' => function ($query) {
                     $query->orderBy('fecha_subida', 'desc');
                 },
-                'procesos.documentos.user.persona', // ← necesario para subido_por
+                'procesos.documentos.user.persona',
                 'user.persona',
             ])->findOrFail($id);
 
@@ -323,26 +328,48 @@ class AdminArbitrajeController extends Controller
         }
     }
 
-    public function archivar(Request $request, $id)
-    {
-        try {
-            DB::beginTransaction();
-            $arbitraje = Arbitraje::findOrFail($id);
-            if (in_array($arbitraje->estado, ['archivado', 'terminado'])) {
-                return response()->json(['success' => false, 'message' => 'El arbitraje ya está ' . $arbitraje->estado], 400);
-            }
-            $arbitraje->update(['estado' => 'archivado', 'fecha_finalizacion' => now()]);
-            NotificacionService::notificarInvolucrados(
-                $arbitraje, 
-                'arbitraje', 
-                'Expediente Archivado', 
-                'El proceso de arbitraje ha sido archivado por la administración. No se realizarán más acciones sobre este expediente.'
-            );
-            DB::commit();
-            return response()->json(['success' => true, 'message' => 'El arbitraje ha sido archivado correctamente']);
-        } catch (\Exception $e) {
-            DB::rollBack();
-            return response()->json(['success' => false, 'message' => 'Error interno: ' . $e->getMessage()], 500);
+public function archivar(Request $request, $id)
+{
+    try {
+        DB::beginTransaction();
+        $arbitraje = Arbitraje::findOrFail($id);
+        
+        // Verificar si ya está archivado o terminado
+        if (in_array($arbitraje->estado, ['archivado', 'terminado', 'finalizado'])) {
+            return response()->json([
+                'success' => false, 
+                'message' => 'El arbitraje ya está ' . $arbitraje->estado
+            ], 400);
         }
+        
+        // Solo archivar, NO pasar al siguiente proceso
+        $arbitraje->update([
+            'estado' => 'archivado', 
+            'fecha_finalizacion' => now()
+        ]);
+        
+        // Notificar a los involucrados
+        NotificacionService::notificarInvolucrados(
+            $arbitraje, 
+            'arbitraje', 
+            'Expediente Archivado', 
+            'El proceso de arbitraje ha sido archivado por la administración. No se realizarán más acciones sobre este expediente.'
+        );
+        
+        DB::commit();
+        
+        return response()->json([
+            'success' => true, 
+            'message' => 'El arbitraje ha sido archivado correctamente'
+        ]);
+        
+    } catch (\Exception $e) {
+        DB::rollBack();
+        \Log::error('Error en archivar:', ['message' => $e->getMessage()]);
+        return response()->json([
+            'success' => false, 
+            'message' => 'Error interno: ' . $e->getMessage()
+        ], 500);
     }
+}
 }

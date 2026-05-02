@@ -9,6 +9,27 @@
         </a>
     </div>
 
+    @php
+        // Obtener el número de expediente según el tipo
+        $numeroExpediente = null;
+        $tipoExpediente = null;
+        $expedienteId = null;
+        
+        if($notificacion->arbitraje_id && $notificacion->arbitraje) {
+            $numeroExpediente = $notificacion->arbitraje->numero_expediente;
+            $tipoExpediente = 'arbitraje';
+            $expedienteId = $notificacion->arbitraje_id;
+        } elseif($notificacion->jrd_id && $notificacion->jrd) {
+            $numeroExpediente = $notificacion->jrd->numero_expediente;
+            $tipoExpediente = 'jrd';
+            $expedienteId = $notificacion->jrd_id;
+        }
+        
+        $tituloExpediente = $numeroExpediente 
+            ? "Expediente N° {$numeroExpediente}"
+            : ($tipoExpediente === 'arbitraje' ? "Arbitraje #{$notificacion->arbitraje_id}" : "JRD #{$notificacion->jrd_id}");
+    @endphp
+
     <div class="row justify-content-center">
         <div class="col-lg-10">
             <div class="card shadow border-0 overflow-hidden">
@@ -52,16 +73,26 @@
                         <p class="mb-2 fw-bold text-muted small"><i class="fas fa-link me-1"></i> EXPEDIENTE RELACIONADO</p>
                         
                         @if($notificacion->arbitraje_id)
-                            <h5 class="mb-3 text-dark">Proceso de Arbitraje #{{ $notificacion->arbitraje_id }}</h5>
-                            {{-- Ajusta la ruta 'arbitraje.detalle' según como la tengas en tu web.php para el usuario --}}
-                            <a href="{{ route('RegistrosArbitraje') }}" class="btn btn-primary px-4 shadow-sm">
+                            <h5 class="mb-3 text-dark">
+                                <i class="fas fa-scale-balanced me-2 text-primary"></i>
+                                {{ $tituloExpediente }}
+                            </h5>
+                            <a href="{{ route('RegistrosArbitraje') }}" 
+                               class="btn btn-primary px-4 shadow-sm btn-ir-expediente"
+                               data-tipo="arbitraje"
+                               data-id="{{ $expedienteId }}">
                                 <i class="fas fa-external-link-alt me-2"></i> Ir al Expediente de Arbitraje
                             </a>
 
                         @elseif($notificacion->jrd_id)
-                            <h5 class="mb-3 text-dark">Proceso JRD #{{ $notificacion->jrd_id }}</h5>
-                            {{-- Ajusta la ruta 'registros.jrd' según como la tengas en tu web.php para el usuario --}}
-                            <a href="{{ route('registros.jrd') }}" class="btn btn-success px-4 shadow-sm">
+                            <h5 class="mb-3 text-dark">
+                                <i class="fas fa-gavel me-2 text-success"></i>
+                                {{ $tituloExpediente }}
+                            </h5>
+                            <a href="{{ route('registros.jrd') }}" 
+                               class="btn btn-success px-4 shadow-sm btn-ir-expediente"
+                               data-tipo="jrd"
+                               data-id="{{ $expedienteId }}">
                                 <i class="fas fa-external-link-alt me-2"></i> Ir al Expediente JRD
                             </a>
 
@@ -83,4 +114,29 @@
         </div>
     </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Capturar clic en los botones "Ir al Expediente"
+    document.querySelectorAll('.btn-ir-expediente').forEach(function(btn) {
+        btn.addEventListener('click', function(e) {
+            e.preventDefault();
+            
+            const tipo = this.dataset.tipo;
+            const id = this.dataset.id;
+            const href = this.getAttribute('href');
+            
+            // ✅ SIMPLE: Limpiar cualquier dato anterior y guardar SOLO el que vamos a buscar
+            sessionStorage.removeItem('expediente_buscar');
+            sessionStorage.setItem('expediente_buscar', JSON.stringify({
+                tipo: tipo,
+                id: parseInt(id)
+            }));
+            
+            // Redirigir a la página correspondiente
+            window.location.href = href;
+        });
+    });
+});
+</script>
 @endsection

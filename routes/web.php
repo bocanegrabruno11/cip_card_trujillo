@@ -117,6 +117,9 @@ Route::middleware(['auth', 'checkrole:mesa_partes'])->prefix('mesa-partes')->gro
         return view('mesa-partes.actualizar');
     })->name('actualizar');
 
+    Route::get('/mesa-partes-virtual', [App\Http\Controllers\MesaVirtualController::class, 'index'])
+    ->name('mesa.virtual');
+    
     // Arbitraje
     Route::get('/arbitraje', function () {
         return view('mesa-partes.arbitraje');

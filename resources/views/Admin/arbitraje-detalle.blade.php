@@ -34,73 +34,82 @@
 
     <!-- Info principal -->
     <div class="card shadow-sm mb-4">
-<div class="card-header bg-danger text-white">
-    <div class="row align-items-center">
-        <div class="col-md-8">
-            <h4 class="mb-0">
-                <i class="fas fa-scale-balanced me-2"></i>{{ $arbitraje->nombre_materia }}
-                
-                <!-- ✅ AGREGAR BADGE DE TIPO EN EL ENCABEZADO -->
-                @if(($arbitraje->tipo_arbitraje ?? 'normal') === 'emergencia')
-                    <span class="badge bg-warning text-dark ms-2"><i class="fas fa-bolt me-1"></i>EMERGENCIA</span>
-                @else
-                    <span class="badge bg-light text-dark ms-2"><i class="fas fa-gavel me-1"></i>NORMAL</span>
-                @endif
-            </h4>
-            <small>ID: #{{ $arbitraje->id_arbitraje }}</small>
+        <div class="card-header bg-danger text-white">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <h4 class="mb-0">
+                        <i class="fas fa-scale-balanced me-2"></i>
+                        {{ $arbitraje->numero_expediente ? "Expediente N° {$arbitraje->numero_expediente}" : $arbitraje->nombre_materia }}
+                        @if(($arbitraje->tipo_arbitraje ?? 'normal') === 'emergencia')
+                            <span class="badge bg-warning text-dark ms-2"><i class="fas fa-bolt me-1"></i>EMERGENCIA</span>
+                        @else
+                            <span class="badge bg-light text-dark ms-2"><i class="fas fa-gavel me-1"></i>NORMAL</span>
+                        @endif
+                    </h4>
+                    @if($arbitraje->numero_expediente && $arbitraje->nombre_materia)
+                        <br><small class="text-light">Materia: {{ $arbitraje->nombre_materia }}</small>
+                    @endif
+                </div>
+                <div class="col-md-4 text-end">
+                    @php
+                        $estadoClass = match(strtolower($arbitraje->estado)) {
+                            'validando'  => 'bg-warning text-dark',
+                            'iniciado'   => 'bg-info',
+                            'observado'  => 'bg-danger',
+                            'en proceso' => 'bg-primary',
+                            'terminado'  => 'bg-success',
+                            'rechazado'  => 'bg-danger',
+                            'archivado'  => 'bg-secondary',
+                            default      => 'bg-secondary'
+                        };
+                    @endphp
+                    <span class="badge {{ $estadoClass }} px-3 py-2 fs-6">{{ strtoupper($arbitraje->estado) }}</span>
+                </div>
+            </div>
         </div>
-        <div class="col-md-4 text-end">
-            @php
-                $estadoClass = match(strtolower($arbitraje->estado)) {
-                    'validando'  => 'bg-warning text-dark',
-                    'iniciado'   => 'bg-info',
-                    'observado'  => 'bg-danger',
-                    'en proceso' => 'bg-primary',
-                    'terminado'  => 'bg-success',
-                    'rechazado'  => 'bg-danger',
-                    'archivado'  => 'bg-secondary',
-                    default      => 'bg-secondary'
-                };
-            @endphp
-            <span class="badge {{ $estadoClass }} px-3 py-2 fs-6">{{ strtoupper($arbitraje->estado) }}</span>
-        </div>
-    </div>
-</div>
         <div class="card-body">
-<!-- En la sección de Información General, agregar después de "Designación Arbitral" o donde prefieras -->
-
-<div class="col-md-6">
-    <h6 class="text-danger mb-3"><i class="fas fa-info-circle me-2"></i>Información General</h6>
-    <table class="table table-sm">
-        <tr><th width="40%">Pretensiones:</th><td>{{ $arbitraje->pretenciones ?? 'No especificadas' }}</td></tr>
-        <tr><th>Cuantía:</th><td>{{ $arbitraje->cuantia ?? 'No especificada' }}</td></tr>
-        <tr><th>Controversia:</th><td>{{ $arbitraje->controversia ?? 'No especificada' }}</td></tr>
-        <tr><th>Tasa de Solicitud:</th><td>{{ $arbitraje->tasa_solicitud ?? 'No especificada' }}</td></tr>
-        <tr><th>Designación Arbitral:</th><td>{{ $arbitraje->designacion_arbitral ?? 'No especificada' }}</td></tr>
-        
-        <!-- ✅ AGREGAR ESTA LÍNEA PARA MOSTRAR EL TIPO DE ARBITRAJE -->
-        <tr>
-            <th>Tipo de Arbitraje:</th>
-            <td>
-                @if(($arbitraje->tipo_arbitraje ?? 'normal') === 'emergencia')
-                    <span class="badge bg-danger"><i class="fas fa-bolt me-1"></i>EMERGENCIA</span>
-                @else
-                    <span class="badge bg-secondary"><i class="fas fa-gavel me-1"></i>NORMAL</span>
-                @endif
-            </td>
-        </tr>
-        
-        <tr><th>Fundamentos de hecho:</th><td>{{ $arbitraje->fundamentos_hecho ?? 'No especificada' }}</td></tr>
-        <tr><th>Fecha de Inicio:</th><td><i class="fas fa-calendar me-1"></i>{{ $arbitraje->fecha_inicio ? \Carbon\Carbon::parse($arbitraje->fecha_inicio)->format('d/m/Y H:i') : 'No especificada' }}</td></tr>
-        <tr><th>Fecha de Finalización:</th><td>
-            @if($arbitraje->fecha_finalizacion)
-                <i class="fas fa-calendar-check me-1"></i>{{ \Carbon\Carbon::parse($arbitraje->fecha_finalizacion)->format('d/m/Y H:i') }}
-            @else
-                <span class="text-muted">En proceso</span>
-            @endif
-        </td></tr>
-    </table>
-</div>
+            <div class="row">
+                <div class="col-md-6">
+                    <h6 class="text-danger mb-3"><i class="fas fa-info-circle me-2"></i>Información General</h6>
+                    <table class="table table-sm">
+                        @if($arbitraje->numero_expediente)
+                        <tr>
+                            <th width="40%">Número de Expediente:</th>
+                            <td><span class="badge bg-dark">{{ $arbitraje->numero_expediente }}</span></td>
+                        </tr>
+                        @endif
+                        <tr><th>Pretensiones:</th><td>{{ $arbitraje->pretenciones ?? 'No especificadas' }}</td></tr>
+                        <tr><th>Cuantía:</th><td>{{ $arbitraje->cuantia ?? 'No especificada' }}</td></tr>
+                        <tr><th>Controversia:</th><td>{{ $arbitraje->controversia ?? 'No especificada' }}</td></tr>
+                        <tr><th>Tasa de Solicitud:</th><td>{{ $arbitraje->tasa_solicitud ?? 'No especificada' }}</td></tr>
+                        <tr><th>Designación Arbitral:</th><td>{{ $arbitraje->designacion_arbitral ?? 'No especificada' }}</td></tr>
+                        <tr><th>Tipo de Arbitraje:</th><td>
+                            @if(($arbitraje->tipo_arbitraje ?? 'normal') === 'emergencia')
+                                <span class="badge bg-danger"><i class="fas fa-bolt me-1"></i>EMERGENCIA</span>
+                            @else
+                                <span class="badge bg-secondary"><i class="fas fa-gavel me-1"></i>NORMAL</span>
+                            @endif
+                         </td></tr>
+                        <tr><th>Fundamentos de hecho:</th><td>{{ $arbitraje->fundamentos_hecho ?? 'No especificada' }}</td></tr>
+                        <tr><th>Fecha de Inicio:</th><td><i class="fas fa-calendar me-1"></i>{{ $arbitraje->fecha_inicio ? \Carbon\Carbon::parse($arbitraje->fecha_inicio)->format('d/m/Y H:i') : 'No especificada' }}</td></tr>
+                        <tr><th>Fecha de Finalización:</th><td>
+                            @if($arbitraje->fecha_finalizacion)
+                                <i class="fas fa-calendar-check me-1"></i>{{ \Carbon\Carbon::parse($arbitraje->fecha_finalizacion)->format('d/m/Y H:i') }}
+                            @else
+                                <span class="text-muted">En proceso</span>
+                            @endif
+                         </td></tr>
+                    </table>
+                </div>
+                <div class="col-md-6">
+                    <h6 class="text-danger mb-3"><i class="fas fa-user-tie me-2"></i>Creador del Arbitraje</h6>
+                    <table class="table table-sm">
+                        <tr><th>Nombre:</th><td>{{ $arbitraje->user->name ?? 'N/A' }}</td></tr>
+                        <tr><th>Email:</th><td>{{ $arbitraje->user->email ?? 'N/A' }}</td></tr>
+                        <tr><th>DNI:</th><td><span class="badge bg-secondary">{{ $arbitraje->user->persona->dni ?? 'N/A' }}</span></td></tr>
+                    </table>
+                </div>
+            </div>
             @if(!in_array($arbitraje->estado, ['archivado', 'terminado']))
             <div class="row mt-4">
                 <div class="col-md-12">
@@ -133,7 +142,7 @@
                                             <span class="badge {{ $persona->tipo === 'Demandante' ? 'bg-success' : 'bg-warning text-dark' }} mb-2">{{ $persona->tipo }}</span>
                                             <h6 class="mb-1">{{ $persona->nombres }} {{ $persona->apellidos }}</h6>
                                             <p class="mb-0 text-muted small"><i class="fas fa-id-card me-1"></i>DNI: {{ $persona->dni }}</p>
-                                            <p class="mb-0 text-muted small"><i class="fas fa-phone-alt me-1"></i>Telefono: {{ $persona->telefono }}</p>
+                                            <p class="mb-0 text-muted small"><i class="fas fa-phone-alt me-1"></i>Teléfono: {{ $persona->telefono }}</p>
                                             @if($persona->correo)<p class="mb-0 text-muted small"><i class="fas fa-envelope me-1"></i>{{ $persona->correo }}</p>@endif
                                             @if($persona->direccion)<p class="mb-0 text-muted small"><i class="fas fa-home me-1"></i>{{ $persona->direccion }}</p>@endif
                                         </div>
@@ -240,9 +249,6 @@
                                             <div class="card-body">
                                                 <p class="mb-3">
                                                     <i class="fas fa-info-circle text-warning me-2"></i>Al finalizar, se creará automáticamente el siguiente proceso.
-                                                    @if(!isset($siguienteEtapa) || !$siguienteEtapa)
-                                                        <strong class="text-success d-block mt-2">⚠️ Este es el último proceso. Al finalizarlo el arbitraje se marcará como TERMINADO.</strong>
-                                                    @endif
                                                 </p>
                                                 <form id="formFinalizarProceso{{ $proceso->id_proceso_de_arbitraje }}"
                                                       action="{{ route('arbitraje.siguiente.proceso', $arbitraje->id_arbitraje) }}"
@@ -252,8 +258,7 @@
                                                     <button type="button" class="btn btn-warning btn-finalizar-proceso"
                                                             data-proceso-nombre="{{ $etapaNombre }}"
                                                             data-proceso-id="{{ $proceso->id_proceso_de_arbitraje }}"
-                                                            data-form-id="formFinalizarProceso{{ $proceso->id_proceso_de_arbitraje }}"
-                                                            data-es-ultimo="{{ isset($siguienteEtapa) && $siguienteEtapa ? 'false' : 'true' }}">
+                                                            data-form-id="formFinalizarProceso{{ $proceso->id_proceso_de_arbitraje }}">
                                                         <i class="fas fa-check-circle me-2"></i>Finalizar Proceso
                                                     </button>
                                                 </form>
@@ -278,14 +283,13 @@
                                                     $estaAprobado   = str_contains($documento->observaciones ?? '', '[ACEPTADO]');
                                                     $estaRechazado  = str_contains($documento->observaciones ?? '', '[RECHAZADO]');
 
-                                                    // ── Quién subió el documento ─────────────────────────
                                                     $uploaderDni      = optional(optional($documento->user)->persona)->dni;
                                                     $personaMatch     = $uploaderDni
                                                         ? $arbitraje->personas->firstWhere('dni', $uploaderDni)
                                                         : null;
 
                                                     if ($personaMatch) {
-                                                        $upLabel  = $personaMatch->tipo;  // Demandante | Demandado
+                                                        $upLabel  = $personaMatch->tipo;
                                                         $upColor  = $personaMatch->tipo === 'Demandante' ? 'success' : 'warning';
                                                         $upIcono  = $personaMatch->tipo === 'Demandante' ? 'fa-user-check' : 'fa-user-shield';
                                                         $upTxtCls = $personaMatch->tipo === 'Demandante' ? '' : 'text-dark';
@@ -300,8 +304,6 @@
 
                                                 <div class="list-group-item">
                                                     <div class="row align-items-center">
-
-                                                        {{-- Ícono tipo --}}
                                                         <div class="col-md-1 text-center">
                                                             @if($documento->tipo_documento === 'pdf')
                                                                 <i class="fas fa-file-pdf fa-2x text-danger"></i>
@@ -314,10 +316,8 @@
                                                             @endif
                                                         </div>
 
-                                                        {{-- Nombre + badges --}}
                                                         <div class="col-md-4">
                                                             <strong>{{ $documento->nombre_original }}</strong>
-
                                                             @if($esVoucher)
                                                                 @if($estaAprobado)
                                                                     <span class="badge bg-success ms-1">✓ Aprobado</span>
@@ -327,16 +327,12 @@
                                                                     <span class="badge bg-warning text-dark ms-1">⏳ Pendiente</span>
                                                                 @endif
                                                             @endif
-
-                                                            {{-- ✅ BADGE: QUIÉN SUBIÓ --}}
                                                             <div class="mt-1 d-flex align-items-center gap-1">
-                                                                <span class="badge-uploader badge bg-{{ $upColor }} {{ $upTxtCls }}"
-                                                                      title="{{ $upNombre }}">
+                                                                <span class="badge-uploader badge bg-{{ $upColor }} {{ $upTxtCls }}" title="{{ $upNombre }}">
                                                                     <i class="fas {{ $upIcono }} me-1"></i>{{ $upLabel }}
                                                                 </span>
                                                                 <small class="text-muted" style="font-size:0.7rem;">{{ $upNombre }}</small>
                                                             </div>
-
                                                             <br>
                                                             <small class="text-muted">
                                                                 <i class="fas fa-calendar me-1"></i>
@@ -347,17 +343,12 @@
                                                             @endif
                                                         </div>
 
-                                                        {{-- Tipo badge --}}
                                                         <div class="col-md-3">
                                                             <span class="badge {{ $esVisualizable || $esVoucher ? 'bg-secondary' : 'bg-warning text-dark' }}">
                                                                 {{ strtoupper($documento->tipo_documento) }}
                                                             </span>
-                                                            @if(!$esVisualizable && !$esVoucher)
-                                                                <span class="badge bg-info ms-1"><i class="fas fa-link me-1"></i>Enlace</span>
-                                                            @endif
                                                         </div>
 
-                                                        {{-- Acciones --}}
                                                         <div class="col-md-4 text-end">
                                                             @if($esVisualizable || $esVoucher)
                                                                 <button type="button"
@@ -388,7 +379,6 @@
                                                                 <i class="fas fa-comment me-1"></i>Comentar
                                                             </button>
                                                         </div>
-
                                                     </div>
                                                 </div>
                                             @endforeach
@@ -396,8 +386,6 @@
                                     @else
                                         <p class="text-muted text-center py-3"><i class="fas fa-info-circle me-2"></i>No hay documentos adjuntos en este proceso</p>
                                     @endif
-                                    {{-- ══════════════════════════════════════════ --}}
-
                                 </div>
                             </div>
                         </div>
@@ -410,142 +398,8 @@
     </div>
 </div>
 
-{{-- ════════════════════ MODALES ════════════════════ --}}
-
-<!-- Modal Comentar -->
-<div class="modal fade" id="comentarDocumentoModal" tabindex="-1">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header bg-info text-white">
-                <h5 class="modal-title"><i class="fas fa-comment me-2"></i>Agregar Comentario</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-            </div>
-            <form id="comentarDocumentoForm" method="POST">
-                @csrf @method('PUT')
-                <div class="modal-body">
-                    <div class="alert alert-info mb-3"><small><strong>Documento:</strong> <span id="comentar_documento_nombre"></span></small></div>
-                    <div class="mb-3">
-                        <label class="form-label">Observaciones / Comentarios</label>
-                        <textarea class="form-control" name="observaciones" rows="4" placeholder="Escriba sus comentarios..."></textarea>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="submit" class="btn btn-info text-white"><i class="fas fa-save me-2"></i>Guardar</button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
-
-<!-- Modal Ver Documento -->
-<div class="modal fade" id="modalDocumento" tabindex="-1">
-    <div class="modal-dialog modal-xl">
-        <div class="modal-content">
-            <div class="modal-header bg-danger text-white">
-                <h5 class="modal-title"><i class="fas fa-file me-2"></i>Vista Previa del Documento</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-                <div class="row">
-                    <div class="col-md-8">
-                        <div class="card border-0 shadow-sm">
-                            <div class="card-body p-0">
-                                <div id="imagenPreview" class="d-none">
-                                    <div class="image-viewer-wrapper">
-                                        <div class="image-container"><img id="imagenDocumento" src="" alt="Documento" class="zoomable-image"></div>
-                                        <div class="d-flex justify-content-center align-items-center mt-3">
-                                            <button type="button" class="btn btn-sm btn-outline-secondary mx-1" id="zoomIn"><i class="fas fa-search-plus"></i></button>
-                                            <button type="button" class="btn btn-sm btn-outline-secondary mx-1" id="zoomOut"><i class="fas fa-search-minus"></i></button>
-                                            <button type="button" class="btn btn-sm btn-outline-secondary mx-1" id="rotateLeft"><i class="fas fa-undo"></i></button>
-                                            <button type="button" class="btn btn-sm btn-outline-secondary mx-1" id="rotateRight"><i class="fas fa-redo"></i></button>
-                                            <button type="button" class="btn btn-sm btn-outline-secondary mx-1" id="resetImage"><i class="fas fa-sync-alt"></i></button>
-                                            <span class="badge bg-info mx-2" id="zoomLevel">100%</span>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div id="pdfPreview" class="d-none">
-                                    <iframe id="pdfIframe" src="" width="100%" height="500px" class="border rounded"></iframe>
-                                </div>
-                                <div id="voucherPreview" class="d-none">
-                                    <div class="voucher-viewer-wrapper">
-                                        <div class="image-container"><img id="voucherImagen" src="" alt="Voucher" class="zoomable-image"></div>
-                                        <div class="d-flex justify-content-center align-items-center mt-3">
-                                            <button type="button" class="btn btn-sm btn-outline-secondary mx-1" id="zoomInVoucher"><i class="fas fa-search-plus"></i></button>
-                                            <button type="button" class="btn btn-sm btn-outline-secondary mx-1" id="zoomOutVoucher"><i class="fas fa-search-minus"></i></button>
-                                            <button type="button" class="btn btn-sm btn-outline-secondary mx-1" id="rotateLeftVoucher"><i class="fas fa-undo"></i></button>
-                                            <button type="button" class="btn btn-sm btn-outline-secondary mx-1" id="rotateRightVoucher"><i class="fas fa-redo"></i></button>
-                                            <button type="button" class="btn btn-sm btn-outline-secondary mx-1" id="resetImageVoucher"><i class="fas fa-sync-alt"></i></button>
-                                            <span class="badge bg-info mx-2" id="zoomLevelVoucher">100%</span>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div id="loadingPreview" class="d-none">
-                                    <div class="d-flex flex-column align-items-center justify-content-center py-5">
-                                        <div class="spinner-border text-danger" role="status"></div>
-                                        <p class="mt-3 text-muted">Cargando documento...</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="card border-0 shadow-sm h-100">
-                            <div class="card-header bg-light"><h6 class="mb-0"><i class="fas fa-info-circle me-2"></i>Información</h6></div>
-                            <div class="card-body">
-                                <div class="mb-3">
-                                    <label class="form-label text-muted small mb-1">Nombre</label>
-                                    <div class="p-2 bg-light rounded"><strong id="infoNombre"></strong></div>
-                                </div>
-                                <div class="mb-3">
-                                    <label class="form-label text-muted small mb-1">Tipo</label>
-                                    <div class="p-2 bg-light rounded"><span id="infoTipo" class="badge bg-secondary"></span></div>
-                                </div>
-                                <div class="mb-3">
-                                    <label class="form-label text-muted small mb-1">Fecha de subida</label>
-                                    <div class="p-2 bg-light rounded"><span id="infoFecha"></span></div>
-                                </div>
-                                {{-- ✅ QUIÉN SUBIÓ en panel lateral del modal --}}
-                                <div class="mb-3">
-                                    <label class="form-label text-muted small mb-1">Subido por</label>
-                                    <div class="p-2 bg-light rounded" id="infoSubidoPor">—</div>
-                                </div>
-                                <div class="mt-4">
-                                    <h6 class="border-bottom pb-2">Acciones</h6>
-                                    <a href="#" id="btnDescargarModal" class="btn btn-danger w-100"><i class="fas fa-download me-2"></i>Descargar</a>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <div class="row w-100" id="modalFooterActions" style="display:none !important;">
-                    <div class="col-md-4"><button type="button" class="btn btn-success w-100" id="btnAceptarVoucher"><i class="fas fa-check-circle me-2"></i>Aceptar Voucher</button></div>
-                    <div class="col-md-4"><button type="button" class="btn btn-danger w-100" id="btnRechazarVoucher"><i class="fas fa-times-circle me-2"></i>Rechazar Voucher</button></div>
-                    <div class="col-md-4"><button type="button" class="btn btn-outline-secondary w-100" data-bs-dismiss="modal"><i class="fas fa-times me-2"></i>Cerrar</button></div>
-                </div>
-                <button type="button" class="btn btn-outline-secondary" id="btnCerrarModal" data-bs-dismiss="modal"><i class="fas fa-times me-2"></i>Cerrar</button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Toast -->
-<div class="position-fixed bottom-0 end-0 p-3" style="z-index: 1055">
-    <div id="toastCopiado" class="toast align-items-center text-bg-success border-0" role="alert">
-        <div class="d-flex">
-            <div class="toast-body"><i class="fas fa-check-circle me-2"></i><span id="toastMessage"></span></div>
-            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
-        </div>
-    </div>
-</div>
-
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
-// FIX focus trap Bootstrap + SweetAlert2
-document.addEventListener('focusin', e => { if (e.target.closest('.swal2-container')) e.stopImmediatePropagation(); });
-
 let documentoActual = null, arbitrajeActual = {{ $arbitraje->id_arbitraje }}, arbitrajeActualEstado = '{{ $arbitraje->estado }}';
 let imgZoom = 1, imgRotate = 0, voucherZoom = 1, voucherRotate = 0;
 
@@ -555,7 +409,6 @@ function abrirModalDocumento(documento) {
     document.getElementById('infoTipo').textContent   = documento.tipo.toUpperCase();
     document.getElementById('infoFecha').textContent  = documento.fecha;
 
-    // ✅ Panel lateral: quién subió
     const colorMap = { success:'#28a745', warning:'#ffc107', danger:'#dc3545', secondary:'#6c757d' };
     const textMap  = { warning:'#000' };
     const el = document.getElementById('infoSubidoPor');
@@ -672,7 +525,6 @@ document.addEventListener('DOMContentLoaded', function () {
         f.addEventListener('submit', async function(e){ e.preventDefault(); await subirDocumento(this, this.dataset.arbitrajeId); });
     });
 
-    // ✅ Botón VER — pasa los datos de quién subió al modal
     document.addEventListener('click', function(e){
         const b=e.target.closest('.btn-ver-documento'); if(!b) return;
         e.preventDefault(); e.stopPropagation();
@@ -689,14 +541,12 @@ document.addEventListener('DOMContentLoaded', function () {
     document.addEventListener('click', function(e){
         const b=e.target.closest('.btn-comentar'); if(!b) return;
         e.preventDefault(); e.stopPropagation();
-        if(!b.dataset.documentoId){Swal.fire('Error','No se pudo identificar el documento','error');return;}
         abrirModalComentar(b.dataset.documentoId, b.dataset.documentoNombre, b.dataset.observaciones||'');
     });
 
     document.getElementById('comentarDocumentoForm')?.addEventListener('submit', function(e){
         e.preventDefault();
         const id=this.dataset.documentoId, txt=this.querySelector('textarea[name="observaciones"]').value.trim();
-        if(!txt){Swal.fire('Error','Debe escribir un comentario','error');return;}
         Swal.fire({title:'Guardando...',allowOutsideClick:false,showConfirmButton:false,didOpen:()=>Swal.showLoading()});
         fetch(`/documentos/${id}/comentar`,{method:'PUT',headers:{'X-CSRF-TOKEN':document.querySelector('meta[name="csrf-token"]').content,'X-Requested-With':'XMLHttpRequest','Accept':'application/json','Content-Type':'application/json'},body:JSON.stringify({observaciones:txt})})
         .then(r=>r.json()).then(data=>{
@@ -715,7 +565,6 @@ document.addEventListener('DOMContentLoaded', function () {
         if(!documentoActual) return;
         Swal.fire({title:'Rechazar voucher',html:`<div class="text-start"><p>Indica el motivo:</p><textarea id="motivoRechazo" class="form-control" rows="4" placeholder="Ej: La imagen es ilegible..."></textarea></div>`,
             icon:'warning',showCancelButton:true,confirmButtonColor:'#dc3545',cancelButtonColor:'#6c757d',confirmButtonText:'Rechazar',cancelButtonText:'Cancelar',
-            didOpen:()=>{ document.getElementById('motivoRechazo')?.focus(); },
             preConfirm:()=>{ const m=document.getElementById('motivoRechazo').value.trim(); if(!m){Swal.showValidationMessage('Debes ingresar un motivo');return false;} return m; }
         }).then(r=>{if(r.isConfirmed) procesarVoucher('rechazar',r.value);});
     });
@@ -723,11 +572,9 @@ document.addEventListener('DOMContentLoaded', function () {
     document.querySelectorAll('.btn-finalizar-proceso').forEach(btn => {
         btn.addEventListener('click', function(e){
             e.preventDefault();
-            const nombre=this.dataset.procesoNombre, pid=this.dataset.procesoId, fid=this.dataset.formId, esUlt=this.dataset.esUltimo==='true';
+            const nombre=this.dataset.procesoNombre, pid=this.dataset.procesoId, fid=this.dataset.formId;
             const form=document.getElementById(fid);
-            const msg=esUlt
-                ?'<div class="alert alert-success mt-3"><i class="fas fa-trophy me-2"></i>Este es el último proceso. El arbitraje se marcará como TERMINADO.</div>'
-                :'<div class="alert alert-info mt-3"><i class="fas fa-info-circle me-2"></i>Se creará automáticamente el siguiente proceso.</div>';
+            const msg='<div class="alert alert-info mt-3"><i class="fas fa-info-circle me-2"></i>Se creará automáticamente el siguiente proceso.</div>';
             Swal.fire({title:'¿Finalizar proceso?',
                 html:`<div class="text-start"><p class="mb-3"><strong>Proceso:</strong> ${nombre}</p>${msg}<div class="form-check mt-3"><input class="form-check-input" type="checkbox" id="confirmarProceso${pid}"><label class="form-check-label" for="confirmarProceso${pid}">Confirmo finalizar este proceso</label></div></div>`,
                 icon:'question',showCancelButton:true,confirmButtonColor:'#ffc107',cancelButtonColor:'#6c757d',confirmButtonText:'Sí, finalizar',cancelButtonText:'Cancelar',
@@ -745,4 +592,111 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 });
 </script>
+
+<!-- Modales necesarios al final -->
+<div class="modal fade" id="modalDocumento" tabindex="-1">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title"><i class="fas fa-file me-2"></i>Vista Previa del Documento</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-8">
+                        <div class="card border-0 shadow-sm">
+                            <div class="card-body p-0">
+                                <div id="imagenPreview" class="d-none">
+                                    <div class="image-viewer-wrapper">
+                                        <div class="image-container"><img id="imagenDocumento" src="" alt="Documento" class="zoomable-image"></div>
+                                        <div class="d-flex justify-content-center align-items-center mt-3">
+                                            <button type="button" class="btn btn-sm btn-outline-secondary mx-1" id="zoomIn"><i class="fas fa-search-plus"></i></button>
+                                            <button type="button" class="btn btn-sm btn-outline-secondary mx-1" id="zoomOut"><i class="fas fa-search-minus"></i></button>
+                                            <button type="button" class="btn btn-sm btn-outline-secondary mx-1" id="rotateLeft"><i class="fas fa-undo"></i></button>
+                                            <button type="button" class="btn btn-sm btn-outline-secondary mx-1" id="rotateRight"><i class="fas fa-redo"></i></button>
+                                            <button type="button" class="btn btn-sm btn-outline-secondary mx-1" id="resetImage"><i class="fas fa-sync-alt"></i></button>
+                                            <span class="badge bg-info mx-2" id="zoomLevel">100%</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div id="pdfPreview" class="d-none">
+                                    <iframe id="pdfIframe" src="" width="100%" height="500px" class="border rounded"></iframe>
+                                </div>
+                                <div id="voucherPreview" class="d-none">
+                                    <div class="voucher-viewer-wrapper">
+                                        <div class="image-container"><img id="voucherImagen" src="" alt="Voucher" class="zoomable-image"></div>
+                                        <div class="d-flex justify-content-center align-items-center mt-3">
+                                            <button type="button" class="btn btn-sm btn-outline-secondary mx-1" id="zoomInVoucher"><i class="fas fa-search-plus"></i></button>
+                                            <button type="button" class="btn btn-sm btn-outline-secondary mx-1" id="zoomOutVoucher"><i class="fas fa-search-minus"></i></button>
+                                            <button type="button" class="btn btn-sm btn-outline-secondary mx-1" id="rotateLeftVoucher"><i class="fas fa-undo"></i></button>
+                                            <button type="button" class="btn btn-sm btn-outline-secondary mx-1" id="rotateRightVoucher"><i class="fas fa-redo"></i></button>
+                                            <button type="button" class="btn btn-sm btn-outline-secondary mx-1" id="resetImageVoucher"><i class="fas fa-sync-alt"></i></button>
+                                            <span class="badge bg-info mx-2" id="zoomLevelVoucher">100%</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div id="loadingPreview" class="d-none">
+                                    <div class="d-flex flex-column align-items-center justify-content-center py-5">
+                                        <div class="spinner-border text-danger" role="status"></div>
+                                        <p class="mt-3 text-muted">Cargando documento...</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card border-0 shadow-sm h-100">
+                            <div class="card-header bg-light"><h6 class="mb-0"><i class="fas fa-info-circle me-2"></i>Información</h6></div>
+                            <div class="card-body">
+                                <div class="mb-3"><label class="form-label text-muted small mb-1">Nombre</label><div class="p-2 bg-light rounded"><strong id="infoNombre"></strong></div></div>
+                                <div class="mb-3"><label class="form-label text-muted small mb-1">Tipo</label><div class="p-2 bg-light rounded"><span id="infoTipo" class="badge bg-secondary"></span></div></div>
+                                <div class="mb-3"><label class="form-label text-muted small mb-1">Fecha de subida</label><div class="p-2 bg-light rounded"><span id="infoFecha"></span></div></div>
+                                <div class="mb-3"><label class="form-label text-muted small mb-1">Subido por</label><div class="p-2 bg-light rounded" id="infoSubidoPor">—</div></div>
+                                <div class="mt-4"><h6 class="border-bottom pb-2">Acciones</h6><a href="#" id="btnDescargarModal" class="btn btn-danger w-100"><i class="fas fa-download me-2"></i>Descargar</a></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <div class="row w-100" id="modalFooterActions" style="display:none !important;">
+                    <div class="col-md-4"><button type="button" class="btn btn-success w-100" id="btnAceptarVoucher"><i class="fas fa-check-circle me-2"></i>Aceptar Voucher</button></div>
+                    <div class="col-md-4"><button type="button" class="btn btn-danger w-100" id="btnRechazarVoucher"><i class="fas fa-times-circle me-2"></i>Rechazar Voucher</button></div>
+                </div>
+                <button type="button" class="btn btn-outline-secondary" id="btnCerrarModal" data-bs-dismiss="modal"><i class="fas fa-times me-2"></i>Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="comentarDocumentoModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-info text-white">
+                <h5 class="modal-title"><i class="fas fa-comment me-2"></i>Agregar Comentario</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="comentarDocumentoForm" method="POST">
+                @csrf @method('PUT')
+                <div class="modal-body">
+                    <div class="alert alert-info mb-3"><small><strong>Documento:</strong> <span id="comentar_documento_nombre"></span></small></div>
+                    <div class="mb-3">
+                        <label class="form-label">Observaciones / Comentarios</label>
+                        <textarea class="form-control" name="observaciones" rows="4" placeholder="Escriba sus comentarios..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-info text-white"><i class="fas fa-save me-2"></i>Guardar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="position-fixed bottom-0 end-0 p-3" style="z-index: 1055">
+    <div id="toastCopiado" class="toast align-items-center text-bg-success border-0" role="alert">
+        <div class="d-flex"><div class="toast-body"><i class="fas fa-check-circle me-2"></i><span id="toastMessage"></span></div><button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button></div>
+    </div>
+</div>
 @endsection

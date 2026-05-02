@@ -22,9 +22,11 @@
                 <div class="col-md-8">
                     <h4 class="mb-0">
                         <i class="fas fa-gavel me-2"></i>
-                        {{ $jrd->nombre_materia }}
+                        {{ $jrd->numero_expediente ? "Expediente N° {$jrd->numero_expediente}" : $jrd->nombre_materia }}
                     </h4>
-                    <small>ID: #{{ $jrd->id_jrd }}</small>
+                    @if($jrd->numero_expediente && $jrd->nombre_materia)
+                        <br><small class="text-light">Materia: {{ $jrd->nombre_materia }}</small>
+                    @endif
                 </div>
                 <div class="col-md-4 text-end">
                     @php
@@ -49,8 +51,16 @@
                         <i class="fas fa-info-circle me-2"></i>Información General
                     </h6>
                     <table class="table table-sm">
+                        @if($jrd->numero_expediente)
                         <tr>
-                            <th width="40%">Pretensiones:</th>
+                            <th width="40%">Número de Expediente:</th>
+                            <td>
+                                <span class="badge bg-dark">{{ $jrd->numero_expediente }}</span>
+                            </td>
+                        </tr>
+                        @endif
+                        <tr>
+                            <th width="40%">Peticiones:</th>
                             <td>{{ $jrd->pretenciones ?? 'No especificadas' }}</td>
                         </tr>
                         <tr>

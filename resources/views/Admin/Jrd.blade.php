@@ -98,7 +98,7 @@
                 <table class="table table-hover mb-0" id="tablaJrd">
                     <thead class="table-light">
                         <tr>
-                            <th width="80">ID</th>
+                            <th>N° Expediente</th>
                             <th>Materia</th>
                             <th>Creador</th>
                             <th>DNI Creador</th>
@@ -179,9 +179,13 @@ function renderJrd(data) {
             ? personasList.map(p => `${p.dni || 'N/A'} (${p.tipo || 'N/A'})`).join('<br>')
             : '<span class="text-muted">Sin personas</span>';
         
+        const numeroExpediente = jrd.numero_expediente 
+            ? `<span class="badge bg-dark">${jrd.numero_expediente}</span>`
+            : '<span class="text-muted">Sin expediente</span>';
+        
         return `
             <tr style="cursor: pointer;" onclick="irADetalle(${jrd.id_jrd})">
-                <td><strong>#${jrd.id_jrd}</strong></td>
+                <td>${numeroExpediente}</td>
                 <td>
                     <strong>${jrd.nombre_materia || 'Sin materia'}</strong><br>
                     <small class="text-muted">${(jrd.pretenciones || '').substring(0, 50)}${(jrd.pretenciones || '').length > 50 ? '...' : ''}</small>
