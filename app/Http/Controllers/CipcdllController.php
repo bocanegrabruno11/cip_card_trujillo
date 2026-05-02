@@ -50,10 +50,10 @@ class CipcdllController extends Controller
         // 🔥 NUEVO: Verificar aforo antes de registrar
         $totalRegistrados = AsistenteCipcdll::where('estado', 'aprobado')->count();
         
-        if ($totalRegistrados >= 250) {
+        if ($totalRegistrados >= 260) {
             return response()->json([
                 'success' => false,
-                'message' => 'Lo sentimos, el aforo máximo de 250 personas ya ha sido alcanzado.'
+                'message' => 'Lo sentimos, el aforo máximo de 260 personas ya ha sido alcanzado.'
             ]);
         }
 
@@ -151,7 +151,7 @@ class CipcdllController extends Controller
     {
         $totalAprobados = AsistenteCipcdll::where('estado', 'registrado')->count();
         
-        if ($totalAprobados >= 250) {
+        if ($totalAprobados >= 260) {
             // Evento lleno - mostrar vista de cupo completo
             return view('evento-lleno');
         } else {

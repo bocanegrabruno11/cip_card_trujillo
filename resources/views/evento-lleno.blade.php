@@ -221,7 +221,7 @@
             <div class="info-box">
                 <div class="info-item">
                     <i class="bi bi-people-fill"></i>
-                    <span>250 Ingenieras Mamás</span>
+                    <span>260 Ingenieras Mamás</span>
                 </div>
                 <div class="info-item">
                     <i class="bi bi-calendar-heart-fill"></i>
@@ -236,7 +236,7 @@
             <div class="message">
                 <p><i class="bi bi-emoji-frown-fill" style="color: var(--crimson); margin-right: 0.5rem;"></i> 
                 <strong>Lo sentimos mucho</strong></p>
-                <p>El cupo máximo de <strong>250 asistentes</strong> ya ha sido alcanzado para este evento.</p>
+                <p>El cupo máximo de <strong>260 asistentes</strong> ya ha sido alcanzado para este evento.</p>
                 <p style="margin-top: 0.8rem;">🌹 Agradecemos tu interés en participar. Te invitamos a estar atenta a futuros eventos organizados por el Comité de Damas del CIP CDLL.</p>
             </div>
             
