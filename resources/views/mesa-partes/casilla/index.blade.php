@@ -55,6 +55,23 @@
                     </thead>
                     <tbody>
                         @forelse($notificaciones as $n)
+                        @php
+                            // Obtener el número de expediente según el tipo
+                            $numeroExpediente = null;
+                            $tipoExpediente = null;
+                            
+                            if($n->arbitraje_id && $n->arbitraje) {
+                                $numeroExpediente = $n->arbitraje->numero_expediente;
+                                $tipoExpediente = 'arbitraje';
+                            } elseif($n->jrd_id && $n->jrd) {
+                                $numeroExpediente = $n->jrd->numero_expediente;
+                                $tipoExpediente = 'jrd';
+                            }
+                            
+                            $tituloExpediente = $numeroExpediente 
+                                ? "Expediente N° {$numeroExpediente}"
+                                : ($tipoExpediente === 'arbitraje' ? "Arbitraje #{$n->arbitraje_id}" : "JRD #{$n->jrd_id}");
+                        @endphp
                         <tr class="{{ $n->estado == 'no leido' ? 'bg-light fw-bold' : '' }}" style="cursor: pointer;" onclick="window.location='{{ route('casilla.show', $n->id_casilla) }}'">
                             <td class="ps-4">
                                 @if($n->estado == 'no leido')
@@ -70,13 +87,25 @@
 
                             <td>
                                 @if($n->arbitraje_id)
-                                    <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-2">
-                                        <i class="fas fa-scale-balanced me-1"></i> ARB-{{ $n->arbitraje_id }}
-                                    </span>
+                                    @if($numeroExpediente)
+                                        <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-2">
+                                            <i class="fas fa-scale-balanced me-1"></i> {{ $tituloExpediente }}
+                                        </span>
+                                    @else
+                                        <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-2">
+                                            <i class="fas fa-scale-balanced me-1"></i> ARB-{{ $n->arbitraje_id }}
+                                        </span>
+                                    @endif
                                 @elseif($n->jrd_id)
-                                    <span class="badge bg-success-subtle text-success border border-success-subtle px-2">
-                                        <i class="fas fa-gavel me-1"></i> JRD-{{ $n->jrd_id }}
-                                    </span>
+                                    @if($numeroExpediente)
+                                        <span class="badge bg-success-subtle text-success border border-success-subtle px-2">
+                                            <i class="fas fa-gavel me-1"></i> {{ $tituloExpediente }}
+                                        </span>
+                                    @else
+                                        <span class="badge bg-success-subtle text-success border border-success-subtle px-2">
+                                            <i class="fas fa-gavel me-1"></i> JRD-{{ $n->jrd_id }}
+                                        </span>
+                                    @endif
                                 @else
                                     <span class="text-muted small">N/A</span>
                                 @endif
@@ -97,7 +126,7 @@
                             <td colspan="6" class="text-center py-5 text-muted">
                                 <i class="fas fa-folder-open fa-3x mb-3 d-block"></i>
                                 No se encontraron notificaciones con los filtros aplicados.
-                            </td>
+                             </td>
                         </tr>
                         @endforelse
                     </tbody>

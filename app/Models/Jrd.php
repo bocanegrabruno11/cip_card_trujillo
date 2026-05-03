@@ -21,7 +21,8 @@ class Jrd extends Model
         'tasa_solicitud',
         'estado',
         'controversia',
-        'fundamentos_hecho'
+        'fundamentos_hecho',
+        'numero_expediente',
     ];
 
     protected $casts = [

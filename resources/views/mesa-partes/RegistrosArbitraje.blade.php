@@ -12,7 +12,7 @@
         <div class="col-md-4">
             <div class="input-group">
                 <span class="input-group-text bg-white"><i class="fas fa-search"></i></span>
-                <input type="text" class="form-control" id="searchArbitraje" placeholder="Buscar por materia, pretensiones o ID...">
+                <input type="text" class="form-control" id="searchArbitraje" placeholder="Buscar por expediente, materia o ID...">
             </div>
         </div>
     </div>
@@ -29,7 +29,7 @@
     <div id="arbitrajesList" class="accordion"></div>
 </div>
 
-<!-- Modal Subir Documento (sin observaciones) -->
+<!-- Modal Subir Documento -->
 <div class="modal fade" id="uploadDocumentModal" tabindex="-1">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -77,7 +77,7 @@
     </div>
 </div>
 
-<!-- Modal Re-subir Voucher Rechazado (sin observaciones) -->
+<!-- Modal Re-subir Voucher Rechazado -->
 <div class="modal fade" id="resubirVoucherModal" tabindex="-1">
     <div class="modal-dialog modal-lg">
         <div class="modal-content border-danger">
@@ -153,8 +153,7 @@
 @push('scripts')
 <script>
 let arbitrajes = [];
-
-// Clave para localStorage
+let scrollIntento = 0;
 const STORAGE_KEY = 'arbitrajes_abiertos';
 
 // ─── Funciones para manejar localStorage ─────────────────────────────────────
@@ -264,6 +263,56 @@ function badgeSubidoPor(doc) {
             <small class="text-muted ms-1" style="font-size:.68rem;">${nombre}</small>`;
 }
 
+// ─── FUNCIÓN SIMPLIFICADA PARA BUSCAR Y EXPANDIR EXPEDIENTE ─────────────────
+function buscarYExpandirExpediente() {
+    const stored = sessionStorage.getItem('expediente_buscar');
+    if (!stored) return;
+    
+    try {
+        const data = JSON.parse(stored);
+        
+        // Limpiar inmediatamente para no reutilizar
+        sessionStorage.removeItem('expediente_buscar');
+        
+        if (data.tipo !== 'arbitraje') return;
+        
+        console.log('🔍 Buscando arbitraje:', data.id);
+        
+        // Función para hacer scroll y expandir
+        const ejecutarScroll = function(intento = 0) {
+            const card = document.querySelector(`.arbitraje-card[data-id="${data.id}"]`);
+            if (card) {
+                // Forzar scroll después de que la página esté completamente estable
+                setTimeout(() => {
+                    card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    card.style.transition = 'all 0.3s ease';
+                    card.style.boxShadow = '0 0 0 3px #dc3545, 0 0 0 6px rgba(220,53,69,0.3)';
+                    setTimeout(() => { card.style.boxShadow = ''; }, 3000);
+                }, 100);
+                
+                const collapseId = `collapse${data.id}`;
+                const collapseElement = document.getElementById(collapseId);
+                if (collapseElement && !collapseElement.classList.contains('show')) {
+                    new bootstrap.Collapse(collapseElement, { toggle: true }).show();
+                }
+                return true;
+            } else if (intento < 3) {
+                // Reintentar si el DOM no está listo
+                setTimeout(() => ejecutarScroll(intento + 1), 300);
+            }
+            return false;
+        };
+        
+        // Intentar inmediatamente y si no, reintentar una vez después de 500ms
+        if (!ejecutarScroll()) {
+            setTimeout(ejecutarScroll, 500);
+        }
+        
+    } catch(e) {
+        console.error('Error:', e);
+    }
+}
+
 // ─── Abrir modal re-subir voucher ──────────────────────────────────────────
 function abrirResubirVoucher(arbitrajeId, procesoId, motivo) {
     document.getElementById('resub_arbitraje_id').value = arbitrajeId;
@@ -338,12 +387,15 @@ function subirDocumento(arbId, procId) {
 
 // ─── Generar HTML de un card individual ────────────────────────────────────
 function generarCardHTML(arb) {
+    const tituloExpediente = arb.titulo_expediente || (arb.numero_expediente 
+        ? `Expediente N° ${arb.numero_expediente}`
+        : (arb.nombre_materia || 'Sin expediente'));
+    
     let rolBadge='';
     if(arb.es_creador) rolBadge='<span class="badge bg-info ms-2"><i class="fas fa-user-tie me-1"></i>Creador</span>';
     else if(arb.rol_usuario==='Demandante') rolBadge='<span class="badge bg-success ms-2"><i class="fas fa-user-check me-1"></i>Demandante</span>';
     else if(arb.rol_usuario==='Demandado') rolBadge='<span class="badge bg-warning text-dark ms-2"><i class="fas fa-user-shield me-1"></i>Demandado</span>';
 
-    // ✅ CORREGIDO: declarar tipoBadge AQUÍ, fuera del template string
     const tipoBadge = arb.tipo_arbitraje === 'emergencia'
         ? '<span class="badge bg-danger ms-2"><i class="fas fa-bolt me-1"></i>Emergencia</span>'
         : '<span class="badge bg-secondary ms-2"><i class="fas fa-gavel me-1"></i>Normal</span>';
@@ -354,7 +406,6 @@ function generarCardHTML(arb) {
     const procActivo  = obtenerProcesoActivo(arb.procesos);
     const panelId = `collapse${arb.id_arbitraje}`;
     
-    // Verificar si debe estar abierto según localStorage
     const debeEstarAbierto = estaPanelAbierto(arb.id_arbitraje) || puedeResub;
     const expandedClass = debeEstarAbierto ? 'show' : '';
     const ariaExpanded = debeEstarAbierto ? 'true' : 'false';
@@ -379,12 +430,24 @@ function generarCardHTML(arb) {
 
     return `
     <div class="card mb-3 shadow-sm arbitraje-card ${esObservado?'border-danger':''}"
-         data-materia="${(arb.nombre_materia||'').toLowerCase()}" data-id="${arb.id_arbitraje}">
+         data-expediente="${(arb.numero_expediente || '').toLowerCase()}"
+         data-materia="${(arb.nombre_materia||'').toLowerCase()}"
+         data-id="${arb.id_arbitraje}">
         <div class="card-header bg-white ${esObservado?'border-bottom border-danger':''}">
             <div class="row align-items-center">
                 <div class="col-md-8">
-                    <h5 class="mb-1"><i class="fas fa-scale-balanced text-danger me-2"></i>${arb.nombre_materia||'Sin materia'}${rolBadge}${tipoBadge}</h5>
-                    <small class="text-muted"><i class="fas fa-calendar me-1"></i>Iniciado: ${formatFecha(arb.fecha_inicio)}</small>
+                    <h5 class="mb-1">
+                        <i class="fas fa-scale-balanced text-danger me-2"></i>
+                        ${tituloExpediente}
+                        ${rolBadge}${tipoBadge}
+                    </h5>
+                    <small class="text-muted">
+                        <i class="fas fa-tag me-1"></i>Materia: ${arb.nombre_materia || 'No especificada'}
+                    </small>
+                    <br>
+                    <small class="text-muted">
+                        <i class="fas fa-calendar me-1"></i>Iniciado: ${formatFecha(arb.fecha_inicio)}
+                    </small>
                 </div>
                 <div class="col-md-4 text-end">
                     <span class="badge ${getEstadoBadge(arb.estado)} px-3 py-2">${(arb.estado||'iniciado').toUpperCase()}</span>
@@ -405,6 +468,8 @@ function generarCardHTML(arb) {
                 <div class="row mb-4">
                     <div class="col-md-12">
                         <h6 class="text-danger border-bottom pb-2 mb-3"><i class="fas fa-info-circle me-2"></i>Información General</h6>
+                        ${arb.numero_expediente ? `<p><strong>Número de Expediente:</strong> <span class="badge bg-dark">${arb.numero_expediente}</span></p>` : ''}
+                        <p><strong>Materia:</strong> ${arb.nombre_materia || 'No especificada'}</p>
                         <p><strong>Pretensiones:</strong> ${arb.pretenciones||'No especificadas'}</p>
                         <p><strong>Controversia:</strong> ${arb.controversia||'No especificadas'}</p>
                         <p><strong>Fundamentos de hecho:</strong> ${arb.fundamentos_hecho||'No especificadas'}</p>
@@ -507,7 +572,6 @@ function generarCardHTML(arb) {
     </div>`;
 }
 
-// ─── Render completo ───────────────────────────────────────────────────────
 function renderArbitrajes(data) {
     const container = document.getElementById('arbitrajesList');
     if (!data || !data.length) {
@@ -518,21 +582,21 @@ function renderArbitrajes(data) {
     document.getElementById('noResults').style.display = 'none';
     container.innerHTML = data.map(arb => generarCardHTML(arb)).join('');
     
-    // Agregar event listeners para guardar el estado cuando se abren/cierran paneles
     document.querySelectorAll('.collapse').forEach(collapse => {
         const arbitrajeId = collapse.id.replace('collapse', '');
-        
         collapse.addEventListener('shown.bs.collapse', function() {
             togglePanelState(arbitrajeId, true);
         });
-        
         collapse.addEventListener('hidden.bs.collapse', function() {
             togglePanelState(arbitrajeId, false);
         });
     });
+    
+    // ✅ Buscar y expandir expediente desde casilla DESPUÉS de renderizar
+    buscarYExpandirExpediente();
 }
 
-// ─── Subir documento y actualizar SOLO el arbitraje afectado ─────────────────
+// ─── Subir documento y actualizar ─────────────────────────────────────────
 document.getElementById('uploadDocumentForm')?.addEventListener('submit', function(e) {
     e.preventDefault();
     const tipo = document.getElementById('tipo_documento').value;
@@ -586,29 +650,24 @@ document.getElementById('uploadDocumentForm')?.addEventListener('submit', functi
         btn.innerHTML = originalText;
         btn.disabled = false;
         if(response.ok && json.success){
-            // Cerrar modal
             bootstrap.Modal.getInstance(document.getElementById('uploadDocumentModal')).hide();
             this.reset();
             
-            // Recargar solo este arbitraje desde el servidor
             return fetch('{{ route("arbitrajes.obtener") }}')
                 .then(r => r.json())
                 .then(data => {
                     if(data.success){
                         const arbitrajeActualizado = data.arbitrajes.find(a => a.id_arbitraje == arbitrajeId);
                         if(arbitrajeActualizado){
-                            // Actualizar en el array local
                             const index = arbitrajes.findIndex(a => a.id_arbitraje == arbitrajeId);
                             if(index !== -1){
                                 arbitrajes[index] = arbitrajeActualizado;
                             }
-                            // Reemplazar el card en el DOM
                             const cardExistente = document.querySelector(`.arbitraje-card[data-id="${arbitrajeId}"]`);
                             if(cardExistente){
                                 const nuevoHtml = generarCardHTML(arbitrajeActualizado);
                                 cardExistente.outerHTML = nuevoHtml;
                                 
-                                // Restaurar event listeners del nuevo card
                                 const nuevoCard = document.querySelector(`.arbitraje-card[data-id="${arbitrajeId}"]`);
                                 if(nuevoCard){
                                     const collapse = nuevoCard.querySelector(`#collapse${arbitrajeId}`);
@@ -660,7 +719,8 @@ function filterArbitrajes() {
     const cards = document.querySelectorAll('.arbitraje-card');
     let visibleCount = 0;
     cards.forEach(card => {
-        const matches = card.textContent.toLowerCase().includes(searchTerm) || 
+        const matches = card.getAttribute('data-expediente')?.includes(searchTerm) ||
+                       card.getAttribute('data-materia')?.includes(searchTerm) || 
                        card.dataset.id.includes(searchTerm);
         card.style.display = matches ? 'block' : 'none';
         if(matches) visibleCount++;

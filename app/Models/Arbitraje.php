@@ -21,7 +21,8 @@ class Arbitraje extends Model
         'estado',
         'tipo_arbitraje',
         'controversia',
-        'fundamentos_hecho'
+        'fundamentos_hecho',
+        'numero_expediente',
     ];
     
     protected $casts = [

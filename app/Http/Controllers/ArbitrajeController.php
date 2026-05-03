@@ -57,7 +57,7 @@ class ArbitrajeController extends Controller
                 'personas',
                 'procesos' => fn($q) => $q->orderBy('fecha_creacion', 'desc'),
                 'procesos.documentos' => fn($q) => $q->orderBy('fecha_subida', 'desc'),
-                'procesos.documentos.user.persona', // ← para subido_por
+                'procesos.documentos.user.persona',
                 'procesos.etapa',
             ])->where('user_id', $userId)->get();
 
@@ -70,7 +70,7 @@ class ArbitrajeController extends Controller
                     'personas',
                     'procesos' => fn($q) => $q->orderBy('fecha_creacion', 'desc'),
                     'procesos.documentos' => fn($q) => $q->orderBy('fecha_subida', 'desc'),
-                    'procesos.documentos.user.persona', // ← para subido_por
+                    'procesos.documentos.user.persona',
                     'procesos.etapa',
                 ])
                 ->whereHas('personas', fn($q) => $q->where('dni', $userDni))
@@ -96,6 +96,11 @@ class ArbitrajeController extends Controller
                     if ($personaEncontrada) $rolEnProceso = $personaEncontrada->tipo;
                 }
 
+                // ✅ Título formateado para usar en la vista
+                $tituloExpediente = $arbitraje->numero_expediente 
+                    ? "Expediente N° {$arbitraje->numero_expediente}"
+                    : ($arbitraje->nombre_materia ?? 'Sin expediente');
+
                 $procesosFormateados = $arbitraje->procesos->map(function ($proceso) use ($arbitraje) {
                     return [
                         'id_proceso_de_arbitraje' => $proceso->id_proceso_de_arbitraje,
@@ -103,7 +108,7 @@ class ArbitrajeController extends Controller
                         'fecha_finalizacion'       => $proceso->fecha_finalizacion,
                         'estado'                   => $proceso->estado,
                         'controversia'             => $arbitraje->controversia,
-                        'tipo_arbitraje' => $arbitraje->tipo_arbitraje ?? 'normal',
+                        'tipo_arbitraje'           => $arbitraje->tipo_arbitraje ?? 'normal',
                         'etapa'                    => $proceso->etapa ? [
                             'id'     => $proceso->etapa->id,
                             'nombre' => $proceso->etapa->nombre,
@@ -141,21 +146,23 @@ class ArbitrajeController extends Controller
 
                 return [
                     'id_arbitraje'         => $arbitraje->id_arbitraje,
-                    'nombre_materia'        => $arbitraje->nombre_materia,
-                    'pretenciones'          => $arbitraje->pretenciones,
-                    'cuantia'               => $arbitraje->cuantia,
-                    'controversia'          => $arbitraje->controversia,
-                    'fundamentos_hecho'          => $arbitraje->fundamentos_hecho,
-                    'tasa_solicitud'        => $arbitraje->tasa_solicitud,
-                    'designacion_arbitral'  => $arbitraje->designacion_arbitral,
-                    'fecha_inicio'          => $arbitraje->fecha_inicio,
-                    'fecha_finalizacion'    => $arbitraje->fecha_finalizacion,
-                    'tipo_arbitraje' => $arbitraje->tipo_arbitraje ?? 'normal',
-                    'estado'                => $arbitraje->estado,
-                    'es_creador'            => $esCreador,
-                    'rol_usuario'           => $esCreador ? 'Creador' : ($rolEnProceso ?? 'Observador'),
-                    'personas'              => $personasFormateadas,
-                    'procesos'              => $procesosFormateados,
+                    'numero_expediente'    => $arbitraje->numero_expediente, // ✅ AGREGADO
+                    'titulo_expediente'    => $tituloExpediente, // ✅ TÍTULO FORMATEADO
+                    'nombre_materia'       => $arbitraje->nombre_materia,
+                    'pretenciones'         => $arbitraje->pretenciones,
+                    'cuantia'              => $arbitraje->cuantia,
+                    'controversia'         => $arbitraje->controversia,
+                    'fundamentos_hecho'    => $arbitraje->fundamentos_hecho,
+                    'tasa_solicitud'       => $arbitraje->tasa_solicitud,
+                    'designacion_arbitral' => $arbitraje->designacion_arbitral,
+                    'fecha_inicio'         => $arbitraje->fecha_inicio,
+                    'fecha_finalizacion'   => $arbitraje->fecha_finalizacion,
+                    'tipo_arbitraje'       => $arbitraje->tipo_arbitraje ?? 'normal',
+                    'estado'               => $arbitraje->estado,
+                    'es_creador'           => $esCreador,
+                    'rol_usuario'          => $esCreador ? 'Creador' : ($rolEnProceso ?? 'Observador'),
+                    'personas'             => $personasFormateadas,
+                    'procesos'             => $procesosFormateados,
                 ];
             });
 

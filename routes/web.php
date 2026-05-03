@@ -30,6 +30,13 @@ use App\Http\Controllers\VoucherController;
 use App\Http\Controllers\ProcesoDeArbitrajeController;
 use App\Http\Controllers\EtapaJrdController;
 use App\Http\Controllers\UsuariosController;
+use App\Http\Controllers\CipcdllController;
+
+Route::get('/eventoscipcdll', [CipcdllController::class, 'verificarEvento']);
+
+Route::post('/validar-cip-dni', [CipcdllController::class, 'validarCipDni']);
+Route::post('/registrar-asistente', [CipcdllController::class, 'registrarAsistente']);
+Route::post('/cambiar-estado', [CipcdllController::class, 'cambiarEstado']);
 
 Route::post('/solicitudes-repo', [RepoSolicitudController::class, 'store'])->name('solicitudes.store');
 Route::get('/', [PageController::class, 'welcome'])->name('welcome');
@@ -110,6 +117,9 @@ Route::middleware(['auth', 'checkrole:mesa_partes'])->prefix('mesa-partes')->gro
         return view('mesa-partes.actualizar');
     })->name('actualizar');
 
+    Route::get('/mesa-partes-virtual', [App\Http\Controllers\MesaVirtualController::class, 'index'])
+    ->name('mesa.virtual');
+    
     // Arbitraje
     Route::get('/arbitraje', function () {
         return view('mesa-partes.arbitraje');

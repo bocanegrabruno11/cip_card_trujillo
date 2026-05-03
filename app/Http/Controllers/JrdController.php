@@ -28,44 +28,46 @@ class JrdController extends Controller
             
             $jrd = Jrd::with([
                 'personas',
-                    'procesos' => function($query) {
-                        $query->orderBy('fecha_creacion', 'desc')->with('etapa');
-                    },
+                'procesos' => function($query) {
+                    $query->orderBy('fecha_creacion', 'desc')->with('etapa');
+                },
                 'procesos.documentos' => function($query) {
                     $query->orderBy('fecha_subida', 'desc');
                 },
                 'procesos.documentos.user'
             ])
-                // DESPUÉS:
-                ->where(function($query) use ($user) {
-                    $query->where('user_id', $user->id)
-                        ->orWhereHas('personas', function($q) use ($user) {
-                            // Buscar el DNI del usuario en la tabla 'personas' y cruzarlo
-                            $dniUsuario = $user->persona?->dni;
-                            if ($dniUsuario) {
-                                $q->where('dni', $dniUsuario);
-                            } else {
-                                $q->whereRaw('1=0'); // Si no tiene DNI, no mostrar nada extra
-                            }
-                        });
-                })
-            ->orderBy('fecha_inicio', 'desc')  // Usa la fecha de inicio que SÍ existe
+            ->where(function($query) use ($user) {
+                $query->where('user_id', $user->id)
+                    ->orWhereHas('personas', function($q) use ($user) {
+                        $dniUsuario = $user->persona?->dni;
+                        if ($dniUsuario) {
+                            $q->where('dni', $dniUsuario);
+                        } else {
+                            $q->whereRaw('1=0');
+                        }
+                    });
+            })
+            ->orderBy('fecha_inicio', 'desc')
             ->get();
             
             // Agregar campos calculados
             foreach ($jrd as $item) {
                 $item->es_creador = ($item->user_id == $user->id);
                 
-                // DESPUÉS:
-if ($item->es_creador) {
-    $item->rol_usuario = 'Creador';
-} else {
-    $dniUsuario = $user->persona?->dni;
-    $persona = $dniUsuario
-        ? $item->personas->firstWhere('dni', $dniUsuario)
-        : null;
-    $item->rol_usuario = $persona ? $persona->tipo : 'Observador';
-}
+                if ($item->es_creador) {
+                    $item->rol_usuario = 'Creador';
+                } else {
+                    $dniUsuario = $user->persona?->dni;
+                    $persona = $dniUsuario
+                        ? $item->personas->firstWhere('dni', $dniUsuario)
+                        : null;
+                    $item->rol_usuario = $persona ? $persona->tipo : 'Observador';
+                }
+                
+                // ✅ Agregar numero_expediente formateado
+                $item->titulo_expediente = $item->numero_expediente 
+                    ? "Expediente N° {$item->numero_expediente}" 
+                    : ($item->nombre_materia ?? 'Sin expediente');
                 
                 // Agregar subido_por a cada documento
                 foreach ($item->procesos as $proceso) {
@@ -96,55 +98,53 @@ if ($item->es_creador) {
     /**
      * Obtener información de quién subió el documento
      */
-private function getSubidoPorAttribute($documento, $jrd = null)
-{
-    $user = $documento->user;
-    if (!$user) return null;
+    private function getSubidoPorAttribute($documento, $jrd = null)
+    {
+        $user = $documento->user;
+        if (!$user) return null;
 
-    $nombreCompleto = trim(
-        ($user->persona->nombres   ?? '') . ' ' .
-        ($user->persona->apellidos ?? '')
-    ) ?: ($user->name ?? 'Usuario');
+        $nombreCompleto = trim(
+            ($user->persona->nombres   ?? '') . ' ' .
+            ($user->persona->apellidos ?? '')
+        ) ?: ($user->name ?? 'Usuario');
 
-    // ✅ Buscar el rol del uploader dentro de las personas del JRD por su DNI
-    $rol = 'Usuario';
-    if ($jrd) {
-        $dniUploader = $user->persona->dni ?? null;
-        $personaJrd  = $dniUploader
-            ? $jrd->personas->firstWhere('dni', $dniUploader)
-            : null;
+        $rol = 'Usuario';
+        if ($jrd) {
+            $dniUploader = $user->persona->dni ?? null;
+            $personaJrd  = $dniUploader
+                ? $jrd->personas->firstWhere('dni', $dniUploader)
+                : null;
 
-        if ($personaJrd) {
-            $rol = $personaJrd->tipo; // Solicitante, Demandado, Contraparte, Tercero, etc.
-        } elseif ($jrd->user_id == $user->id) {
-            $rol = 'Creador';
-        } else {
-            // Si no está en personas pero subió un doc, es admin o mesa de partes
-            $rolSistema = strtolower($user->rol ?? '');
-            if ($rolSistema === 'admin')        $rol = 'Administrador';
-            elseif ($rolSistema === 'mesa_partes') $rol = 'Mesa de Partes';
+            if ($personaJrd) {
+                $rol = $personaJrd->tipo;
+            } elseif ($jrd->user_id == $user->id) {
+                $rol = 'Creador';
+            } else {
+                $rolSistema = strtolower($user->rol ?? '');
+                if ($rolSistema === 'admin')        $rol = 'Administrador';
+                elseif ($rolSistema === 'mesa_partes') $rol = 'Mesa de Partes';
+            }
         }
+
+        $rolConfig = [
+            'Solicitante'    => ['color' => 'success',   'icono' => 'fa-user-check'],
+            'Demandado'      => ['color' => 'warning',   'icono' => 'fa-user-shield'],
+            'Contraparte'    => ['color' => 'danger',    'icono' => 'fa-user-slash'],
+            'Tercero'        => ['color' => 'secondary', 'icono' => 'fa-user-friends'],
+            'Demandante'     => ['color' => 'primary',   'icono' => 'fa-user-plus'],
+            'Creador'        => ['color' => 'info',      'icono' => 'fa-user-tie'],
+            'Administrador'  => ['color' => 'danger',    'icono' => 'fa-user-tie'],
+            'Mesa de Partes' => ['color' => 'info',      'icono' => 'fa-building'],
+            'Usuario'        => ['color' => 'secondary', 'icono' => 'fa-user'],
+        ];
+
+        $cfg = $rolConfig[$rol] ?? ['color' => 'secondary', 'icono' => 'fa-user'];
+
+        return [
+            'label'  => $rol,
+            'color'  => $cfg['color'],
+            'icono'  => $cfg['icono'],
+            'nombre' => strtoupper($nombreCompleto),
+        ];
     }
-
-    $rolConfig = [
-        'Solicitante'    => ['color' => 'success',   'icono' => 'fa-user-check'],
-        'Demandado'      => ['color' => 'warning',   'icono' => 'fa-user-shield'],
-        'Contraparte'    => ['color' => 'danger',    'icono' => 'fa-user-slash'],
-        'Tercero'        => ['color' => 'secondary', 'icono' => 'fa-user-friends'],
-        'Demandante'     => ['color' => 'primary',   'icono' => 'fa-user-plus'],
-        'Creador'        => ['color' => 'info',      'icono' => 'fa-user-tie'],
-        'Administrador'  => ['color' => 'danger',    'icono' => 'fa-user-tie'],
-        'Mesa de Partes' => ['color' => 'info',      'icono' => 'fa-building'],
-        'Usuario'        => ['color' => 'secondary', 'icono' => 'fa-user'],
-    ];
-
-    $cfg = $rolConfig[$rol] ?? ['color' => 'secondary', 'icono' => 'fa-user'];
-
-    return [
-        'label'  => $rol,
-        'color'  => $cfg['color'],
-        'icono'  => $cfg['icono'],
-        'nombre' => strtoupper($nombreCompleto),
-    ];
-}
 }

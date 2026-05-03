@@ -61,11 +61,12 @@ class AdminJrdController extends Controller
 
                 return [
                     'id_jrd'                     => $jrd->id_jrd,
+                    'numero_expediente'          => $jrd->numero_expediente, // ✅ AGREGADO
                     'nombre_materia'             => $jrd->nombre_materia,
                     'pretenciones'               => $jrd->pretenciones,
                     'cuantia'                    => $jrd->cuantia,
-                    'controversia'                    => $jrd->controversia,
-                    'fundamentos_hecho'                    => $jrd->fundamentos_hecho,
+                    'controversia'               => $jrd->controversia,
+                    'fundamentos_hecho'          => $jrd->fundamentos_hecho,
                     'tasa_solicitud'             => $jrd->tasa_solicitud,
                     'designacion_adjudicadores'  => $jrd->designacion_adjudicadores,
                     'fecha_inicio'               => $jrd->fecha_inicio,
@@ -74,6 +75,9 @@ class AdminJrdController extends Controller
                     'creador_nombre'             => $creador ? $creador->name : 'Usuario #' . $jrd->user_id,
                     'creador_dni'                => $personaCreador ? $personaCreador->dni : 'N/A',
                     'etapa_actual'               => $etapaActual,
+                    'titulo_expediente'          => $jrd->numero_expediente 
+                        ? "Expediente N° {$jrd->numero_expediente}" 
+                        : ($jrd->nombre_materia ?? 'Sin expediente'), // ✅ TÍTULO FORMATEADO
                     'personas' => $jrd->personas->map(fn($p) => [
                         'id_proceso_jrd_persona' => $p->id_proceso_jrd_persona,
                         'dni'       => $p->dni,
@@ -83,7 +87,7 @@ class AdminJrdController extends Controller
                         'telefono'  => $p->telefono,
                         'ruc'       => $p->ruc,
                         'tipo'      => $p->tipo,
-                        'direccion'      => $p->direccion,
+                        'direccion' => $p->direccion,
                     ]),
                     'procesos' => $jrd->procesos->map(function($proceso) use ($jrd) {
                         return [
@@ -221,6 +225,7 @@ class AdminJrdController extends Controller
                 'Voucher Validado', 
                 'Su comprobante de pago ha sido aprobado exitosamente por la administración.'
             );
+            
             $siguienteEtapa = EtapaJrd::where('estado', 1)
                 ->where('id', '>', $procesoActual->id_etapa_jrd)
                 ->orderBy('id', 'asc')
@@ -289,12 +294,13 @@ class AdminJrdController extends Controller
                 ->where('estado', 'activo')
                 ->update(['estado' => 'observado']);
 
-                NotificacionService::notificarTitular(
+            NotificacionService::notificarTitular(
                 $jrd, 
                 'jrd', 
                 'Solicitud Observada - Voucher Rechazado', 
                 "El voucher subido ha sido observado por la administración. Motivo: {$request->motivo}."
             );
+            
             return response()->json([
                 'success' => true,
                 'message' => 'Voucher rechazado. JRD marcado como observado.',
@@ -309,41 +315,48 @@ class AdminJrdController extends Controller
         }
     }
 
-    public function archivar(Request $request, $id_jrd)
-    {
-        try {
-            $jrd = Jrd::findOrFail($id_jrd);
-            $jrd->estado             = 'archivado';
-            $jrd->fecha_finalizacion = now();
-            $jrd->save();
-
-            ProcesoJrd::where('jrd_id', $id_jrd)
-                ->where('estado', 'activo')
-                ->update([
-                    'estado'             => 'finalizado',
-                    'fecha_finalizacion' => now()
-                ]);
-
-                NotificacionService::notificarInvolucrados(
-                    $jrd, 
-                    'jrd', 
-                    'Expediente JRD Archivado', 
-                    'El proceso correspondiente a esta Junta de Resolución de Disputas ha sido archivado por la administración.'
-                );
-
-            return response()->json([
-                'success' => true,
-                'message' => 'JRD archivado correctamente.',
-            ]);
-
-        } catch (\Exception $e) {
-            Log::error('Error al archivar JRD:', ['error' => $e->getMessage()]);
+public function archivar(Request $request, $id_jrd)
+{
+    try {
+        $jrd = Jrd::findOrFail($id_jrd);
+        
+        // Verificar si ya está archivado o terminado
+        if (in_array($jrd->estado, ['archivado', 'terminado', 'finalizado'])) {
             return response()->json([
                 'success' => false,
-                'message' => 'Error al archivar el JRD: ' . $e->getMessage()
-            ], 500);
+                'message' => 'El JRD ya está ' . $jrd->estado
+            ], 400);
         }
+        
+        // Solo archivar el JRD principal
+        $jrd->estado             = 'archivado';
+        $jrd->fecha_finalizacion = now();
+        $jrd->save();
+        
+        // NOTA: Se eliminó la actualización de ProcesoJrd
+        // para que NO se finalicen los procesos automáticamente
+        
+        // Opcional: Si quieres mantener las notificaciones
+        NotificacionService::notificarInvolucrados(
+            $jrd, 
+            'jrd', 
+            'Expediente JRD Archivado', 
+            'El proceso correspondiente a esta Junta de Resolución de Disputas ha sido archivado por la administración.'
+        );
+
+        return response()->json([
+            'success' => true,
+            'message' => 'JRD archivado correctamente.',
+        ]);
+
+    } catch (\Exception $e) {
+        Log::error('Error al archivar JRD:', ['error' => $e->getMessage()]);
+        return response()->json([
+            'success' => false,
+            'message' => 'Error al archivar el JRD: ' . $e->getMessage()
+        ], 500);
     }
+}
 
     public function obtenerUno($id)
     {
