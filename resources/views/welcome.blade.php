@@ -305,8 +305,7 @@
                     <div class="main-title">{{ $sliderData->titulo }}</div>
                     <div class="description">{!! strip_tags($sliderData->descripcion) !!}</div>
                 @else
-                    <div class="small-title">CUMPLIMOS MÁS DE</div>
-                    <div class="main-title">25 AÑOS EN LA SOLUCIÓN DE CONTROVERSIAS</div>
+                  
                     <div class="description">Somos considerados uno de los mejores Centros de Arbitraje del Perú.</div>
                 @endif
                 <div class="hero-buttons">
