@@ -561,13 +561,48 @@ document.addEventListener('DOMContentLoaded', function () {
         .then(r=>{if(r.isConfirmed) procesarVoucher('aceptar');});
     });
 
-    document.getElementById('btnRechazarVoucher')?.addEventListener('click',function(){
-        if(!documentoActual) return;
-        Swal.fire({title:'Rechazar voucher',html:`<div class="text-start"><p>Indica el motivo:</p><textarea id="motivoRechazo" class="form-control" rows="4" placeholder="Ej: La imagen es ilegible..."></textarea></div>`,
-            icon:'warning',showCancelButton:true,confirmButtonColor:'#dc3545',cancelButtonColor:'#6c757d',confirmButtonText:'Rechazar',cancelButtonText:'Cancelar',
-            preConfirm:()=>{ const m=document.getElementById('motivoRechazo').value.trim(); if(!m){Swal.showValidationMessage('Debes ingresar un motivo');return false;} return m; }
-        }).then(r=>{if(r.isConfirmed) procesarVoucher('rechazar',r.value);});
-    });
+document.getElementById('btnRechazarVoucher')?.addEventListener('click', function () {
+    if (!documentoActual) return;
+
+    // 1. Cerrar el modal de Bootstrap para liberar su focus trap
+    const modalEl = document.getElementById('modalDocumento');
+    const modalInstance = bootstrap.Modal.getInstance(modalEl);
+    modalInstance.hide();
+
+    // 2. Esperar a que Bootstrap termine de cerrar (150ms) antes de abrir Swal
+    setTimeout(() => {
+        Swal.fire({
+            title: 'Rechazar voucher',
+            html: `<div class="text-start">
+                       <p>Indica el motivo del rechazo:</p>
+                       <textarea id="motivoRechazo" class="form-control" rows="4"
+                           placeholder="Ej: La imagen es ilegible..."></textarea>
+                   </div>`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#dc3545',
+            cancelButtonColor: '#6c757d',
+            confirmButtonText: 'Rechazar',
+            cancelButtonText: 'Cancelar',
+            didOpen: () => {
+                // 3. Forzar el foco en el textarea al abrirse el Swal
+                document.getElementById('motivoRechazo')?.focus();
+            },
+            preConfirm: () => {
+                const m = document.getElementById('motivoRechazo').value.trim();
+                if (!m) { Swal.showValidationMessage('Debes ingresar un motivo'); return false; }
+                return m;
+            }
+        }).then(r => {
+            if (r.isConfirmed) {
+                procesarVoucher('rechazar', r.value);
+            } else {
+                // 4. Si cancela, volver a abrir el modal del documento
+                modalInstance.show();
+            }
+        });
+    }, 150);
+});
 
     document.querySelectorAll('.btn-finalizar-proceso').forEach(btn => {
         btn.addEventListener('click', function(e){
