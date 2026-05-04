@@ -520,7 +520,7 @@ function generarCardHTML(arb) {
                                             </div>
                                             <div class="text-end">
                                                 <span class="badge ${getProcesoEstadoBadge(proc.estado)} mb-2">${(proc.estado||'iniciado').toUpperCase()}</span>
-                                                ${proc.estado==='iniciado'&&arb.estado!=='observado'?`
+                                                ${proc.estado==='iniciado' && arb.estado!=='observado' && arb.estado!=='archivado' ?`
                                                     <button class="btn btn-sm btn-danger ms-2" onclick="subirDocumento(${arb.id_arbitraje},${proc.id_proceso_de_arbitraje})">
                                                         <i class="fas fa-paperclip me-1"></i> Subir Archivo - Dar click aquí
                                                     </button>`:''
