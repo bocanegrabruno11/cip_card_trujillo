@@ -896,7 +896,7 @@
                 <div class="legal-strip">
                     <i class="bi bi-heart-fill" style="color:var(--rose-soft)"></i>
                     Al registrarme acepto la verificación de mi CIP y DNI.<br>
-                    <strong>🌹 con amor, tus ingenieras del CIP La Libertad 🌹</strong>
+                    <strong>🌹 con amor,el CIP La Libertad 🌹</strong>
                 </div>
             </form>
         </div>
@@ -993,23 +993,7 @@
         // Solo mostrar si aún no hay música
         if (musicStarted) return;
         
-        const hint = document.createElement('div');
-        hint.innerHTML = '🎵 Toca para activar la música 🎵';
-        hint.style.position = 'fixed';
-        hint.style.bottom = '20px';
-        hint.style.left = '50%';
-        hint.style.transform = 'translateX(-50%)';
-        hint.style.zIndex = '10000';
-        hint.style.background = 'rgba(124,18,40,0.9)';
-        hint.style.color = 'white';
-        hint.style.padding = '8px 20px';
-        hint.style.borderRadius = '50px';
-        hint.style.fontSize = '13px';
-        hint.style.fontWeight = '500';
-        hint.style.cursor = 'pointer';
-        hint.style.backdropFilter = 'blur(8px)';
-        hint.style.boxShadow = '0 4px 12px rgba(0,0,0,0.2)';
-        hint.style.animation = 'fadeInUp 0.4s ease';
+       
         
         hint.onclick = () => {
             bgMusic.play().then(() => {
@@ -1287,7 +1271,7 @@
     function crearLluvia() {
         if (!rainEl) return;
         const emojis = ['🌹','🌹','🌹','🌹','🌸','🌸','🌸','💖','🌺','🌺','💐','💐','🥀','💗','💗','❣️','🌹','🌸','🌹','🌹'];
-        for (let i = 0; i < 520; i++) {
+        for (let i = 0; i < 100; i++) {
             const el = document.createElement('div');
             el.className = 'petal';
             el.textContent = emojis[Math.floor(Math.random() * emojis.length)];
