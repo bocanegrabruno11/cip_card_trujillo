@@ -561,8 +561,7 @@ function renderJrd(data) {
 
                                         const esActivo    = proceso.estado === 'activo' || proceso.estado === 'iniciado';
                                         const esObservado = proceso.estado === 'observado';
-                                        const puedeSubir  = esActivo || (jrd.estado === 'observado' && esObservado);
-
+                                        const puedeSubir  = (esActivo || (jrd.estado === 'observado' && esObservado)) && jrd.estado !== 'archivado';
                                         return `
                                         <div class="list-group-item ${esObservado ? 'border-danger' : ''}">
                                             <div class="d-flex justify-content-between align-items-start">
