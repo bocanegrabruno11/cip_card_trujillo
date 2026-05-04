@@ -403,23 +403,23 @@
                 <li>
                     @guest
                         {{-- Si NO está logueado -> Login --}}
-                        <a href="{{ route('login') }}" onclick="handleMenuClick(event, this)">MESA DE PARTES - VIRTUAL</a>
+                        <a href="{{ route('login') }}" onclick="handleMenuClick(event, this)">CARD-CIPCDLL</a>
                     @endguest
 
                     @auth
                         {{-- Si SÍ está logueado -> Redirigir según Rol --}}
                         @if(Auth::user()->hasRole('admin'))
-                            <a href="{{ route('Admin.dashboard') }}" onclick="handleMenuClick(event, this)">MESA DE PARTES - VIRTUAL</a>
+                            <a href="{{ route('Admin.dashboard') }}" onclick="handleMenuClick(event, this)">CARD-CIPCDLLL</a>
                         
                         @elseif(Auth::user()->hasRole('gestor_contenido'))
-                            <a href="{{ route('gestion-contenido') }}" onclick="handleMenuClick(event, this)">MESA DE PARTES - VIRTUAL</a>
+                            <a href="{{ route('gestion-contenido') }}" onclick="handleMenuClick(event, this)">CARD-CIPCDLL</a>
                         
                         @elseif(Auth::user()->hasRole('mesa_partes'))
-                            <a href="{{ route('dashboard') }}" onclick="handleMenuClick(event, this)">MESA DE PARTES - VIRTUAL</a>
+                            <a href="{{ route('dashboard') }}" onclick="handleMenuClick(event, this)">CARD-CIPCDLLL</a>
                         
                         @else
                             {{-- Default si tiene otro rol (o ninguno) --}}
-                            <a href="{{ url('/') }}" onclick="handleMenuClick(event, this)">MESA DE PARTES - VIRTUAL</a>
+                            <a href="{{ url('/') }}" onclick="handleMenuClick(event, this)">CARD-CIPCDLL</a>
                         @endif
                     @endauth
                 </li>
