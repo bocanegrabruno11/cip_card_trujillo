@@ -17,11 +17,11 @@ use App\Http\Controllers\ArbitrajeController;
 use App\Http\Controllers\AdminArbitrajeController;
 use App\Http\Controllers\ProcesoArbitrajeDocumentoController;
 use App\Http\Controllers\JrdRegistroController;
- use App\Http\Controllers\JrdController;
- use App\Http\Controllers\AdminJrdController;
+use App\Http\Controllers\JrdController;
+use App\Http\Controllers\AdminJrdController;
 use App\Http\Controllers\CasillaElectronicaController;
 use App\Http\Controllers\JrdDocumentoController;
-  use App\Http\Controllers\JrdProcesoController;
+use App\Http\Controllers\JrdProcesoController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\RepoSolicitudController;
 use App\Http\Controllers\EtapaArbitralController;
@@ -31,6 +31,29 @@ use App\Http\Controllers\ProcesoDeArbitrajeController;
 use App\Http\Controllers\EtapaJrdController;
 use App\Http\Controllers\UsuariosController;
 use App\Http\Controllers\CipcdllController;
+
+
+// Vista login (FALTABA ESTO)
+Route::get('/login-eventos', function () {
+    return view('eventoscipcdll.login');
+})->name('login.eventos');
+
+// Procesar login
+Route::post('/login-eventos', [AuthController::class, 'login'])
+    ->name('login.eventos.post');
+
+// Dashboard
+Route::get('/dashboard-eventos', function () {
+    if (!session('usuario')) {
+        return redirect('/login-eventos');
+    }
+    return view('eventoscipcdll.dashboard');
+})->name('dashboard.eventos');
+
+// Logout
+Route::post('/logout-eventos', [AuthController::class, 'logout'])
+    ->name('logout.eventos');
+
 
 Route::get('/eventoscipcdll', [CipcdllController::class, 'verificarEvento']);
 

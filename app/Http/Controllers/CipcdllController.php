@@ -153,10 +153,10 @@ class CipcdllController extends Controller
         
         if ($totalAprobados >= 260) {
             // Evento lleno - mostrar vista de cupo completo
-            return view('evento-lleno');
+            return view('eventoscipcdll/evento-lleno');
         } else {
             // Evento disponible - mostrar formulario normal
-            return view('eventoscipcdll');
+            return view('eventoscipcdll/eventoscipcdll');
         }
     }
 }

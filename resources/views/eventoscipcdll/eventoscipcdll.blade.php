@@ -485,7 +485,7 @@
             color:var(--gold); font-size:.7rem; font-weight:700; letter-spacing:3px;
             text-transform:uppercase; margin:1.6rem 0 1.8rem;
         }
-        .divider::before,.divider::after { content:''; flex:1; height:1px; background:linear-gradient(90deg,transparent,rgba(196,149,96,.45),transparent); }
+        .divider::before,.divider::after { content:''; flex:1; height:1px; background:linear-gradient(90deg,transparent,rgba(175, 109, 35, 0.78),transparent); }
 
         .row-fields { display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin-bottom:1rem; }
         @media (max-width:540px) { .row-fields { grid-template-columns:1fr; } }
@@ -712,7 +712,7 @@
 
         <!-- Texto principal -->
         <div class="intro-greeting" id="introGreeting">
-            <span>🌸 ¡Festejemos a Mamá! 🌸</span>
+            <span>🌸¡Festejemos a Mamá!🌸</span>
         </div>
         <div class="intro-sub" id="introSub">Bienvenida, Ingeniera Mamá</div>
 
@@ -756,7 +756,7 @@
     <div class="flyer-content">
         <img src="{{ asset('img/mama.jpeg') }}" alt="Flyer Festejemos a Mamá" class="flyer-imagen"
              onerror="this.onerror=null;this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 820 580%22%3E%3Crect width=%22820%22 height=%22580%22 fill=%22%23f9dce3%22/%3E%3Ctext x=%22410%22 y=%22210%22 text-anchor=%22middle%22 fill=%22%237c1228%22 font-size=%2252%22 font-weight=%22bold%22 font-family=%22Georgia%22%3EFestejemos a Mamá%3C/text%3E%3Ctext x=%22410%22 y=%22285%22 text-anchor=%22middle%22 fill=%22%23b01e3a%22 font-size=%2228%22 font-family=%22Georgia%22%3ECena Show Bailable%3C/text%3E%3Ctext x=%22410%22 y=%22370%22 text-anchor=%22middle%22 fill=%22%23993333%22 font-size=%2222%22 font-family=%22Georgia%22%3EViernes 08 de mayo · Auditorio CECAP%3C/text%3E%3Ctext x=%22410%22 y=%22440%22 text-anchor=%22middle%22 font-size=%2248%22%3E🌹 🌸 🌺%3C/text%3E%3C/svg%3E';">
-        <div class="flyer-badge">🌹&nbsp; Festejemos a Mamá &nbsp;🌸</div>
+        <div class="flyer-badge">🌹Festejemos a Mamá🌸</div>
     </div>
 </div>
 
@@ -822,7 +822,7 @@
                 <i class="bi bi-stars"></i>
                 <div>
                     <strong>✨ Evento exclusivo para Ingenieras que también son Mamás ✨</strong><br>
-                    Solo ingenieras con CIP activo + DNI válido que sean madres. ¡Cupos limitados!
+                    Solo ingenieras con CIP activo que sean madres. ¡Cupos limitados!
                     — regalo especial para quienes lleguen antes de las 5:00 PM.
                 </div>
             </div>
@@ -1149,7 +1149,19 @@
 
         runCycle(startDelay);
     }
-
+    // ==================== PAUSAR MÚSICA AL SALIR DE LA PESTAÑA ====================
+    document.addEventListener('visibilitychange', () => {
+        if (!bgMusic || !musicStarted) return;
+        if (document.hidden) {
+            bgMusic.pause();
+            musicPlaying = false;
+            if (musicBtn) musicBtn.textContent = '🔇';
+        } else {
+            bgMusic.play().catch(() => {});
+            musicPlaying = true;
+            if (musicBtn) musicBtn.textContent = '🎵';
+        }
+    });
     // ==================== ORQUESTACIÓN DEL INTRO ====================
     let pageReady = false;
     let introDone = false;
@@ -1253,7 +1265,7 @@
                         Swal.fire({
                             icon: 'success',
                             title: '🌸 ¡Festejemos a Mamá! 🌸',
-                            html: '<strong>Bienvenida, Ingeniera Mamá</strong><br><br>Completa tus datos para confirmar tu asistencia a la Cena Show Bailable.',
+                            html: '<strong>Bienvenida, Ingeniera Mamá</strong><br><br>Completa tus datos para que podamos validar y confirmar tu asistencia a la Cena Show Bailable.',
                             confirmButtonColor: '#7c1228',
                             timer: 4000,
                             showConfirmButton: true,
