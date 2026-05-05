@@ -155,7 +155,6 @@
       <tbody id="tbody">
         <tr><td colspan="7" class="val-empty-td">Cargando......</td></tr>
       </tbody>
-    60
   </div>
 
   <div class="val-footer">
