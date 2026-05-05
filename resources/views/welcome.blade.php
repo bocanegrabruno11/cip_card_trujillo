@@ -276,7 +276,7 @@
         <a href="{{ route('comunicados') }}" class="item negro"><i class="fas fa-bullhorn"></i> Comunicados<span>Noticias</span></a>
         <a href="{{ route('eventos') }}" class="item dorado"><i class="fas fa-calendar-alt"></i> Eventos<span>Actividades</span></a>
         <a href="{{ route('contactos') }}" class="item rojo"><i class="fas fa-phone"></i> Contactos<span>Info</span></a>
-        <a href="{{ route('login') }}" class="item negro"><i class="fas fa-envelope-open-text"></i> Mesa de Partes<span>Trámites</span></a>
+        <!-- <a href="{{ route('login') }}" class="item negro"><i class="fas fa-envelope-open-text"></i> Mesa de Partes<span>Trámites</span></a> -->
     </aside>
 
     <section class="seccion-central">
@@ -295,7 +295,7 @@
                             <button class="slider-arrow next-arrow" id="sliderNext">❯</button>
                         @endif
                     @else
-                        <img src="{{ asset('img/main-site/1.png') }}" class="hero-slide active">
+                        <img src="{{ asset('img/welcomeimage.jpg') }}" class="hero-slide active">
                     @endif
                 </div>
             </div>
@@ -311,7 +311,26 @@
                 <div class="hero-buttons">
                     <a href="{{ route('institucion-arbitral') }}" class="btn-hero btn-red-light">Arbitraje</a>
                     <a href="{{ route('junta-prevencion') }}" class="btn-hero btn-gold">Junta de Prevención</a>
-                    <a href="{{ route('login') }}" class="btn-hero btn-red-light">Mesa de partes</a>
+                    @guest
+                        {{-- Si NO ha iniciado sesión, lo manda al login --}}
+                        <a href="{{ route('login') }}" class="btn-hero btn-red-light">Mesa de partes</a>
+                    @endguest
+
+                    @auth
+                        {{-- Si SÍ ha iniciado sesión, lo manda a su panel correspondiente manteniendo tus estilos --}}
+                        @if(Auth::user()->hasRole('admin'))
+                            <a href="{{ route('Admin.dashboard') }}" class="btn-hero btn-red-light">Ir a mi Panel</a>
+                            
+                        @elseif(Auth::user()->hasRole('gestor_contenido'))
+                            <a href="{{ route('gestion-contenido') }}" class="btn-hero btn-red-light">Ir a mi Panel</a>
+                            
+                        @elseif(Auth::user()->hasRole('mesa_partes'))
+                            <a href="{{ route('dashboard') }}" class="btn-hero btn-red-light">Ir a Mesa de Partes</a>
+                            
+                        @else
+                            <a href="{{ url('/') }}" class="btn-hero btn-red-light">Ir al Inicio</a>
+                        @endif
+                    @endauth
                 </div>
             </div>
         </div>

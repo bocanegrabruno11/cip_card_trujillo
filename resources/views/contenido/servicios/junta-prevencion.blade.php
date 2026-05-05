@@ -181,7 +181,7 @@
     <div class="card-grid">
         <div class="info-card">
             <h3>Normativa JPRD</h3>
-            <p>Consulte la Ley de Contrataciones del Estado, su Reglamento y las directivas de OSCE que regulan la obligatoriedad y el funcionamiento de la JRD.</p>
+            <p>Consulte la Ley de Contrataciones del Estado, su Reglamento y las directivas de OECE que regulan la obligatoriedad y el funcionamiento de la JPRD.</p>
             <a href="{{ route('junta-prevencion.normativa') }}" class="btn-card">Ver Documentos</a>
         </div>
 
@@ -192,8 +192,8 @@
         </div>
 
         <div class="info-card">
-            <h3>Nómina de Adjudicadores</h3>
-            <p>Consulte nuestra lista de expertos calificados (Ingenieros y Abogados) con amplia experiencia técnica para integrar Juntas de Disputas.</p>
+            <h3>Nómina de Adjudicadores y Secretarios Técnicos</h3>
+            <p>Consulte nuestra lista de expertos calificados con amplia experiencia técnica para integrar Juntas de Disputas.</p>
             <a href="{{ route('junta-prevencion.nomina') }}" class="btn-card">Ver Expertos</a>
         </div>
 
@@ -204,7 +204,7 @@
         </div>
 
         <div class="info-card">
-            <h3>Repositorio de Decisiones</h3>
+            <h3>Repositorio de Decisiones, Opiniones y Consultas</h3>
             <p>Acceda a las decisiones emitidas por las Juntas, clasificadas para fines académicos y de transparencia (sujeto a confidencialidad).</p>
             <a href="{{ route('junta-prevencion.repositorio') }}" class="btn-card">Acceder al Portal</a>
         </div>

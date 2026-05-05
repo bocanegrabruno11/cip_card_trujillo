@@ -329,6 +329,83 @@
         font-size: 14px; font-weight: bold; color: #333; transition: 0.3s;
     }
     .social-bubble:hover .social-text { opacity: 1; }
+    .custom-modal-overlay {
+        position: fixed; 
+        top: 0; 
+        left: 0; 
+        width: 100%; 
+        height: 100%;
+        background: rgba(0,0,0,0.6);
+        z-index: 2000; /* Por encima de todo */
+        display: none; /* Oculto por defecto */
+        align-items: center; 
+        justify-content: center;
+        backdrop-filter: blur(3px);
+    }
+    .custom-modal-overlay.active { display: flex; }
+    
+    .custom-modal-box {
+        background: white;
+        width: 90%; 
+        max-width: 420px;
+        border-radius: 8px;
+        padding: 30px 25px;
+        text-align: center;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        position: relative;
+        animation: modalFadeIn 0.3s ease;
+    }
+    
+    @keyframes modalFadeIn {
+        from { opacity: 0; transform: translateY(-20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .custom-modal-close {
+        position: absolute; 
+        top: 10px; 
+        right: 15px;
+        font-size: 28px; 
+        cursor: pointer; 
+        color: #888;
+        transition: color 0.3s;
+        line-height: 1;
+    }
+    .custom-modal-close:hover { color: #AD2B2E; }
+    
+    .custom-modal-title {
+        color: #AD2B2E; 
+        font-size: 22px; 
+        font-weight: bold; 
+        margin-bottom: 15px;
+    }
+    
+    .custom-modal-text {
+        color: #444; 
+        font-size: 16px; 
+        margin-bottom: 25px; 
+        line-height: 1.6;
+    }
+    
+    .custom-modal-btn {
+        display: inline-block;
+        background-color: #AD2B2E; 
+        color: white;
+        padding: 12px 25px; 
+        border-radius: 5px;
+        text-decoration: none !important; 
+        font-weight: bold;
+        transition: background 0.3s;
+        width: 100%;
+    }
+    .custom-modal-btn:hover { background-color: #8B0000; color: white; }
+    
+    .email-highlight { 
+        font-weight: bold; 
+        color: #AD2B2E; 
+        font-size: 18px;
+        word-break: break-all;
+    }
 
 </style>
     @yield('styles')
@@ -430,13 +507,76 @@
 
     
     <div class="social-bubbles">
-       
-    
+        
+        <!-- Botón 1: Facebook -->
         <div class="social-bubble facebook" onclick="window.open('https://www.facebook.com/CIPLaLibertad?locale=es_LA', '_blank')">
             <img src="https://cdn-icons-png.flaticon.com/512/733/733547.png" alt="Facebook">
             <span class="social-text">Facebook</span>
         </div>
-       
+
+        <!-- Botón 2: Denuncias -->
+        <div class="social-bubble" onclick="openCustomModal('modalDenuncia')">
+            <!-- Icono de correo/alerta de Flaticon -->
+            <img src="https://cdn-icons-png.flaticon.com/512/732/732200.png" alt="Denuncias">
+            <span class="social-text">Denuncias</span>
+        </div>
+
+        <!-- Botón 3: Solicitudes (Mesa de Partes) -->
+        <div class="social-bubble" onclick="openCustomModal('modalSolicitud')">
+            <!-- Icono de documento/registro de Flaticon -->
+            <img src="https://cdn-icons-png.flaticon.com/512/2965/2965306.png" alt="Solicitudes">
+            <span class="social-text">Solicitudes</span>
+        </div>
+        
+    </div>
+
+    <!-- =========================================
+         MODAL 1: DENUNCIAS
+         ========================================= -->
+    <div class="custom-modal-overlay" id="modalDenuncia">
+        <div class="custom-modal-box">
+            <span class="custom-modal-close" onclick="closeCustomModal('modalDenuncia')">&times;</span>
+            <div class="custom-modal-title">Canal de Denuncias</div>
+            <div class="custom-modal-text">
+                Cualquier denuncia o comunicación de carácter ético debe ser enviada a nuestro correo oficial:<br><br>
+                <span class="email-highlight">eticacardcdll@cip.org.pe</span>
+            </div>
+            <!-- Botón que abre el cliente de correo por defecto -->
+            <a href="mailto:eticacardcdll@cip.org.pe" class="custom-modal-btn">Enviar Correo</a>
+        </div>
+    </div>
+
+    <!-- =========================================
+         MODAL 2: SOLICITUDES (Dinámico con Blade)
+         ========================================= -->
+    <div class="custom-modal-overlay" id="modalSolicitud">
+        <div class="custom-modal-box">
+            <span class="custom-modal-close" onclick="closeCustomModal('modalSolicitud')">&times;</span>
+            <div class="custom-modal-title">Mesa de Partes Virtual</div>
+            <div class="custom-modal-text">
+                Registra tu solicitud aquí. Serás redirigido al sistema para continuar con tu trámite.
+            </div>
+            
+            {{-- Lógica de redirección calcada de tu Menú de Navegación --}}
+            @guest
+                <a href="{{ route('login') }}" class="custom-modal-btn">Ingresar al Sistema</a>
+            @endguest
+
+            @auth
+                @if(Auth::user()->hasRole('admin'))
+                    <a href="{{ route('Admin.dashboard') }}" class="custom-modal-btn">Ir a mi Panel de Control</a>
+                
+                @elseif(Auth::user()->hasRole('gestor_contenido'))
+                    <a href="{{ route('gestion-contenido') }}" class="custom-modal-btn">Ir a mi Panel</a>
+                
+                @elseif(Auth::user()->hasRole('mesa_partes'))
+                    <a href="{{ route('dashboard') }}" class="custom-modal-btn">Ir a mi Panel</a>
+                
+                @else
+                    <a href="{{ url('/') }}" class="custom-modal-btn">Ir a mi Panel</a>
+                @endif
+            @endauth
+        </div>
     </div>
 
     <script>
@@ -539,6 +679,26 @@
         // Prevenir cierre al hacer clic dentro del menú
         document.querySelector('.nav-menu').addEventListener('click', function(event) {
              event.stopPropagation();
+        });
+
+        function openCustomModal(modalId) {
+            document.getElementById(modalId).classList.add('active');
+            // Opcional: Ocultar el scroll del body cuando el modal está abierto
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeCustomModal(modalId) {
+            document.getElementById(modalId).classList.remove('active');
+            // Devolver el scroll al body
+            document.body.style.overflow = 'auto';
+        }
+
+        // Permitir cerrar el modal haciendo clic afuera de la caja blanca
+        window.addEventListener('click', function(event) {
+            if (event.target.classList.contains('custom-modal-overlay')) {
+                event.target.classList.remove('active');
+                document.body.style.overflow = 'auto';
+            }
         });
     </script>
     @yield('scripts')
