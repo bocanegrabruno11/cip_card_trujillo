@@ -11,10 +11,17 @@ body {
     font-family: Arial, sans-serif;
 }
 
+/* 🎨 COLOR BASE CIP */
+:root {
+    --rojo: #b30000;
+    --rojo-oscuro: #990000;
+    --rojo-hover: #cc0000;
+}
+
 /* NAVBAR SOLO MÓVIL */
 .navbar {
     display: none;
-    background: #b30000;
+    background: var(--rojo);
     color: white;
     padding: 10px;
     align-items: center;
@@ -25,15 +32,10 @@ body {
     width: 35px;
 }
 
-.menu-toggle {
-    font-size: 24px;
-    cursor: pointer;
-}
-
 /* SIDEBAR */
 .sidebar {
-    width: 230px;
-    background: #8b0000;
+    width: 240px;
+    background: var(--rojo-oscuro);
     color: white;
     height: 100vh;
     position: fixed;
@@ -41,48 +43,61 @@ body {
     flex-direction: column;
 }
 
-.sidebar-top {
+/* HEADER SIDEBAR (LOGO + NOMBRE) */
+.sidebar-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
     padding: 15px;
-    font-weight: bold;
-    text-align: center;
-    border-bottom: 1px solid #a52a2a;
+    border-bottom: 1px solid rgba(255,255,255,0.2);
 }
 
+.sidebar-header img {
+    width: 40px;
+}
+
+.sidebar-header span {
+    font-weight: bold;
+}
+
+/* LINKS */
 .sidebar a {
-    padding: 12px;
+    padding: 12px 15px;
     text-decoration: none;
     color: white;
     display: block;
 }
 
 .sidebar a:hover {
-    background: #cc0000;
+    background: var(--rojo-hover);
 }
 
 /* USER ABAJO */
 .sidebar-bottom {
     margin-top: auto;
     padding: 15px;
-    border-top: 1px solid #a52a2a;
-}
-
-.sidebar-bottom form {
-    margin-top: 10px;
+    border-top: 1px solid rgba(255,255,255,0.2);
 }
 
 .sidebar-bottom button {
     width: 100%;
     padding: 8px;
     background: white;
-    color: #8b0000;
+    color: var(--rojo);
     border: none;
     cursor: pointer;
 }
 
 /* CONTENIDO */
 .content {
-    margin-left: 230px;
+    margin-left: 240px;
     padding: 20px;
+}
+
+/* HAMBURGUESA */
+.menu-toggle {
+    font-size: 24px;
+    cursor: pointer;
 }
 
 /* RESPONSIVE */
@@ -93,7 +108,7 @@ body {
     }
 
     .sidebar {
-        left: -230px;
+        left: -240px;
         transition: 0.3s;
     }
 
@@ -109,7 +124,7 @@ body {
 </head>
 <body>
 
-<!-- NAVBAR SOLO EN MÓVIL -->
+<!-- NAVBAR SOLO MÓVIL -->
 <div class="navbar">
     <img src="{{ asset('img/logo.png') }}">
     <div class="menu-toggle" onclick="toggleMenu()">☰</div>
@@ -118,16 +133,17 @@ body {
 <!-- SIDEBAR -->
 <div class="sidebar" id="sidebar">
 
-    <!-- MENÚ -->
-    <div class="sidebar-top">
-        MENÚ
+    <!-- HEADER -->
+    <div class="sidebar-header">
+        <img src="{{ asset('img/logo.png') }}">
+        <span>Gestor de Eventos</span>
     </div>
 
-    <a href="/dashboard-eventos">🏠 Dashboard</a>
+    <!-- MENÚ -->
+    <a href="/dashboard-eventos">🏠 Registros</a>
     <a href="/validacion">✔️ Validación</a>
-    <a href="/envio-tarjetas">📨 Envío de tarjetas</a>
 
-    <!-- USUARIO ABAJO -->
+    <!-- USER -->
     <div class="sidebar-bottom">
         <div><strong>{{ session('usuario') }}</strong></div>
 

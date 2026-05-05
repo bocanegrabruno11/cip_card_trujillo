@@ -20,6 +20,7 @@ class AsistenteCipcdll extends Model
         'dni',
         'celular',
         'correo',
-        'estado'
+        'estado',
+        'asistio'
     ];
 }

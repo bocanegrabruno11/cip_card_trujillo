@@ -50,6 +50,69 @@ Route::get('/dashboard-eventos', function () {
     return view('eventoscipcdll.dashboard');
 })->name('dashboard.eventos');
 
+// ✅ Validar múltiples asistencias en BATCH (más rápido)
+Route::post('/validar-asistencias-batch', function () {
+    if (!session('usuario')) {
+        return response()->json(['success' => false, 'message' => 'No autorizado'], 401);
+    }
+    return app(\App\Http\Controllers\CipcdllController::class)->validarAsistenciaBatch(request());
+});
+
+// 📊 Listar todos agrupados con resumen
+Route::get('/asistentes', function () {
+    if (!session('usuario')) {
+        return redirect('/login-eventos');
+    }
+    return app(\App\Http\Controllers\CipcdllController::class)->listarTodosAgrupados();
+});
+// ✅ NUEVAS RUTAS para el módulo de validación (con verificación de sesión)
+Route::get('/asistentes/registrado', function() {
+    if (!session('usuario')) {
+        return response()->json(['success' => false, 'message' => 'No autorizado'], 401);
+    }
+    return app(\App\Http\Controllers\CipcdllController::class)->listarPorEstado('registrado');
+});
+
+// Estas rutas deben ir ANTES de Route::get('/asistentes/{estado}', ...)
+Route::get('/ver-pendientes', function() {
+    if (!session('usuario')) {
+        return response()->json(['success' => false, 'message' => 'No autorizado'], 401);
+    }
+    return app(\App\Http\Controllers\CipcdllController::class)->verPendientes();
+});
+
+Route::get('/ver-aprobados', function() {
+    if (!session('usuario')) {
+        return response()->json(['success' => false, 'message' => 'No autorizado'], 401);
+    }
+    return app(\App\Http\Controllers\CipcdllController::class)->verAprobados();
+});
+
+Route::get('/ver-rechazados', function() {
+    if (!session('usuario')) {
+        return response()->json(['success' => false, 'message' => 'No autorizado'], 401);
+    }
+    return app(\App\Http\Controllers\CipcdllController::class)->verRechazados();
+});
+
+// Esta ruta debe ir DESPUÉS de las específicas
+Route::get('/asistentes/{estado}', function ($estado) {
+    if (!session('usuario')) {
+        return redirect('/login-eventos');
+    }
+    return app(\App\Http\Controllers\CipcdllController::class)->listarPorEstado($estado);
+});
+
+
+
+
+Route::get('/validacion', function () {
+    if (!session('usuario')) {
+        return redirect('/login-eventos');
+    }
+    return view('eventoscipcdll.validacion');
+})->name('validacion');
+
 // Logout
 Route::post('/logout-eventos', [AuthController::class, 'logout'])
     ->name('logout.eventos');
