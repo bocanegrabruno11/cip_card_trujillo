@@ -101,7 +101,8 @@ class ArbitrajeController extends Controller
                     ? "Expediente N° {$arbitraje->numero_expediente}"
                     : ($arbitraje->nombre_materia ?? 'Sin expediente');
 
-                $procesosFormateados = $arbitraje->procesos->map(function ($proceso) use ($arbitraje) {
+                // ✅ PROCESOS FORMATEADOS CON FILTRO DE DOCUMENTOS
+                $procesosFormateados = $arbitraje->procesos->map(function ($proceso) use ($arbitraje, $userId) {
                     return [
                         'id_proceso_de_arbitraje' => $proceso->id_proceso_de_arbitraje,
                         'fecha_creacion'           => $proceso->fecha_creacion,
@@ -113,23 +114,31 @@ class ArbitrajeController extends Controller
                             'id'     => $proceso->etapa->id,
                             'nombre' => $proceso->etapa->nombre,
                         ] : null,
-                        'documentos' => $proceso->documentos->map(function ($doc) use ($arbitraje) {
-                            $rol = $this->determinarRolSubidor($doc, $arbitraje);
-                            return [
-                                'id_proceso_arbitraje_documento' => $doc->id_proceso_arbitraje_documento,
-                                'tipo_documento'  => $doc->tipo_documento,
-                                'nombre_original' => $doc->nombre_original,
-                                'ruta_archivo'    => $doc->ruta_archivo,
-                                'observaciones'   => $doc->observaciones,
-                                'fecha_subida'    => $doc->fecha_subida,
-                                'subido_por'      => [
-                                    'nombre' => optional($doc->user)->name ?? 'N/A',
-                                    'label'  => $rol['label'],
-                                    'color'  => $rol['color'],
-                                    'icono'  => $rol['icono'],
-                                ],
-                            ];
-                        }),
+                        // ✅ FILTRO: Solo documentos del usuario actual, Administrador o Sistema
+                        'documentos' => $proceso->documentos
+                            ->filter(function ($doc) use ($userId, $arbitraje) {
+                                $rol = $this->determinarRolSubidor($doc, $arbitraje);
+                                // Mostrar si es Administrador, Sistema O si es del usuario actual
+                                return in_array($rol['label'], ['Administrador', 'Sistema']) 
+                                       || $doc->user_id === $userId;
+                            })
+                            ->map(function ($doc) use ($arbitraje) {
+                                $rol = $this->determinarRolSubidor($doc, $arbitraje);
+                                return [
+                                    'id_proceso_arbitraje_documento' => $doc->id_proceso_arbitraje_documento,
+                                    'tipo_documento'  => $doc->tipo_documento,
+                                    'nombre_original' => $doc->nombre_original,
+                                    'ruta_archivo'    => $doc->ruta_archivo,
+                                    'observaciones'   => $doc->observaciones,
+                                    'fecha_subida'    => $doc->fecha_subida,
+                                    'subido_por'      => [
+                                        'nombre' => optional($doc->user)->name ?? 'N/A',
+                                        'label'  => $rol['label'],
+                                        'color'  => $rol['color'],
+                                        'icono'  => $rol['icono'],
+                                    ],
+                                ];
+                            }),
                     ];
                 });
 
@@ -146,8 +155,8 @@ class ArbitrajeController extends Controller
 
                 return [
                     'id_arbitraje'         => $arbitraje->id_arbitraje,
-                    'numero_expediente'    => $arbitraje->numero_expediente, // ✅ AGREGADO
-                    'titulo_expediente'    => $tituloExpediente, // ✅ TÍTULO FORMATEADO
+                    'numero_expediente'    => $arbitraje->numero_expediente,
+                    'titulo_expediente'    => $tituloExpediente,
                     'nombre_materia'       => $arbitraje->nombre_materia,
                     'pretenciones'         => $arbitraje->pretenciones,
                     'cuantia'              => $arbitraje->cuantia,

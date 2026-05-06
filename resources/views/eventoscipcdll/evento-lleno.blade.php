@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>Evento Completado | Ingenieras CIPCDLL</title>
+    <title>Validando Inscripciones | Ingenieras CIPCDLL</title>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;0,800;1,600;1,700&family=Nunito:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     
@@ -105,19 +105,21 @@
             50% { transform: scale(1.1); }
         }
 
-        h1 {
+        .main-title {
             font-family: 'Playfair Display', serif;
-            font-size: 2.2rem;
+            font-size: 2rem;
             color: var(--wine);
             margin-bottom: 1rem;
             font-weight: 800;
         }
 
         .subtitle {
-            font-size: 1.1rem;
+            font-size: 1.3rem;
             color: var(--crimson);
             margin-bottom: 1.5rem;
-            font-weight: 600;
+            font-weight: 800;
+            letter-spacing: 1px;
+            text-transform: uppercase;
         }
 
         .message {
@@ -131,12 +133,17 @@
 
         .message p {
             color: var(--ink);
-            line-height: 1.7;
-            margin-bottom: 0.5rem;
+            line-height: 1.6;
+            margin-bottom: 0.75rem;
         }
 
         .message p:last-child {
             margin-bottom: 0;
+        }
+
+        .highlight {
+            font-weight: 800;
+            color: var(--wine);
         }
 
         .info-box {
@@ -165,6 +172,49 @@
             color: var(--gold);
         }
 
+        .social-card {
+            background: white;
+            border-radius: 1.2rem;
+            padding: 1rem 1.2rem;
+            margin: 1.5rem 0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 1rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            border: 1px solid rgba(196,149,96,0.3);
+        }
+
+        .social-text {
+            font-weight: 600;
+            color: var(--wine);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.95rem;
+        }
+
+        .btn-social {
+            background: linear-gradient(108deg, #3b5998, #4c70ba);
+            color: white;
+            padding: 0.6rem 1.4rem;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.9rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: 0.25s ease;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+
+        .btn-social:hover {
+            transform: translateY(-2px);
+            background: #2d4373;
+        }
+
         .btn {
             display: inline-flex;
             align-items: center;
@@ -175,7 +225,7 @@
             border-radius: 50px;
             text-decoration: none;
             font-weight: 700;
-            margin-top: 1.5rem;
+            margin-top: 0.5rem;
             transition: transform 0.25s ease, box-shadow 0.25s ease;
             box-shadow: 0 8px 20px -8px rgba(124, 18, 40, 0.4);
         }
@@ -183,11 +233,6 @@
         .btn:hover {
             transform: translateY(-3px);
             box-shadow: 0 15px 30px -10px rgba(124, 18, 40, 0.5);
-        }
-
-        .btn-secondary {
-            background: linear-gradient(108deg, #9e6d3e, #c49560);
-            margin-left: 0.8rem;
         }
 
         .footer {
@@ -201,12 +246,19 @@
             .card {
                 padding: 2rem 1.5rem;
             }
-            h1 {
-                font-size: 1.8rem;
+            .main-title {
+                font-size: 1.5rem;
+            }
+            .subtitle {
+                font-size: 1rem;
             }
             .btn {
                 width: 100%;
                 justify-content: center;
+            }
+            .social-card {
+                flex-direction: column;
+                text-align: center;
             }
         }
     </style>
@@ -214,15 +266,13 @@
 <body>
     <div class="container">
         <div class="card">
-            <div class="icon">🌸</div>
-            <h1>✨ ¡Evento Completado! ✨</h1>
-            <div class="subtitle">Aforo máximo alcanzado</div>
+            <div class="icon">✨🌸</div>
+            
+            <!-- Título principal eliminado, solo queda el icono -->
+            
+            <div class="subtitle">ESTAMOS VALIDANDO INSCRIPCIONES</div>
             
             <div class="info-box">
-                <div class="info-item">
-                    <i class="bi bi-people-fill"></i>
-                    <span>260 Ingenieras Mamás</span>
-                </div>
                 <div class="info-item">
                     <i class="bi bi-calendar-heart-fill"></i>
                     <span>08 de Mayo</span>
@@ -234,20 +284,31 @@
             </div>
             
             <div class="message">
-                <p><i class="bi bi-emoji-frown-fill" style="color: var(--crimson); margin-right: 0.5rem;"></i> 
-                <strong>Lo sentimos mucho</strong></p>
-                <p>El cupo máximo de <strong>260 asistentes</strong> ya ha sido alcanzado para este evento.</p>
-                <p style="margin-top: 0.8rem;">🌹 Agradecemos tu interés en participar. Te invitamos a estar atenta a futuros eventos organizados por el Comité de Damas del CIP CDLL.</p>
+                <p><i class="bi bi-check-circle-fill" style="color: var(--crimson); margin-right: 0.5rem;"></i> 
+                <strong>✅ En estos momentos, nuestro equipo está validando la información y depurando registros</strong> para confirmar las asistencias reales.</p>
+                <p>🔄 <strong>¿Pueden liberarse nuevos cupos?</strong> Sí. Si alguna inscripción no cumple con los requisitosd, <strong>abriremos espacios adicionales</strong> y los anunciaremos de inmediato.</p>
+                <p>📱 <strong>Te invitamos a seguirnos en redes sociales</strong> para enterarte primero si se liberan nuevas entradas o para futuros eventos.</p>
+            </div>
+            
+            <!-- Invitación a redes sociales -->
+            <div class="social-card">
+                <div class="social-text">
+                    <i class="bi bi-facebook"></i> CIP La Libertad — Canal oficial
+                </div>
+                <a href="https://www.facebook.com/CIPLaLibertad?locale=es_LA" target="_blank" rel="noopener noreferrer" class="btn-social">
+                    <i class="bi bi-box-arrow-up-right"></i> Ver Facebook
+                </a>
             </div>
             
             <div>
                 <a href="tel:+5144340010" class="btn">
-                    <i class="bi bi-telephone-fill"></i> Contactar Sede
+                    <i class="bi bi-telephone-fill"></i> Contactar Sede CIP
                 </a>
             </div>
             
             <div class="footer">
-                <i class="bi bi-flower1"></i> Consejo Departamental La Libertad — Comité de Damas <i class="bi bi-flower1"></i>
+                <i class="bi bi-flower1"></i> Consejo Departamental La Libertad — Comité de Damas Ingenieras <i class="bi bi-flower1"></i><br>
+                <span style="font-size:0.7rem;">🔔 Estate atenta a nuestras redes — Podrían liberarse nuevos cupos</span>
             </div>
         </div>
     </div>
