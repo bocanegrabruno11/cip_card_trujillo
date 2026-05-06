@@ -489,17 +489,20 @@ function generarCardHTML(arb) {
                 <div class="row mb-4">
                     <div class="col-md-12">
                         <h6 class="text-danger border-bottom pb-2 mb-3"><i class="fas fa-users me-2"></i>Personas Involucradas</h6>
-                        <div class="row">
-                            ${arb.personas&&arb.personas.length?arb.personas.map(p=>`
-                                <div class="col-md-6 mb-2">
-                                    <div class="p-2 bg-light rounded">
-                                        <span class="badge ${p.tipo==='Demandante'?'bg-success':'bg-warning text-dark'} me-2">${p.tipo}</span>
-                                        <strong>${p.nombres||''} ${p.apellidos||''}</strong><br>
-                                        <small class="text-muted">DNI: ${p.dni||''}</small>
-                                        ${p.correo?`<br><small><i class="fas fa-envelope me-1"></i>${p.correo}</small>`:''}
+                            <div class="row">
+                                ${arb.personas && arb.personas.length ? arb.personas.map(p => `
+                                    <div class="col-md-6 mb-2">
+                                        <div class="p-2 bg-light rounded">
+                                            <span class="badge ${p.tipo === 'Demandante' ? 'bg-success' : 'bg-warning text-dark'} me-2">${p.tipo}</span>
+                                            <strong>${p.nombres_apellidos || '—'}</strong><br>
+                                            ${p.razon_social ? `<small class="text-muted">Razón Social: ${p.razon_social}</small><br>` : ''}
+                                            <small class="text-muted">DNI: ${p.dni || '—'}</small>
+                                            ${p.correo ? `<br><small><i class="fas fa-envelope me-1"></i>${p.correo}</small>` : ''}
+                                            ${p.ruc ? `<br><small><i class="fas fa-building me-1"></i>RUC: ${p.ruc}</small>` : ''}
+                                        </div>
                                     </div>
-                                </div>`).join(''):'<p class="text-muted">No hay personas registradas</p>'}
-                        </div>
+                                `).join('') : '<p class="text-muted">No hay personas registradas</p>'}
+                            </div>
                     </div>
                 </div>
 

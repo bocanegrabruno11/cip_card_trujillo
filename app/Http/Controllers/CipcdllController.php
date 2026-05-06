@@ -151,7 +151,7 @@ class CipcdllController extends Controller
     {
         $totalAprobados = AsistenteCipcdll::where('estado', 'registrado')->count();
         
-        if ($totalAprobados >= 260) {
+        if ($totalAprobados >= 100) {
             // Evento lleno - mostrar vista de cupo completo
             return view('eventoscipcdll/evento-lleno');
         } else {
