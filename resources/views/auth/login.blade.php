@@ -9,28 +9,41 @@
 
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Arial', sans-serif; }
-        body { height: 100vh; width: 100%; overflow: hidden; }
+        
+        /* Se agregó el color rojo institucional como fondo principal */
+        body { height: 100vh; width: 100%; overflow: hidden; background-color: #AD2B2E; }
 
-        .login-container { display: flex; width: 100%; height: 100%; position: relative; }
+        .login-container { display: flex; width: 100%; height: 100%; position: relative; z-index: 1; }
 
         .bg-layer {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background-image: url("{{ asset('img/appmovil.jpg') }}");
-            background-size: cover; background-position: center; z-index: -1;
-        }
-
-        .overlay-layer {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background-color: rgba(20, 20, 20, 0.85); z-index: 0;
+            background-image: url("{{ asset('img/welcomeimage2.jpg') }}");
+            
+            /* 'contain' encaja la imagen sin recortarla ni deformarla */
+            background-size: 90% 100%; 
+            background-position: center;
+            background-repeat: no-repeat;
+            
+            /* Oscurece SOLAMENTE la imagen, dejando el rojo sobrante limpio y brillante */
+            filter: brightness(0.15);
+            z-index: 0;
         }
 
         .left-branding {
             flex: 1; display: flex; flex-direction: column;
-            justify-content: center; align-items: center;
-            z-index: 1; color: white; padding: 40px; text-align: center;
+            justify-content: flex-end; 
+            align-items: center;
+            z-index: 1; color: white; padding: 50px 40px; text-align: center;
         }
 
-        .brand-logo-large { margin-bottom: 20px; }
+        .brand-content {
+            margin-top: auto; 
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .brand-logo-large { margin-bottom: 15px; }
         .brand-logo-large i {
             font-size: 80px; color: #D4AF37;
             text-shadow: 0 2px 10px rgba(0,0,0,0.5);
@@ -45,14 +58,18 @@
         .brand-subtitle {
             font-size: 18px; text-transform: uppercase; line-height: 1.4;
             max-width: 400px; color: #f0f0f0;
+            margin-bottom: 30px; 
         }
 
         .brand-footer-logo {
-            position: absolute; bottom: 30px; left: 40px;
-            display: flex; align-items: center; gap: 15px;
+            display: flex; align-items: center; justify-content: center; gap: 15px;
+            padding-top: 25px;
+            border-top: 1px solid rgba(255, 255, 255, 0.2); 
+            width: 100%;
+            max-width: 400px;
         }
 
-        .brand-footer-logo img { height: 50px; }
+        .brand-footer-logo img { height: 45px; }
         .brand-footer-text { font-size: 12px; color: #ccc; text-align: left; }
 
         .right-form {
@@ -97,7 +114,6 @@
 
         .btn-login:hover { background-color: #c2181e; }
 
-        /* Estilo para botón desactivado */
         .btn-login:disabled {
             background-color: #f08b8e;
             cursor: not-allowed;
@@ -113,6 +129,7 @@
 
         .d-none { display: none; }
 
+        /* Media Query para pantallas pequeñas (Móviles) */
         @media (max-width: 900px) {
             .login-container { flex-direction: column; }
             .left-branding { display: none; }
@@ -122,24 +139,26 @@
 </head>
 <body>
 
+    <!-- Se eliminó el div overlay-layer para no oscurecer el fondo rojo -->
     <div class="bg-layer"></div>
-    <div class="overlay-layer"></div>
 
     <div class="login-container">
 
         <div class="left-branding">
-            <div class="brand-logo-large">
-                <i class="fas fa-scale-balanced"></i>
-            </div>
-            <div class="brand-title">CARD</div>
-            <div class="brand-subtitle">
-                CENTRO DE ARBITRAJE Y RESOLUCIÓN DE DISPUTAS DEL CIP TRUJILLO
-            </div>
-            <div class="brand-footer-logo">
-                <img src="{{ asset('img/logo.png') }}">
-                <div class="brand-footer-text">
-                    CONSEJO DEPARTAMENTAL DE LA LIBERTAD<br>
-                    CENTRO DE ARBITRAJE
+            <div class="brand-content">
+                <div class="brand-logo-large">
+                    <i class="fas fa-scale-balanced"></i>
+                </div>
+                <div class="brand-title">CARD</div>
+                <div class="brand-subtitle">
+                    CENTRO DE ARBITRAJE Y RESOLUCIÓN DE DISPUTAS DEL CIP TRUJILLO
+                </div>
+                <div class="brand-footer-logo">
+                    <img src="{{ asset('img/logo.png') }}" alt="Logo CIP">
+                    <div class="brand-footer-text">
+                        CONSEJO DEPARTAMENTAL DE LA LIBERTAD<br>
+                        CENTRO DE ARBITRAJE
+                    </div>
                 </div>
             </div>
         </div>
@@ -174,8 +193,6 @@
                         @enderror
                     </div>
 
-                    <!-- <a href="{{ route('password.request') }}" class="forgot-link">¿Olvidaste tu contraseña?</a> -->
-
                     <button type="submit" class="btn-login" id="btnLogin">
                         <span id="btnText">Iniciar Sesión</span>
                         <i id="btnSpinner" class="fas fa-circle-notch fa-spin d-none"></i>
@@ -190,7 +207,6 @@
     </div>
 
     <script>
-        // Función para ver/ocultar contraseña
         function togglePassword() {
             const input = document.getElementById('password');
             const icon = document.querySelector('.toggle-password');
@@ -206,16 +222,12 @@
             }
         }
 
-        // Lógica para desactivar el botón al enviar
         document.getElementById('loginForm').addEventListener('submit', function() {
             const btn = document.getElementById('btnLogin');
             const text = document.getElementById('btnText');
             const spinner = document.getElementById('btnSpinner');
 
-            // Desactivar botón
             btn.disabled = true;
-            
-            // Cambiar texto por spinner
             text.textContent = "Accediendo...";
             spinner.classList.remove('d-none');
         });
