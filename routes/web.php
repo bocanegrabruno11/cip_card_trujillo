@@ -31,6 +31,7 @@ use App\Http\Controllers\ProcesoDeArbitrajeController;
 use App\Http\Controllers\EtapaJrdController;
 use App\Http\Controllers\UsuariosController;
 use App\Http\Controllers\CipcdllController;
+use App\Http\Controllers\AsistentasCipcdllFinalController;
 
 
 // Vista login (FALTABA ESTO)
@@ -42,6 +43,12 @@ Route::get('/login-eventos', function () {
 Route::post('/login-eventos', [AuthController::class, 'login'])
     ->name('login.eventos.post');
 
+Route::get('/envio-tarjetas', [AsistentasCipcdllFinalController::class, 'index'])
+    ->name('tarjetas.eventos');
+    
+Route::post('/generar-tarjetas', [AsistentasCipcdllFinalController::class, 'generarTarjetas'])
+    ->name('tarjetas.generar');
+
 // Dashboard
 Route::get('/dashboard-eventos', function () {
     if (!session('usuario')) {
@@ -49,6 +56,9 @@ Route::get('/dashboard-eventos', function () {
     }
     return view('eventoscipcdll.dashboard');
 })->name('dashboard.eventos');
+
+Route::get('/envio-tarjetas', [AsistentasCipcdllFinalController::class, 'index'])
+    ->name('tarjetas.eventos');
 
 // ✅ Validar múltiples asistencias en BATCH (más rápido)
 Route::post('/validar-asistencias-batch', function () {
