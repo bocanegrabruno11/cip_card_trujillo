@@ -27,31 +27,76 @@ public function generarTarjetas()
     $asistentes     = AsistenteFinalCipcdll::all();
     $imagenBase     = public_path('img/tarjeta.png');
     $carpetaDestino = storage_path('app/public/tarjetas');
-    $carpetaFuentes = storage_path('app/fonts');
 
     if (!file_exists($carpetaDestino)) {
         mkdir($carpetaDestino, 0755, true);
     }
-    if (!file_exists($carpetaFuentes)) {
-        mkdir($carpetaFuentes, 0755, true);
-    }
 
-    $fuenteNombreRuta = $carpetaFuentes . '/OpenSans-Bold.ttf';
-    $fuenteCipRuta    = $carpetaFuentes . '/OpenSans-ExtraBold.ttf';
-
-    if (!file_exists($fuenteNombreRuta)) {
-        file_put_contents($fuenteNombreRuta, file_get_contents(
-            'https://github.com/googlefonts/opensans/raw/main/fonts/ttf/OpenSans-Bold.ttf'
-        ));
+    // ──────────────────────────────────────────────
+    // CONFIGURACIÓN DE FUENTES NOTO SERIF
+    // ──────────────────────────────────────────────
+    $carpetaFuentes = storage_path('app/fonts/Noto_Serif/static');
+    
+    if (!is_dir($carpetaFuentes)) {
+        $carpetaFuentes = storage_path('fonts/Noto_Serif/static');
     }
-    if (!file_exists($fuenteCipRuta)) {
-        file_put_contents($fuenteCipRuta, file_get_contents(
-            'https://github.com/googlefonts/opensans/raw/main/fonts/ttf/OpenSans-ExtraBold.ttf'
-        ));
+    
+    if (!is_dir($carpetaFuentes)) {
+        $carpetaFuentes = base_path('storage/app/fonts/Noto_Serif/static');
+    }
+    
+    // BUSCAR TODOS LOS ARCHIVOS .ttf
+    $fuentesEncontradas = [];
+    if (is_dir($carpetaFuentes)) {
+        $archivos = scandir($carpetaFuentes);
+        foreach ($archivos as $archivo) {
+            if (pathinfo($archivo, PATHINFO_EXTENSION) === 'ttf') {
+                $fuentesEncontradas[] = $archivo;
+            }
+        }
+    }
+    
+    // ✅ USAR NotoSerif_ExtraCondensed-MediumItalic para AMBAS (nombre y CIP)
+    $fuenteNombreRuta = null;
+    $fuenteCipRuta = null;
+    
+    // Buscar NotoSerif_ExtraCondensed-MediumItalic
+    foreach ($fuentesEncontradas as $fuente) {
+        if (strpos($fuente, 'ExtraCondensed-MediumItalic') !== false) {
+            $fuenteNombreRuta = $carpetaFuentes . '/' . $fuente;
+            $fuenteCipRuta = $carpetaFuentes . '/' . $fuente;
+            break;
+        }
+    }
+    
+    // Si no encuentra esa, buscar cualquier MediumItalic
+    if (!$fuenteNombreRuta) {
+        foreach ($fuentesEncontradas as $fuente) {
+            if (strpos($fuente, 'MediumItalic') !== false) {
+                $fuenteNombreRuta = $carpetaFuentes . '/' . $fuente;
+                $fuenteCipRuta = $carpetaFuentes . '/' . $fuente;
+                break;
+            }
+        }
+    }
+    
+    // Si no encuentra, buscar cualquier fuente disponible
+    if (!$fuenteNombreRuta && count($fuentesEncontradas) > 0) {
+        $fuenteNombreRuta = $carpetaFuentes . '/' . $fuentesEncontradas[0];
+        $fuenteCipRuta = $fuenteNombreRuta;
+    }
+    
+    $fuenteExiste = $fuenteNombreRuta && file_exists($fuenteNombreRuta);
+    
+    // Log para depuración
+    if ($fuenteExiste) {
+        \Log::info("✅ Fuente encontrada: " . basename($fuenteNombreRuta));
+    } else {
+        \Log::warning("❌ No se encontró NotoSerif_ExtraCondensed-MediumItalic en: " . $carpetaFuentes);
     }
 
     $cuadroXPorcentaje     = 0.63;
-    $cuadroYPorcentaje     = 0.22;
+    $cuadroYPorcentaje     = 0.10;
     $cuadroAnchoPorcentaje = 0.33;
     $cuadroAltoPorcentaje  = 0.70;
 
@@ -70,22 +115,78 @@ public function generarTarjetas()
     $cuadroAncho = (int)($imgAncho * $cuadroAnchoPorcentaje);
     $cuadroAlto  = (int)($imgAlto  * $cuadroAltoPorcentaje);
 
-    // ── QR: centrado en la mitad derecha de la imagen ────
-    // La mitad derecha va desde imgAncho/2 hasta imgAncho
-    // El QR se centra horizontalmente dentro de esa mitad derecha
-    $mitadDerechaX      = (int)($imgAncho / 2);
-    $mitadDerechaAncho  = (int)($imgAncho / 2);
-    $qrSize             = (int)($cuadroAncho * 0.40 * 1.5); // tamaño actual + 50%
-    $qrXFijo            = $mitadDerechaX + (int)(($mitadDerechaAncho - $qrSize) / 2);
+    // ── QR: posición ajustada ────
+    $qrSize = (int)($cuadroAncho * 0.40 * 1.5);
+    
+    $qrDesplazamientoX = 210;
+    $qrDesplazamientoY = 10;
+    
+    $mitadDerechaX = (int)($imgAncho / 2);
+    $mitadDerechaAncho = (int)($imgAncho / 2);
+    $qrXFijo = $mitadDerechaX + (int)(($mitadDerechaAncho - $qrSize) / 2) + $qrDesplazamientoX;
+    $qrY = (int)($imgAlto * 0.55) + $qrDesplazamientoY;
 
-    $centrarTexto = function($imagen, $fontSize, $fuente, $texto, $cuadroX, $cuadroAncho, $y, $colorSombra, $colorPrincipal) {
-        $bbox   = \imagettfbbox($fontSize, 0, $fuente, $texto);
-        $tAncho = abs($bbox[4] - $bbox[0]);
-        $tAlto  = abs($bbox[5] - $bbox[1]);
-        $x      = $cuadroX + (int)(($cuadroAncho - $tAncho) / 2);
-        \imagettftext($imagen, $fontSize, 0, $x + 2, $y + 2, $colorSombra,    $fuente, $texto);
-        \imagettftext($imagen, $fontSize, 0, $x,     $y,     $colorPrincipal, $fuente, $texto);
-        return $tAlto;
+    /**
+     * Función para dividir texto en líneas de máximo 15 caracteres (incluyendo espacios)
+     */
+    $dividirTexto = function($texto, $maxCaracteres = 15) {
+        $lineas = [];
+        $palabras = explode(' ', $texto);
+        $lineaActual = '';
+        
+        foreach ($palabras as $palabra) {
+            $prueba = empty($lineaActual) ? $palabra : $lineaActual . ' ' . $palabra;
+            
+            if (strlen($prueba) <= $maxCaracteres) {
+                $lineaActual = $prueba;
+            } else {
+                if (!empty($lineaActual)) {
+                    $lineas[] = $lineaActual;
+                }
+                $lineaActual = $palabra;
+            }
+        }
+        
+        if (!empty($lineaActual)) {
+            $lineas[] = $lineaActual;
+        }
+        
+        return $lineas;
+    };
+
+    $dibujarTexto = function($imagen, $fontSize, $fuente, $texto, $cuadroX, $cuadroAncho, $y, $colorSombra, $colorPrincipal) use ($dividirTexto) {
+        $lineas = $dividirTexto($texto, 15);
+        $fontExists = $fuente && file_exists($fuente);
+        $altoTotal = 0;
+        $yActual = $y;
+        
+        foreach ($lineas as $linea) {
+            if (!$fontExists) {
+                // Fallback: texto simple
+                $x = $cuadroX + (int)(($cuadroAncho - (strlen($linea) * $fontSize * 0.6)) / 2);
+                imagestring($imagen, 5, $x, $yActual, $linea, $colorPrincipal);
+                $altoLinea = $fontSize;
+            } else {
+                $bbox = \imagettfbbox($fontSize, 0, $fuente, $linea);
+                $tAncho = abs($bbox[4] - $bbox[0]);
+                $tAlto = abs($bbox[5] - $bbox[1]);
+                $x = $cuadroX + (int)(($cuadroAncho - $tAncho) / 2);
+                
+                if ($fontSize > 0) {
+                    \imagettftext($imagen, $fontSize, 0, $x + 2, $yActual + $fontSize - 5, $colorSombra, $fuente, $linea);
+                    \imagettftext($imagen, $fontSize, 0, $x, $yActual + $fontSize - 5, $colorPrincipal, $fuente, $linea);
+                }
+                
+                $altoLinea = $tAlto;
+            }
+            
+            // ESPACIADO ENTRE LÍNEAS
+            $espaciado = 100;
+            $altoTotal += $altoLinea + $espaciado;
+            $yActual += $altoLinea + $espaciado;
+        }
+        
+        return $altoTotal;
     };
 
     $generadas = 0;
@@ -99,42 +200,27 @@ public function generarTarjetas()
             \imagecopy($imagen, $imagenOriginal, 0, 0, 0, 0, $imgAncho, $imgAlto);
             \imagealphablending($imagen, true);
 
-            $colorNombre = \imagecolorallocate($imagen, 139, 0,   0);
-            $colorCip    = \imagecolorallocate($imagen, 101, 51,  0);
-            $colorSombra = \imagecolorallocate($imagen, 255, 200, 180);
+            // COLORES
+            $colorNombre = \imagecolorallocate($imagen, 223, 0, 0);     // DF0000 - Rojo
+            $colorCip    = \imagecolorallocate($imagen, 212, 175, 55);  // D4AF37 - Dorado
+            $colorSombra = \imagecolorallocate($imagen, 255, 200, 200); // Sombra rojo claro
 
-            $fontSizeNombre = (int)($imgAncho * 0.022);
-            $fontSizeCip    = (int)($imgAncho * 0.014);
+            // TAMAÑOS DE FUENTE (ajustados para ExtraCondensed-MediumItalic)
+            $fontSizeNombre = (int)($imgAncho * 0.032); // Más grande por ser condensada
+            $fontSizeCip    = (int)($imgAncho * 0.028); // Más grande para CIP
 
-            $nombre   = strtoupper(trim(($asistente->nombres ?? '') . ' ' . ($asistente->apellidos ?? '')));
+            $nombreCompleto = strtoupper(trim(($asistente->nombres ?? '') . ' ' . ($asistente->apellidos ?? '')));
             $cipTexto = 'CIP: ' . ($asistente->cip ?? '');
 
-            $textoY = $cuadroY + (int)($cuadroAlto * 0.08);
-
-            $bboxTest    = \imagettfbbox($fontSizeNombre, 0, $fuenteNombreRuta, $nombre);
-            $nombreAncho = abs($bboxTest[4] - $bboxTest[0]);
-
-            if ($nombreAncho > $cuadroAncho - 20) {
-                $palabras = explode(' ', $nombre);
-                $mitad    = (int)(ceil(count($palabras) / 2));
-                $linea1   = implode(' ', array_slice($palabras, 0, $mitad));
-                $linea2   = implode(' ', array_slice($palabras, $mitad));
-
-                $altoLinea = $centrarTexto($imagen, $fontSizeNombre, $fuenteNombreRuta, $linea1, $cuadroX, $cuadroAncho, $textoY, $colorSombra, $colorNombre);
-                $textoY   += $altoLinea + 100;
-                $centrarTexto($imagen, $fontSizeNombre, $fuenteNombreRuta, $linea2, $cuadroX, $cuadroAncho, $textoY, $colorSombra, $colorNombre);
-                $textoY   += $altoLinea + 50;
-            } else {
-                $altoLinea = $centrarTexto($imagen, $fontSizeNombre, $fuenteNombreRuta, $nombre, $cuadroX, $cuadroAncho, $textoY, $colorSombra, $colorNombre);
-                $textoY   += $altoLinea + 200;
-            }
-
-            $altoCip = $centrarTexto($imagen, $fontSizeCip, $fuenteCipRuta, $cipTexto, $cuadroX, $cuadroAncho, $textoY, $colorSombra, $colorCip);
-
-            // ── QR más abajo: parte desde debajo del CIP + margen extra ──
-            $qrY = $textoY + $altoCip + 80;
-
-            // ── Generar y dibujar QR ──────────────────────────────────────
+            // NOMBRE
+            $yNombre = $cuadroY + (int)($cuadroAlto * 0.05);
+            $altoNombre = $dibujarTexto($imagen, $fontSizeNombre, $fuenteNombreRuta, $nombreCompleto, $cuadroX, $cuadroAncho, $yNombre, $colorSombra, $colorNombre);
+            
+            // CIP (con espaciado de 50 puntos desde el nombre)
+            $yCip = $yNombre + $altoNombre + 50;
+            $altoCip = $dibujarTexto($imagen, $fontSizeCip, $fuenteCipRuta, $cipTexto, $cuadroX, $cuadroAncho, $yCip, $colorSombra, $colorCip);
+            
+            // QR
             $qrCode = \Endroid\QrCode\QrCode::create($asistente->dni ?? 'SIN-DNI')
                 ->setSize(180)
                 ->setMargin(2);
@@ -145,9 +231,9 @@ public function generarTarjetas()
 
             \imagecopyresampled(
                 $imagen, $qrImg,
-                $qrXFijo, $qrY,   // X fijo centrado en mitad derecha, Y debajo del CIP
+                $qrXFijo, $qrY,
                 0, 0,
-                $qrSize, $qrSize, // tamaño + 50%
+                $qrSize, $qrSize,
                 $qrAncho, $qrAlto
             );
 
@@ -169,10 +255,12 @@ public function generarTarjetas()
 
     \imagedestroy($imagenOriginal);
 
+    $nombreFuente = $fuenteExiste ? basename($fuenteNombreRuta) : 'No encontrada';
+    $mensajeFuente = $fuenteExiste ? "✅ Usando fuente: {$nombreFuente}" : "⚠️ No se encontró NotoSerif_ExtraCondensed-MediumItalic";
+    
     return back()->with([
-        'success' => "✅ Se generaron {$generadas} tarjetas correctamente.",
+        'success' => "✅ Se generaron {$generadas} tarjetas. {$mensajeFuente}",
         'errores' => $errores,
     ]);
 }
-
 }
