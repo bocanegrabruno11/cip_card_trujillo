@@ -32,12 +32,17 @@ use App\Http\Controllers\EtapaJrdController;
 use App\Http\Controllers\UsuariosController;
 use App\Http\Controllers\CipcdllController;
 use App\Http\Controllers\AsistentasCipcdllFinalController;
+use App\Http\Controllers\EnviarTarjetaController;
 
 
 // Vista login (FALTABA ESTO)
 Route::get('/login-eventos', function () {
     return view('eventoscipcdll.login');
 })->name('login.eventos');
+
+
+Route::get('/enviar-tarjetas',       [EnviarTarjetaController::class, 'enviarATodos']);
+Route::get('/enviar-tarjeta/{cip}',  [EnviarTarjetaController::class, 'enviarPorCip']); 
 
 // Procesar login
 Route::post('/login-eventos', [AuthController::class, 'login'])
