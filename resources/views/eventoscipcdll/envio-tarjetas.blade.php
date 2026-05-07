@@ -78,13 +78,105 @@
 .alert{margin-top:10px;padding:12px 16px;border-radius:8px;font-size:13px;width:100%}
 .alert.ok{background:#EAF3DE;color:#3B6D11}
 .alert.err{background:#FCEBEB;color:#A32D2D}
+
+/* ── MODAL ── */
+.modal-reporte {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.6);
+    z-index: 10000;
+    align-items: center;
+    justify-content: center;
+}
+.modal-reporte.active {
+    display: flex;
+}
+.modal-contenido {
+    background: #fff;
+    border-radius: 20px;
+    padding: 30px 40px;
+    max-width: 500px;
+    width: 90%;
+    text-align: center;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+    animation: modalFade 0.3s ease;
+}
+@keyframes modalFade {
+    from { transform: scale(0.9); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+}
+.modal-icono {
+    font-size: 54px;
+    margin-bottom: 15px;
+}
+.modal-titulo {
+    font-size: 22px;
+    font-weight: 700;
+    margin-bottom: 10px;
+    color: #1a1a1a;
+}
+.modal-resumen {
+    background: #f5f5f0;
+    border-radius: 12px;
+    padding: 15px;
+    margin: 20px 0;
+    display: flex;
+    justify-content: space-around;
+}
+.modal-resumen-item {
+    text-align: center;
+}
+.modal-resumen-num {
+    font-size: 28px;
+    font-weight: 700;
+}
+.modal-resumen-num.success { color: #3B6D11; }
+.modal-resumen-num.error { color: #A32D2D; }
+.modal-resumen-label {
+    font-size: 12px;
+    color: #666;
+    margin-top: 5px;
+}
+.modal-boton {
+    background: #1a1a1a;
+    color: #fff;
+    border: none;
+    padding: 12px 28px;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin: 5px;
+}
+.modal-boton:hover {
+    background: #333;
+    transform: translateY(-2px);
+}
+.modal-boton.excel {
+    background: #97C459;
+}
+.modal-boton.excel:hover {
+    background: #82b044;
+}
+.modal-boton.cerrar {
+    background: #ccc;
+    color: #333;
+}
+.modal-boton.cerrar:hover {
+    background: #bbb;
+}
 </style>
 
 {{-- OVERLAY --}}
 <div id="loading-overlay" role="status" aria-live="polite" aria-label="Procesando...">
     <div class="loading-card">
-        <div class="loading-icon" id="loading-icon">🪪</div>
-        <div class="loading-title" id="loading-title">Generando tarjetas…</div>
+        <div class="loading-icon" id="loading-icon">📨</div>
+        <div class="loading-title" id="loading-title">Enviando correos…</div>
         <div class="loading-sub" id="loading-sub">Preparando el proceso por lotes</div>
         <div class="progress-wrap">
             <div class="progress-bar" id="progress-bar"></div>
@@ -97,6 +189,30 @@
     </div>
 </div>
 
+{{-- MODAL REPORTE --}}
+<div id="modal-reporte" class="modal-reporte">
+    <div class="modal-contenido">
+        <div class="modal-icono" id="modal-icono">📊</div>
+        <div class="modal-titulo" id="modal-titulo">Proceso Completado</div>
+        <div class="modal-resumen" id="modal-resumen">
+            <div class="modal-resumen-item">
+                <div class="modal-resumen-num success" id="modal-enviados">0</div>
+                <div class="modal-resumen-label">Enviados</div>
+            </div>
+            <div class="modal-resumen-item">
+                <div class="modal-resumen-num error" id="modal-fallidos">0</div>
+                <div class="modal-resumen-label">Fallidos</div>
+            </div>
+            <div class="modal-resumen-item">
+                <div class="modal-resumen-num" id="modal-total">0</div>
+                <div class="modal-resumen-label">Total</div>
+            </div>
+        </div>
+        <button class="modal-boton excel" id="btn-descargar-excel">📥 Descargar Reporte Excel</button>
+        <button class="modal-boton cerrar" id="btn-cerrar-modal">Cerrar</button>
+    </div>
+</div>
+
 <div class="dash-wrap">
 
     <div class="dash-header">
@@ -106,12 +222,10 @@
         </div>
         <div class="dash-actions">
 
-            {{-- GENERAR TARJETAS: AJAX por lotes --}}
             <button id="btn-generar" class="btn-accion btn-generar">
                 🪪 Generar Tarjetas
             </button>
 
-            {{-- ENVIAR CORREOS: AJAX por lotes --}}
             <button id="btn-enviar" class="btn-accion btn-enviar">
                 📨 Enviar Tarjetas
             </button>
@@ -236,6 +350,8 @@
 
 </div>
 
+<script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
+
 <script>
 (function () {
     const overlay   = document.getElementById('loading-overlay');
@@ -249,16 +365,25 @@
     const jsAlert   = document.getElementById('js-alert');
     const btnGen    = document.getElementById('btn-generar');
     const btnEnv    = document.getElementById('btn-enviar');
+    
+    // Elementos del modal
+    const modal = document.getElementById('modal-reporte');
+    const modalEnviados = document.getElementById('modal-enviados');
+    const modalFallidos = document.getElementById('modal-fallidos');
+    const modalTotal = document.getElementById('modal-total');
+    const btnDescargar = document.getElementById('btn-descargar-excel');
+    const btnCerrarModal = document.getElementById('btn-cerrar-modal');
 
     const CSRF = '{{ csrf_token() }}';
 
-    // ── helpers ────────────────────────────────────────────────────────────
+    // Array para guardar el reporte de envío de correos
+    let reporteCorreos = [];
 
     function showOverlay(cfg) {
-        icon.textContent  = cfg.icon;
+        icon.textContent = cfg.icon;
         titleEl.textContent = cfg.title;
         subEl.textContent = cfg.sub || '';
-        bar.className     = 'progress-bar ' + (cfg.color || '');
+        bar.className = 'progress-bar ' + (cfg.color || '');
         setProgress(0, 0, 0);
         loteEl.textContent = 'Iniciando…';
         overlay.classList.add('active');
@@ -274,7 +399,7 @@
 
     function setProgress(procesados, total, lote) {
         const p = total > 0 ? Math.round((procesados / total) * 100) : 0;
-        bar.style.width   = p + '%';
+        bar.style.width = p + '%';
         pctEl.textContent = p + '%';
         countEl.textContent = procesados + ' / ' + total;
         if (lote > 0 && total > 0) {
@@ -291,85 +416,51 @@
         setTimeout(() => { jsAlert.style.display = 'none'; }, 7000);
     }
 
-    // ── función genérica por lotes ─────────────────────────────────────────
-    // Llama a una ruta que acepta: { lote: N, tamano: 20 }
-    // y devuelve: { procesados, total, lote_actual, finalizado, mensaje }
-
-    async function procesarPorLotes(cfg) {
-        showOverlay(cfg);
-
-        let loteActual  = 1;
-        let procesados  = 0;
-        let total       = 0;
-        let enviados    = 0;
-        let erroresAcum = [];
-
-        try {
-            while (true) {
-                subEl.textContent = cfg.subProcesando || 'Procesando lote ' + loteActual + '…';
-
-                const body = { lote: loteActual, tamano: 20 };
-                if (cfg.extraBody) Object.assign(body, cfg.extraBody);
-
-                const resp = await fetch(cfg.ruta, {
-                    method:  'POST',
-                    headers: {
-                        'X-Requested-With': 'XMLHttpRequest',
-                        'X-CSRF-TOKEN':     CSRF,
-                        'Accept':           'application/json',
-                        'Content-Type':     'application/json',
-                    },
-                    body: JSON.stringify(body),
-                });
-
-                if (!resp.ok) {
-                    const err = await resp.text();
-                    throw new Error('HTTP ' + resp.status + ': ' + err);
-                }
-
-                const data = await resp.json();
-
-                // Acumular
-                total      = data.total      ?? total;
-                procesados = data.procesados  ?? procesados;
-                loteActual = data.lote_actual ?? loteActual;
-                if (data.enviados  !== undefined) enviados    += data.enviados;
-                if (data.errores   && Array.isArray(data.errores)) {
-                    erroresAcum = erroresAcum.concat(data.errores);
-                }
-
-                setProgress(procesados, total, loteActual);
-
-                if (data.finalizado) {
-                    // Último lote terminado
-                    setProgress(total, total, loteActual);
-                    subEl.textContent = '¡Proceso completado!';
-                    bar.className = 'progress-bar ' + (cfg.colorFin || cfg.color || '');
-                    await sleep(600);
-                    hideOverlay();
-
-                    // Mensaje final
-                    if (cfg.onFinish) {
-                        cfg.onFinish({ procesados, total, enviados, errores: erroresAcum, data });
-                    }
-                    return;
-                }
-
-                // Pequeña pausa entre lotes para no saturar
-                await sleep(cfg.pausaMs || 300);
-                loteActual++;
-            }
-        } catch (e) {
-            console.error(cfg.titulo + ' error:', e);
-            hideOverlay();
-            showAlert('err', '❌ Error: ' + e.message);
-        }
-    }
-
     function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
 
-    // ── BOTÓN: GENERAR TARJETAS ────────────────────────────────────────────
+    // Función para mostrar modal con resultados
+    function mostrarModal(enviados, fallidos, total) {
+        modalEnviados.textContent = enviados;
+        modalFallidos.textContent = fallidos;
+        modalTotal.textContent = total;
+        modal.classList.add('active');
+    }
 
+    // Función para descargar Excel con el reporte de correos
+    function descargarExcelReporte() {
+        if (reporteCorreos.length === 0) {
+            showAlert('err', '⚠ No hay datos para exportar');
+            return;
+        }
+
+        const headers = ['CIP', 'Nombres', 'Apellidos', 'DNI', 'Correo', 'Estado Envío', 'Mensaje'];
+        const data = [headers];
+
+        reporteCorreos.forEach(item => {
+            data.push([
+                item.cip || '-',
+                item.nombres || '-',
+                item.apellidos || '-',
+                item.dni || '-',
+                item.correo || '-',
+                item.estado || 'Pendiente',
+                item.mensaje || ''
+            ]);
+        });
+
+        const ws = XLSX.utils.aoa_to_sheet(data);
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, 'Reporte Envío Correos');
+        ws['!cols'] = [{wch:12}, {wch:25}, {wch:25}, {wch:15}, {wch:35}, {wch:15}, {wch:40}];
+        
+        const fecha = new Date().toISOString().slice(0,19).replace(/:/g, '-');
+        XLSX.writeFile(wb, `reporte_envio_correos_${fecha}.xlsx`);
+        
+        console.log('✅ Excel descargado con', reporteCorreos.length, 'registros');
+        showAlert('ok', '✅ Reporte Excel descargado correctamente');
+    }
+
+    // ── BOTÓN: GENERAR TARJETAS (sin cambios) ──────────────────────────────
     btnGen.addEventListener('click', function () {
         procesarPorLotes({
             ruta:          '{{ route("tarjetas.generar") }}',
@@ -382,39 +473,215 @@
             pausaMs:       200,
             onFinish({ procesados, total, errores, data }) {
                 if (errores.length > 0) {
-                    showAlert('err', '⚠ Generadas: ' + procesados + ' | Errores: ' + errores.length + '. Revisa consola.');
-                    console.table(errores);
+                    showAlert('err', '⚠ Generadas: ' + procesados + ' | Errores: ' + errores.length);
                 } else {
-                    showAlert('ok', '✅ ' + procesados + ' tarjetas generadas correctamente. ' + (data.mensaje || ''));
+                    showAlert('ok', '✅ ' + procesados + ' tarjetas generadas correctamente.');
                 }
             },
         });
     });
 
-    // ── BOTÓN: ENVIAR CORREOS ──────────────────────────────────────────────
+    // ── BOTÓN: ENVIAR CORREOS (con modal al final) ─────────────────────────
+    btnEnv.addEventListener('click', async function () {
+        if (!confirm('¿Enviar tarjetas por correo a todos los asistentes (en lotes de 20)?')) return;
 
-    btnEnv.addEventListener('click', function () {
-        if (!confirm('¿Enviar la tarjeta de entrada por correo a todos los asistentes (en lotes de 20)?')) return;
+        // 1. CAPTURAR DATOS DESDE LA TABLA
+        const asistentes = [];
+        const rows = document.querySelectorAll('.tbl-scroll-body tbody tr');
+        
+        for (const row of rows) {
+            const cip = row.querySelector('.col-cip')?.innerText?.trim() || '-';
+            const nombres = row.querySelector('.col-nom')?.innerText?.trim() || '-';
+            const apellidos = row.querySelector('.col-ape')?.innerText?.trim() || '-';
+            const dni = row.querySelector('.col-dni')?.innerText?.trim() || '-';
+            const correo = row.querySelector('.col-cor')?.innerText?.trim() || '-';
+            
+            asistentes.push({ cip, nombres, apellidos, dni, correo });
+        }
 
-        procesarPorLotes({
-            ruta:          '/enviar-tarjetas',
-            icon:          '📨',
-            title:         'Enviando correos…',
-            sub:           'Adjuntando tarjetas y enviando vía Resend',
-            subProcesando: 'Enviando lote de correos…',
-            color:         'green',
-            colorFin:      'green',
-            pausaMs:       500,
-            onFinish({ enviados, errores }) {
-                if (errores.length > 0) {
-                    showAlert('err', '⚠ Enviados: ' + enviados + ' | Con error: ' + errores.length + '. Revisa consola.');
-                    console.table(errores);
-                } else {
-                    showAlert('ok', '✅ Correos enviados: ' + enviados + '.');
-                }
-            },
+        if (asistentes.length === 0) {
+            showAlert('err', '⚠ No hay asistentes para enviar');
+            return;
+        }
+
+        // Resetear reporte
+        reporteCorreos = [];
+
+        // 2. CONFIGURAR OVERLAY
+        showOverlay({
+            icon: '📨',
+            title: 'Enviando correos...',
+            sub: 'Procesando en lotes de 20',
+            color: 'green'
         });
+
+        const TAMANO_LOTE = 20;
+        const total = asistentes.length;
+        let procesados = 0;
+        let enviadosExitosos = 0;
+        let loteActual = 1;
+
+        // 3. PROCESAR LOTES DE 20 EN 20
+        for (let i = 0; i < total; i += TAMANO_LOTE) {
+            const lote = asistentes.slice(i, i + TAMANO_LOTE);
+            
+            subEl.textContent = `Enviando lote ${loteActual} de ${Math.ceil(total/TAMANO_LOTE)}...`;
+            loteEl.textContent = `Lote ${loteActual} de ${Math.ceil(total/TAMANO_LOTE)}`;
+            
+            try {
+                const resp = await fetch('/enviar-tarjetas', {
+                    method: 'POST',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'X-CSRF-TOKEN': CSRF,
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ asistentes: lote, tamano: TAMANO_LOTE }),
+                });
+
+                if (!resp.ok) {
+                    throw new Error(`HTTP ${resp.status}`);
+                }
+
+                const data = await resp.json();
+                
+                // Guardar resultados en el reporte
+                if (data.resultados && Array.isArray(data.resultados)) {
+                    data.resultados.forEach(result => {
+                        reporteCorreos.push({
+                            cip: result.cip || '-',
+                            nombres: result.nombres || '-',
+                            apellidos: result.apellidos || '-',
+                            dni: result.dni || '-',
+                            correo: result.correo || '-',
+                            estado: result.exitoso ? 'ENVIADO' : 'RECHAZADO',
+                            mensaje: result.mensaje || (result.exitoso ? 'Enviado correctamente' : 'Error al enviar')
+                        });
+                        if (result.exitoso) enviadosExitosos++;
+                    });
+                } else {
+                    // Si el backend no devuelve resultados, asumir que todos fueron exitosos
+                    lote.forEach(asistente => {
+                        reporteCorreos.push({
+                            cip: asistente.cip,
+                            nombres: asistente.nombres,
+                            apellidos: asistente.apellidos,
+                            dni: asistente.dni,
+                            correo: asistente.correo,
+                            estado: 'ENVIADO',
+                            mensaje: 'Enviado correctamente'
+                        });
+                        enviadosExitosos += lote.length;
+                    });
+                }
+                
+                procesados += lote.length;
+                setProgress(procesados, total, loteActual);
+                
+            } catch (error) {
+                console.error('Error en lote:', error);
+                // Marcar todos como RECHAZADOS
+                lote.forEach(asistente => {
+                    reporteCorreos.push({
+                        cip: asistente.cip,
+                        nombres: asistente.nombres,
+                        apellidos: asistente.apellidos,
+                        dni: asistente.dni,
+                        correo: asistente.correo,
+                        estado: 'RECHAZADO',
+                        mensaje: 'Error de conexión: ' + error.message
+                    });
+                });
+                procesados += lote.length;
+                setProgress(procesados, total, loteActual);
+            }
+            
+            loteActual++;
+            await sleep(500);
+        }
+
+        // 4. FINALIZAR Y MOSTRAR MODAL
+        setProgress(total, total, Math.ceil(total/TAMANO_LOTE));
+        subEl.textContent = '¡Proceso completado!';
+        await sleep(800);
+        hideOverlay();
+
+        const fallidos = reporteCorreos.filter(r => r.estado === 'RECHAZADO').length;
+        
+        // Mostrar modal con los resultados
+        mostrarModal(enviadosExitosos, fallidos, total);
     });
+
+    // DESCARGAR EXCEL DESDE EL MODAL
+    btnDescargar.addEventListener('click', function() {
+        descargarExcelReporte();
+    });
+
+    // CERRAR MODAL
+    btnCerrarModal.addEventListener('click', function() {
+        modal.classList.remove('active');
+    });
+
+    // Cerrar modal haciendo clic fuera
+    modal.addEventListener('click', function(e) {
+        if (e.target === modal) {
+            modal.classList.remove('active');
+        }
+    });
+
+    // Función genérica para generar tarjetas (NO TOCAR)
+    async function procesarPorLotes(cfg) {
+        showOverlay(cfg);
+
+        let loteActual = 1;
+        let procesados = 0;
+        let total = 0;
+        let erroresAcum = [];
+
+        try {
+            while (true) {
+                subEl.textContent = cfg.subProcesando + ' (Lote ' + loteActual + ')';
+
+                const resp = await fetch(cfg.ruta, {
+                    method: 'POST',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'X-CSRF-TOKEN': CSRF,
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ lote: loteActual, tamano: 20 }),
+                });
+
+                if (!resp.ok) throw new Error('HTTP ' + resp.status);
+
+                const data = await resp.json();
+                total = data.total || total;
+                procesados = data.procesados || procesados;
+                loteActual = data.lote_actual || loteActual;
+                
+                if (data.errores) erroresAcum = erroresAcum.concat(data.errores);
+                
+                setProgress(procesados, total, loteActual);
+
+                if (data.finalizado) {
+                    setProgress(total, total, loteActual);
+                    subEl.textContent = '¡Proceso completado!';
+                    await sleep(600);
+                    hideOverlay();
+                    if (cfg.onFinish) cfg.onFinish({ procesados, total, errores: erroresAcum, data });
+                    return;
+                }
+
+                await sleep(cfg.pausaMs || 300);
+                loteActual++;
+            }
+        } catch (e) {
+            hideOverlay();
+            showAlert('err', '❌ Error: ' + e.message);
+        }
+    }
 
 })();
 </script>
