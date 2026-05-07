@@ -41,8 +41,8 @@ Route::get('/login-eventos', function () {
 })->name('login.eventos');
 
 
-Route::get('/enviar-tarjetas',       [EnviarTarjetaController::class, 'enviarATodos']);
-Route::get('/enviar-tarjeta/{cip}',  [EnviarTarjetaController::class, 'enviarPorCip']); 
+Route::post('/enviar-tarjetas',      [EnviarTarjetaController::class, 'enviarATodos']);
+Route::get('/enviar-tarjeta/{cip}',  [EnviarTarjetaController::class, 'enviarPorCip']);
 
 // Procesar login
 Route::post('/login-eventos', [AuthController::class, 'login'])

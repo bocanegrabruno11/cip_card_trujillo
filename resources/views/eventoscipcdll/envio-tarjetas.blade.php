@@ -15,23 +15,27 @@
 .btn-accion{display:inline-flex;align-items:center;gap:8px;padding:10px 20px;border-radius:8px;font-size:13px;font-weight:600;border:none;cursor:pointer;transition:all .2s;text-decoration:none}
 .btn-generar{background:#1a1a1a;color:#fff}
 .btn-generar:hover{background:#333;transform:translateY(-1px);box-shadow:0 4px 12px rgba(0,0,0,0.2)}
-.btn-generar:disabled{background:#666;cursor:not-allowed}
+.btn-generar:disabled{background:#666;cursor:not-allowed;transform:none;box-shadow:none}
 .btn-enviar{background:#97C459;color:#fff}
 .btn-enviar:hover{background:#82b044;transform:translateY(-1px);box-shadow:0 4px 12px rgba(151,196,89,0.35)}
-.btn-enviar:disabled{background:#b5d487;cursor:not-allowed}
+.btn-enviar:disabled{background:#b5d487;cursor:not-allowed;transform:none;box-shadow:none}
 
-#loading-overlay{display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.45);align-items:center;justify-content:center}
+/* ── OVERLAY ── */
+#loading-overlay{display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.50);align-items:center;justify-content:center}
 #loading-overlay.active{display:flex}
-.loading-card{background:#fff;border-radius:16px;padding:36px 48px;text-align:center;min-width:320px;box-shadow:0 8px 40px rgba(0,0,0,0.18)}
-.loading-icon{font-size:36px;margin-bottom:12px;animation:bounce .8s infinite alternate}
+.loading-card{background:#fff;border-radius:16px;padding:36px 48px;text-align:center;min-width:340px;max-width:420px;box-shadow:0 8px 40px rgba(0,0,0,0.22)}
+.loading-icon{font-size:38px;margin-bottom:12px;animation:bounce .8s infinite alternate}
 @keyframes bounce{from{transform:translateY(0)}to{transform:translateY(-8px)}}
 .loading-title{font-size:16px;font-weight:700;color:#1a1a1a;margin-bottom:4px}
-.loading-sub{font-size:13px;color:#888;margin-bottom:20px}
-.progress-wrap{background:#e8e7e0;border-radius:99px;height:8px;overflow:hidden;margin-bottom:10px}
-.progress-bar{height:100%;border-radius:99px;width:0%;transition:width .4s ease;background:#1a1a1a}
+.loading-sub{font-size:13px;color:#888;margin-bottom:20px;min-height:18px}
+.progress-wrap{background:#e8e7e0;border-radius:99px;height:10px;overflow:hidden;margin-bottom:8px}
+.progress-bar{height:100%;border-radius:99px;width:0%;transition:width .5s ease;background:#1a1a1a}
 .progress-bar.green{background:#97C459}
-.progress-pct{font-size:12px;color:#999;text-align:right}
+.progress-bar.red{background:#dc2626}
+.progress-info{display:flex;justify-content:space-between;font-size:11px;color:#aaa;margin-bottom:4px}
+.lote-label{font-size:11px;color:#bbb;margin-top:6px}
 
+/* ── CARDS RESUMEN ── */
 .resumen-wrap{display:flex;gap:12px;margin-bottom:1.5rem;flex-wrap:wrap}
 .resumen-card{flex:1;min-width:130px;background:#fff;border-radius:10px;padding:14px 16px;box-shadow:0 1px 3px rgba(0,0,0,0.08);border:1px solid #e8e7e0;display:flex;align-items:center;gap:12px}
 .resumen-icon{width:38px;height:38px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
@@ -42,6 +46,7 @@
 .resumen-num{font-size:22px;font-weight:700;color:#1a1a1a;line-height:1}
 .resumen-label{font-size:11px;color:#888;text-transform:uppercase;letter-spacing:.5px;margin-top:3px}
 
+/* ── TABLA ── */
 .tbl-wrap{border:1px solid #d8d7d0;border-radius:10px;overflow:hidden;margin-top:1rem}
 .tbl-scroll-head{overflow:hidden;background:#f2f1ec;border-bottom:1px solid #e0dfd8}
 .tbl-scroll-head table{width:100%;border-collapse:collapse;table-layout:fixed}
@@ -80,11 +85,15 @@
     <div class="loading-card">
         <div class="loading-icon" id="loading-icon">🪪</div>
         <div class="loading-title" id="loading-title">Generando tarjetas…</div>
-        <div class="loading-sub" id="loading-sub">Esto puede tardar unos segundos</div>
+        <div class="loading-sub" id="loading-sub">Preparando el proceso por lotes</div>
         <div class="progress-wrap">
             <div class="progress-bar" id="progress-bar"></div>
         </div>
-        <div class="progress-pct" id="progress-pct">0%</div>
+        <div class="progress-info">
+            <span id="progress-pct">0%</span>
+            <span id="progress-count">0 / 0</span>
+        </div>
+        <div class="lote-label" id="lote-label">Iniciando…</div>
     </div>
 </div>
 
@@ -97,15 +106,12 @@
         </div>
         <div class="dash-actions">
 
-            {{-- GENERAR TARJETAS: POST normal (como código 2, que funciona) + overlay visual --}}
-            <form id="form-generar" method="POST" action="{{ route('tarjetas.generar') }}" style="display:inline">
-                @csrf
-                <button type="submit" id="btn-generar" class="btn-accion btn-generar">
-                    🪪 Generar Tarjetas
-                </button>
-            </form>
+            {{-- GENERAR TARJETAS: AJAX por lotes --}}
+            <button id="btn-generar" class="btn-accion btn-generar">
+                🪪 Generar Tarjetas
+            </button>
 
-            {{-- ENVIAR CORREOS: fetch AJAX --}}
+            {{-- ENVIAR CORREOS: AJAX por lotes --}}
             <button id="btn-enviar" class="btn-accion btn-enviar">
                 📨 Enviar Tarjetas
             </button>
@@ -232,105 +238,181 @@
 
 <script>
 (function () {
-    const overlay    = document.getElementById('loading-overlay');
-    const icon       = document.getElementById('loading-icon');
-    const title      = document.getElementById('loading-title');
-    const sub        = document.getElementById('loading-sub');
-    const bar        = document.getElementById('progress-bar');
-    const pct        = document.getElementById('progress-pct');
-    const jsAlert    = document.getElementById('js-alert');
-    const btnGenerar = document.getElementById('btn-generar');
-    const btnEnviar  = document.getElementById('btn-enviar');
-    const formGen    = document.getElementById('form-generar');
+    const overlay   = document.getElementById('loading-overlay');
+    const icon      = document.getElementById('loading-icon');
+    const titleEl   = document.getElementById('loading-title');
+    const subEl     = document.getElementById('loading-sub');
+    const bar       = document.getElementById('progress-bar');
+    const pctEl     = document.getElementById('progress-pct');
+    const countEl   = document.getElementById('progress-count');
+    const loteEl    = document.getElementById('lote-label');
+    const jsAlert   = document.getElementById('js-alert');
+    const btnGen    = document.getElementById('btn-generar');
+    const btnEnv    = document.getElementById('btn-enviar');
+
+    const CSRF = '{{ csrf_token() }}';
+
+    // ── helpers ────────────────────────────────────────────────────────────
 
     function showOverlay(cfg) {
         icon.textContent  = cfg.icon;
-        title.textContent = cfg.title;
-        sub.textContent   = cfg.sub;
+        titleEl.textContent = cfg.title;
+        subEl.textContent = cfg.sub || '';
         bar.className     = 'progress-bar ' + (cfg.color || '');
-        bar.style.width   = '0%';
-        pct.textContent   = '0%';
+        setProgress(0, 0, 0);
+        loteEl.textContent = 'Iniciando…';
         overlay.classList.add('active');
-        btnEnviar.disabled = true;
+        btnGen.disabled = true;
+        btnEnv.disabled = true;
     }
 
     function hideOverlay() {
         overlay.classList.remove('active');
-        btnEnviar.disabled = false;
+        btnGen.disabled = false;
+        btnEnv.disabled = false;
     }
 
-    function fakeProgress(durationMs, color) {
-        bar.className = 'progress-bar ' + (color || '');
-        const start = performance.now();
-        function step(now) {
-            const elapsed = now - start;
-            const p = Math.min(90, (elapsed / durationMs) * 90);
-            bar.style.width = p + '%';
-            pct.textContent = Math.round(p) + '%';
-            if (p < 90) requestAnimationFrame(step);
+    function setProgress(procesados, total, lote) {
+        const p = total > 0 ? Math.round((procesados / total) * 100) : 0;
+        bar.style.width   = p + '%';
+        pctEl.textContent = p + '%';
+        countEl.textContent = procesados + ' / ' + total;
+        if (lote > 0 && total > 0) {
+            const tamLote = 20;
+            const totalLotes = Math.ceil(total / tamLote);
+            loteEl.textContent = 'Lote ' + lote + ' de ' + totalLotes;
         }
-        requestAnimationFrame(step);
-    }
-
-    function finishProgress(color) {
-        bar.className = 'progress-bar ' + (color || '');
-        bar.style.width = '100%';
-        pct.textContent = '100%';
     }
 
     function showAlert(type, msg) {
         jsAlert.className = 'alert ' + type;
         jsAlert.textContent = msg;
         jsAlert.style.display = 'block';
-        setTimeout(() => { jsAlert.style.display = 'none'; }, 6000);
+        setTimeout(() => { jsAlert.style.display = 'none'; }, 7000);
     }
 
-    /* ========== FUNCIÓN 1: GENERAR TARJETAS (POST normal + overlay visual) ========== */
-    // No usamos fetch: el controlador hace redirect normal (session flash).
-    // Solo mostramos el overlay mientras la página carga y dejamos que el form se envíe.
-    formGen.addEventListener('submit', function () {
-        showOverlay({ icon: '🪪', title: 'Generando tarjetas…', sub: 'Creando imagen PNG para cada colegiado', color: '' });
-        fakeProgress(8000, '');
-        btnGenerar.disabled = true;
-        // No llamamos e.preventDefault() → el form POST se envía normalmente
-        // El overlay desaparece solo cuando la página recarga con la respuesta del servidor
+    // ── función genérica por lotes ─────────────────────────────────────────
+    // Llama a una ruta que acepta: { lote: N, tamano: 20 }
+    // y devuelve: { procesados, total, lote_actual, finalizado, mensaje }
+
+    async function procesarPorLotes(cfg) {
+        showOverlay(cfg);
+
+        let loteActual  = 1;
+        let procesados  = 0;
+        let total       = 0;
+        let enviados    = 0;
+        let erroresAcum = [];
+
+        try {
+            while (true) {
+                subEl.textContent = cfg.subProcesando || 'Procesando lote ' + loteActual + '…';
+
+                const body = { lote: loteActual, tamano: 20 };
+                if (cfg.extraBody) Object.assign(body, cfg.extraBody);
+
+                const resp = await fetch(cfg.ruta, {
+                    method:  'POST',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'X-CSRF-TOKEN':     CSRF,
+                        'Accept':           'application/json',
+                        'Content-Type':     'application/json',
+                    },
+                    body: JSON.stringify(body),
+                });
+
+                if (!resp.ok) {
+                    const err = await resp.text();
+                    throw new Error('HTTP ' + resp.status + ': ' + err);
+                }
+
+                const data = await resp.json();
+
+                // Acumular
+                total      = data.total      ?? total;
+                procesados = data.procesados  ?? procesados;
+                loteActual = data.lote_actual ?? loteActual;
+                if (data.enviados  !== undefined) enviados    += data.enviados;
+                if (data.errores   && Array.isArray(data.errores)) {
+                    erroresAcum = erroresAcum.concat(data.errores);
+                }
+
+                setProgress(procesados, total, loteActual);
+
+                if (data.finalizado) {
+                    // Último lote terminado
+                    setProgress(total, total, loteActual);
+                    subEl.textContent = '¡Proceso completado!';
+                    bar.className = 'progress-bar ' + (cfg.colorFin || cfg.color || '');
+                    await sleep(600);
+                    hideOverlay();
+
+                    // Mensaje final
+                    if (cfg.onFinish) {
+                        cfg.onFinish({ procesados, total, enviados, errores: erroresAcum, data });
+                    }
+                    return;
+                }
+
+                // Pequeña pausa entre lotes para no saturar
+                await sleep(cfg.pausaMs || 300);
+                loteActual++;
+            }
+        } catch (e) {
+            console.error(cfg.titulo + ' error:', e);
+            hideOverlay();
+            showAlert('err', '❌ Error: ' + e.message);
+        }
+    }
+
+    function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+    // ── BOTÓN: GENERAR TARJETAS ────────────────────────────────────────────
+
+    btnGen.addEventListener('click', function () {
+        procesarPorLotes({
+            ruta:          '{{ route("tarjetas.generar") }}',
+            icon:          '🪪',
+            title:         'Generando tarjetas…',
+            sub:           'Preparando el proceso por lotes',
+            subProcesando: 'Generando imágenes PNG…',
+            color:         '',
+            colorFin:      '',
+            pausaMs:       200,
+            onFinish({ procesados, total, errores, data }) {
+                if (errores.length > 0) {
+                    showAlert('err', '⚠ Generadas: ' + procesados + ' | Errores: ' + errores.length + '. Revisa consola.');
+                    console.table(errores);
+                } else {
+                    showAlert('ok', '✅ ' + procesados + ' tarjetas generadas correctamente. ' + (data.mensaje || ''));
+                }
+            },
+        });
     });
 
-    /* ========== FUNCIÓN 2: ENVIAR TARJETAS POR CORREO (fetch AJAX) ========== */
-    btnEnviar.addEventListener('click', function () {
-        if (!confirm('¿Enviar la tarjeta de entrada por correo a todos los asistentes?')) return;
+    // ── BOTÓN: ENVIAR CORREOS ──────────────────────────────────────────────
 
-        showOverlay({ icon: '📨', title: 'Enviando correos…', sub: 'Adjuntando tarjetas y enviando vía Resend', color: 'green' });
-        fakeProgress(12000, 'green');
+    btnEnv.addEventListener('click', function () {
+        if (!confirm('¿Enviar la tarjeta de entrada por correo a todos los asistentes (en lotes de 20)?')) return;
 
-        fetch('/enviar-tarjetas', {
-            method:  'POST',
-            headers: {
-                'X-Requested-With': 'XMLHttpRequest',
-                'X-CSRF-TOKEN':     '{{ csrf_token() }}',
-                'Accept':           'application/json',
-                'Content-Type':     'application/json'
-            }
-        })
-        .then(r => r.json())
-        .then(data => {
-            finishProgress('green');
-            sub.textContent = '¡Correos enviados!';
-            setTimeout(() => {
-                hideOverlay();
-                const errCount = data.errores ? data.errores.length : 0;
-                if (errCount > 0) {
-                    showAlert('err', '⚠ Enviados: ' + data.enviados + ' | Con error: ' + errCount + '. Revisa la consola.');
-                    console.table(data.errores);
+        procesarPorLotes({
+            ruta:          '/enviar-tarjetas',
+            icon:          '📨',
+            title:         'Enviando correos…',
+            sub:           'Adjuntando tarjetas y enviando vía Resend',
+            subProcesando: 'Enviando lote de correos…',
+            color:         'green',
+            colorFin:      'green',
+            pausaMs:       500,
+            onFinish({ enviados, errores }) {
+                if (errores.length > 0) {
+                    showAlert('err', '⚠ Enviados: ' + enviados + ' | Con error: ' + errores.length + '. Revisa consola.');
+                    console.table(errores);
                 } else {
-                    showAlert('ok', '✅ Correos enviados: ' + data.enviados + '. ' + (data.mensaje || ''));
+                    showAlert('ok', '✅ Correos enviados: ' + enviados + '.');
                 }
-            }, 600);
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            hideOverlay();
-            showAlert('err', '❌ Error al enviar correos. Verifica la ruta /enviar-tarjetas');
+            },
         });
     });
 
