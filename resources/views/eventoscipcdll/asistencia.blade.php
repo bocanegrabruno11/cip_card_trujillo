@@ -3,6 +3,7 @@
 @section('title', 'Dashboard - Control de Asistencia')
 
 @section('content')
+<meta name="csrf-token" content="{{ csrf_token() }}">  <!-- ← Agrega esto aquí -->
 <div class="dashboard-container">
 
     <div class="stats-cards">
@@ -978,8 +979,8 @@ function abrirModalConfirmacion(data) {
 
 function cerrarModalConfirmacion() {
     document.getElementById('modalConfirmacion').style.display = 'none';
-    asistenteActualId = null;
-    asistenteActualData = null;
+    //asistenteActualId = null;
+    //asistenteActualData = null;
 }
 
 function confirmarMarcarAsistencia() {
@@ -1048,18 +1049,29 @@ function cerrarModalNoEncontrado() {
 }
 
 // ─── MARCAR ASISTENCIA ────────────────────────────────────────────────────────
+// ─── MARCAR ASISTENCIA ────────────────────────────────────────────────────────
 function marcarAsistencia() {
-    if (!asistenteActualId) return;
+    if (!asistenteActualData || !asistenteActualData.dni) {
+        console.error('No hay datos del asistente', asistenteActualData);
+        mostrarToast('❌ Error: No se encontraron los datos del asistente', 'error');
+        return;
+    }
+
+    const dni = asistenteActualData.dni;
+    console.log('📝 Marcando asistencia para DNI:', dni);
 
     const btn = document.querySelector('#modalConfirmacion .btn-marcar');
+    const originalText = btn ? btn.textContent : '✅ Sí, marcar asistencia';
+    
     if (btn) {
         btn.disabled = true;
-        btn.textContent = 'Guardando...';
+        btn.textContent = '⏳ Guardando...';
     }
 
     mostrarToast('📝 Registrando asistencia...', 'info');
 
-    fetch('/marcar-asistencia-qr', {
+    // Usar la ruta POST con el DNI en la URL
+    fetch(`/marcar-asistencia-qr/${dni}`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -1067,43 +1079,54 @@ function marcarAsistencia() {
             'X-CSRF-TOKEN': csrfToken,
             'X-Requested-With': 'XMLHttpRequest'
         },
-        body: JSON.stringify({ id: asistenteActualId })
+        body: JSON.stringify({})  // Cuerpo vacío porque el DNI va en la URL
     })
-    .then(r => r.json())
+    .then(response => {
+        console.log('Response status:', response.status);
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.json();
+    })
     .then(data => {
-        console.log('Respuesta marcar asistencia:', data);
+        console.log('Respuesta del servidor:', data);
         
         if (data.success) {
-            // Actualizar el array local
-            const idx = todosLosAprobados.findIndex(a => a.id === asistenteActualId);
+            mostrarToast('✅ Asistencia registrada correctamente', 'success');
+            
+            // Actualizar el array local de asistentes
+            const idx = todosLosAprobados.findIndex(a => a.dni === dni);
             if (idx !== -1) {
                 todosLosAprobados[idx].asistio = 1;
             }
-
+            
+            // Refrescar la tabla
             mostrarAsistentes(todosLosAprobados, false);
             actualizarTarjetas(todosLosAprobados);
             
-            mostrarToast('✅ Asistencia registrada correctamente', 'success');
+            // Cerrar modal de confirmación
+            cerrarModalConfirmacion();
             
-            // Mostrar modal de éxito
+            // Mostrar modal de éxito (ya asistió)
             if (asistenteActualData) {
+                asistenteActualData.asistio = 1;
                 abrirModalAprobado(asistenteActualData);
             }
         } else {
-            mostrarToast('⚠️ ' + (data.message || 'Error al registrar'), 'error');
+            mostrarToast('⚠️ ' + data.message, 'error');
+            if (btn) {
+                btn.disabled = false;
+                btn.textContent = originalText;
+            }
         }
     })
     .catch(err => {
-        console.error('Error:', err);
-        mostrarToast('❌ Error al conectar con el servidor', 'error');
-    })
-    .finally(() => {
+        console.error('Error en fetch:', err);
+        mostrarToast('❌ Error al conectar con el servidor: ' + err.message, 'error');
         if (btn) {
             btn.disabled = false;
-            btn.textContent = '✅ Sí, marcar asistencia';
+            btn.textContent = originalText;
         }
-        asistenteActualId = null;
-        asistenteActualData = null;
     });
 }
 

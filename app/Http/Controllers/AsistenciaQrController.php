@@ -122,71 +122,90 @@ class AsistenciaQrController extends Controller
         }
     }
 
-    public function marcarAsistenciaQr(Request $request)
-    {
-        try {
-            $id = $request->input('id');
+public function marcarAsistenciaQr($dni)
+{
+    try {
+        \Log::info('=== MARCAR ASISTENCIA ===');
+        \Log::info('DNI recibido por URL: ' . $dni);
 
-            \Log::info('=== MARCAR ASISTENCIA ===');
-            \Log::info('ID recibido: ' . $id);
-
-            if (!$id) {
-                return response()->json([
-                    'success' => false, 
-                    'message' => 'ID no proporcionado'
-                ]);
-            }
-
-            $asistente = AsistenteCipcdll::find($id);
-
-            if (!$asistente) {
-                \Log::warning('Asistente no encontrado con ID: ' . $id);
-                return response()->json([
-                    'success' => false, 
-                    'message' => 'Asistente no encontrado'
-                ]);
-            }
-
-            \Log::info('Asistente encontrado: ' . $asistente->nombres);
-            \Log::info('Estado actual: ' . $asistente->estado);
-            \Log::info('Asistio actual: ' . $asistente->asistio);
-
-            if ($asistente->estado !== 'aprobado') {
-                \Log::warning('Intento de marcar asistencia para no aprobado: ' . $asistente->estado);
-                return response()->json([
-                    'success' => false, 
-                    'message' => 'El asistente no está aprobado'
-                ]);
-            }
-
-            if ($asistente->asistio == 1) {
-                \Log::warning('Intento duplicado de asistencia para: ' . $asistente->nombres);
-                return response()->json([
-                    'success' => false,
-                    'already' => true,
-                    'message' => 'La asistencia ya fue registrada anteriormente'
-                ]);
-            }
-
-            // Marcar asistencia
-            $asistente->asistio = 1;
-            $asistente->save();
-
-            \Log::info('✅ Asistencia marcada exitosamente: ' . $asistente->nombres . ' (ID: ' . $id . ')');
-
+        if (!$dni) {
             return response()->json([
-                'success' => true, 
-                'message' => 'Asistencia marcada correctamente'
+                'success' => false, 
+                'message' => 'DNI no proporcionado'
             ]);
+        }
 
-        } catch (\Exception $e) {
-            \Log::error('Error en marcarAsistenciaQr: ' . $e->getMessage());
+        // Limpiar el DNI (solo números)
+        $dniLimpio = preg_replace('/[^0-9]/', '', $dni);
+        
+        if (strlen($dniLimpio) < 6) {
+            return response()->json([
+                'success' => false, 
+                'message' => 'DNI inválido: ' . $dniLimpio
+            ]);
+        }
+
+        // Buscar por DNI
+        $asistente = AsistenteCipcdll::where('dni', $dniLimpio)->first();
+
+        if (!$asistente) {
+            \Log::warning('Asistente no encontrado con DNI: ' . $dniLimpio);
+            return response()->json([
+                'success' => false, 
+                'message' => 'Asistente no encontrado'
+            ]);
+        }
+
+        \Log::info('Asistente encontrado: ' . $asistente->nombres);
+        \Log::info('Estado actual: ' . $asistente->estado);
+        \Log::info('Asistio actual: ' . $asistente->asistio);
+
+        if ($asistente->estado !== 'aprobado') {
+            \Log::warning('Intento de marcar asistencia para no aprobado: ' . $asistente->estado);
+            return response()->json([
+                'success' => false, 
+                'message' => 'El asistente no está aprobado'
+            ]);
+        }
+
+        if ($asistente->asistio == 1) {
+            \Log::warning('Intento duplicado de asistencia para: ' . $asistente->nombres);
             return response()->json([
                 'success' => false,
-                'message' => 'Error interno: ' . $e->getMessage()
-            ], 500);
+                'already' => true,
+                'message' => 'La asistencia ya fue registrada anteriormente'
+            ]);
         }
+
+        // Marcar asistencia
+        $asistente->asistio = 1;
+        $asistente->save();
+
+        \Log::info('✅ Asistencia marcada exitosamente: ' . $asistente->nombres . ' (DNI: ' . $dniLimpio . ')');
+
+        return response()->json([
+            'success' => true, 
+            'message' => 'Asistencia marcada correctamente',
+            'dni' => $dniLimpio,
+            'asistente' => [
+                'id' => $asistente->id,
+                'cip' => $asistente->cip,
+                'nombres' => $asistente->nombres,
+                'apellidos' => $asistente->apellidos,
+                'dni' => $asistente->dni,
+                'capitulo' => $asistente->capitulo,
+                'asistio' => $asistente->asistio
+            ]
+        ]);
+
+    } catch (\Exception $e) {
+        \Log::error('Error en marcarAsistenciaQr: ' . $e->getMessage());
+        return response()->json([
+            'success' => false,
+            'message' => 'Error interno: ' . $e->getMessage()
+        ], 500);
     }
+}
 
     // Método adicional para debug por GET
     public function buscarPorDniGet($dni)

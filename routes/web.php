@@ -46,7 +46,7 @@ Route::post('/enviar-tarjetas',      [EnviarTarjetaController::class, 'enviarATo
 Route::get('/enviar-tarjeta/{cip}',  [EnviarTarjetaController::class, 'enviarPorCip']);
 
 Route::post('/buscar-por-dni',       [AsistenciaQrController::class, 'buscarPorDni']);
-Route::post('/marcar-asistencia-qr', [AsistenciaQrController::class, 'marcarAsistenciaQr']);
+Route::post('/marcar-asistencia-qr/{dni}', [AsistenciaQrController::class, 'marcarAsistenciaQr']);
 Route::get('/buscar-por-dni/{dni}', [AsistenciaQrController::class, 'buscarPorDniGet']);
 
 // Procesar login
