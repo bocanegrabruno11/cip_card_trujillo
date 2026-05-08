@@ -56,6 +56,7 @@
                     <th>Capítulo</th>
                     <th>Celular</th>
                     <th>Correo</th>
+                    <th>Tarjeta</th>
                     <th>Estado Asistencia</th>
                 </tr>
             </thead>
@@ -235,6 +236,19 @@
 <div id="toast" class="toast" style="display:none;"></div>
 
 <style>
+
+.btn-descargar-tarjeta {
+    display: inline-block;
+    padding: 5px 10px;
+    background: #1565c0;
+    color: white;
+    border-radius: 6px;
+    text-decoration: none;
+    font-size: 14px;
+    transition: background 0.2s;
+}
+.btn-descargar-tarjeta:hover { background: #0d47a1; }
+
 .dashboard-container {
     background: white;
     border-radius: 8px;
@@ -693,6 +707,11 @@ function mostrarAsistentes(asistentes, incluirRechazados = false) {
                 <td>${asistente.capitulo  || '-'}</td>
                 <td>${asistente.celular   || '-'}</td>
                 <td>${asistente.correo    || '-'}</td>
+                <td>
+                    ${asistente.cip
+                        ? `<a href="/storage/tarjetas/${asistente.cip}.png" download="${asistente.cip}.png" class="btn-descargar-tarjeta" title="Descargar tarjeta">⬇️</a>`
+                        : '-'}
+                </td>
                 <td>${asistioHtml}</td>
             </tr>
         `;
