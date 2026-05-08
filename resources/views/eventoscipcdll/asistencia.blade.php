@@ -177,6 +177,44 @@
     </div>
 </div>
 
+<!-- MODAL CONFIRMACIÓN ANTES DE MARCAR -->
+<div id="modalConfirmacion" class="modal-overlay" style="display:none;">
+    <div class="modal-box modal-confirmacion">
+        <button class="modal-close modal-close-dark" onclick="cerrarModalConfirmacion()">✖</button>
+        <div class="modal-icono-grande">❓</div>
+        <h2 class="modal-titulo">Confirmar Asistencia</h2>
+        <div class="info-grid">
+            <div class="info-item info-full">
+                <span class="info-label">CIP</span>
+                <span class="info-value" id="confirmCip">-</span>
+            </div>
+            <div class="info-item info-full">
+                <span class="info-label">DNI</span>
+                <span class="info-value" id="confirmDni">-</span>
+            </div>
+            <div class="info-item info-full">
+                <span class="info-label">Nombres y Apellidos</span>
+                <span class="info-value" id="confirmNombreCompleto">-</span>
+            </div>
+            <div class="info-item info-full">
+                <span class="info-label">Capítulo</span>
+                <span class="info-value" id="confirmCapitulo">-</span>
+            </div>
+        </div>
+        <p style="text-align:center; margin: 15px 0; color:#666;">
+            ¿Deseas registrar la asistencia de esta persona?
+        </p>
+        <div class="modal-acciones">
+            <button class="btn-marcar" onclick="confirmarMarcarAsistencia()">
+                ✅ Sí, marcar asistencia
+            </button>
+            <button class="btn-cancelar-modal" onclick="cerrarModalConfirmacion()">
+                Cancelar
+            </button>
+        </div>
+    </div>
+</div>
+
 <!-- MODAL NO ENCONTRADO -->
 <div id="modalNoEncontrado" class="modal-overlay" style="display:none;">
     <div class="modal-box modal-noEncontrado">
@@ -548,6 +586,7 @@
 }
 .toast-success { background: #2e7d32; }
 .toast-error   { background: #b30000; }
+.toast-info    { background: #1565c0; }
 
 @keyframes fadeIn  { from { opacity: 0; } to { opacity: 1; } }
 @keyframes slideUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
@@ -591,6 +630,7 @@ let todosLosRechazados = [];
 let streamActivo       = null;
 let scannerInterval    = null;
 let asistenteActualId  = null;
+let asistenteActualData = null;
 let escanerBloqueado   = false;
 
 const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content || '';
@@ -747,7 +787,7 @@ function mostrarError() {
 }
 
 // ══════════════════════════════════════════════════════════════════════════════
-// ESCÁNER QR
+// ESCÁNER QR - USANDO NUEVA RUTA GET
 // ══════════════════════════════════════════════════════════════════════════════
 
 function setStatusEscaner(msg) {
@@ -756,14 +796,12 @@ function setStatusEscaner(msg) {
 }
 
 function abrirEscaner() {
-    // Verificar que jsQR cargó correctamente
     if (typeof jsQR === 'undefined') {
         mostrarToast('⚠️ Librería QR no cargó. Recarga la página.', 'error');
         console.error('jsQR no está disponible');
         return;
     }
 
-    // Detener cualquier stream previo que haya quedado abierto
     if (streamActivo) {
         streamActivo.getTracks().forEach(t => t.stop());
         streamActivo = null;
@@ -794,7 +832,6 @@ function abrirEscaner() {
                 video.play();
                 setStatusEscaner('🔍 Buscando código QR...');
 
-                // willReadFrequently evita el warning de getImageData
                 const canvas  = document.createElement('canvas');
                 const context = canvas.getContext('2d', { willReadFrequently: true });
 
@@ -827,7 +864,6 @@ function abrirEscaner() {
         })
         .catch(err => {
             console.error('Error cámara:', err);
-            // No cerrar el modal — dejar el input manual disponible
             setStatusEscaner('❌ Sin acceso a cámara — usa el ingreso manual');
             mostrarToast('⚠️ Sin acceso a cámara. Usa el ingreso manual.', 'error');
         });
@@ -846,48 +882,112 @@ function cerrarEscaner() {
 function procesarManual() {
     const val = document.getElementById('dniManualInput').value.trim();
     if (!val) { mostrarToast('⚠️ Ingresa un DNI', 'error'); return; }
+    
+    // Extraer solo números del DNI ingresado manualmente
+    const dniLimpio = val.replace(/[^0-9]/g, '');
+    if (dniLimpio.length < 6) {
+        mostrarToast('⚠️ DNI inválido (mínimo 6 dígitos)', 'error');
+        return;
+    }
+    
     cerrarEscaner();
-    procesarQr(val);
+    procesarQr(dniLimpio);
 }
 
 function procesarQr(dniRaw) {
-    console.log('Enviando al servidor:', dniRaw);
+    // Extraer solo números del QR
+    const dniLimpio = dniRaw.toString().replace(/[^0-9]/g, '');
+    
+    console.log('DNI original:', dniRaw);
+    console.log('DNI limpio:', dniLimpio);
+    
+    if (dniLimpio.length < 6) {
+        mostrarToast('⚠️ DNI inválido (mínimo 6 dígitos)', 'error');
+        setTimeout(() => { escanerBloqueado = false; }, 2000);
+        return;
+    }
+    
+    mostrarToast('🔍 Buscando asistente...', 'info');
 
-    fetch('/buscar-por-dni', {
-        method: 'POST',
+    // Usar la nueva ruta GET
+    const url = `/buscar-por-dni/${dniLimpio}`;
+    console.log('URL de petición GET:', url);
+
+    fetch(url, {
+        method: 'GET',
         headers: {
-            'Content-Type': 'application/json',
             'Accept': 'application/json',
-            'X-CSRF-TOKEN': csrfToken,
             'X-Requested-With': 'XMLHttpRequest'
-        },
-        body: JSON.stringify({ dni: dniRaw })
+        }
     })
-    .then(r => r.json())
+    .then(response => {
+        console.log('Response status:', response.status);
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.json();
+    })
     .then(data => {
-        console.log('Respuesta servidor:', data);
-
+        console.log('Respuesta del servidor:', data);
+        
         if (!data.success) {
-            abrirModalNoEncontrado(data.raw_qr || dniRaw, data.dni_buscado || dniRaw);
+            console.log('Asistente no encontrado');
+            abrirModalNoEncontrado(dniRaw, dniLimpio);
             return;
         }
-
+        
+        console.log('Estado del asistente:', data.estado);
+        
         if (data.estado === 'aprobado') {
-            abrirModalAprobado(data);
+            if (data.asistio == 1) {
+                // Ya asistió, mostrar mensaje
+                abrirModalAprobado(data);
+            } else {
+                // No ha asistido, mostrar confirmación
+                abrirModalConfirmacion(data);
+            }
         } else if (data.estado === 'rechazado') {
             abrirModalRechazado(data);
         } else {
-            abrirModalNoEncontrado(dniRaw, dniRaw);
+            abrirModalNoEncontrado(dniRaw, dniLimpio);
         }
     })
     .catch(err => {
-        console.error('Error fetch:', err);
-        escanerBloqueado = false;
-        mostrarToast('❌ Error al conectar con el servidor', 'error');
+        console.error('Error en fetch:', err);
+        mostrarToast('❌ Error al conectar con el servidor: ' + err.message, 'error');
+    })
+    .finally(() => {
+        setTimeout(() => {
+            escanerBloqueado = false;
+        }, 2000);
     });
 }
 
-// ─── MODAL APROBADO ───────────────────────────────────────────────────────────
+// ─── MODAL CONFIRMACIÓN ───────────────────────────────────────────────────────
+function abrirModalConfirmacion(data) {
+    asistenteActualId = data.id;
+    asistenteActualData = data;
+    
+    document.getElementById('confirmCip').textContent = data.cip || '-';
+    document.getElementById('confirmDni').textContent = data.dni || '-';
+    document.getElementById('confirmNombreCompleto').textContent = `${data.nombres || ''} ${data.apellidos || ''}`.trim() || '-';
+    document.getElementById('confirmCapitulo').textContent = data.capitulo || '-';
+    
+    document.getElementById('modalConfirmacion').style.display = 'flex';
+}
+
+function cerrarModalConfirmacion() {
+    document.getElementById('modalConfirmacion').style.display = 'none';
+    asistenteActualId = null;
+    asistenteActualData = null;
+}
+
+function confirmarMarcarAsistencia() {
+    cerrarModalConfirmacion();
+    marcarAsistencia();
+}
+
+// ─── MODAL APROBADO (YA ASISTIÓ) ─────────────────────────────────────────────
 function abrirModalAprobado(data) {
     asistenteActualId = data.id;
 
@@ -900,15 +1000,8 @@ function abrirModalAprobado(data) {
     const btnMarcar    = document.getElementById('btnMarcarAsistencia');
     const yaAsistioDiv = document.getElementById('yaAsistioAviso');
 
-    if (data.asistio == 1) {
-        yaAsistioDiv.style.display = 'block';
-        btnMarcar.style.display    = 'none';
-    } else {
-        yaAsistioDiv.style.display = 'none';
-        btnMarcar.style.display    = 'inline-block';
-        btnMarcar.disabled         = false;
-        btnMarcar.textContent      = '✅ Marcar Asistencia';
-    }
+    yaAsistioDiv.style.display = 'block';
+    btnMarcar.style.display    = 'none';
 
     document.getElementById('modalAprobado').style.display = 'flex';
 }
@@ -936,11 +1029,16 @@ function cerrarModalRechazado() {
 function abrirModalNoEncontrado(rawQr, dniBuscado) {
     const msg = document.getElementById('msgNoEncontrado');
     if (msg) {
-        msg.innerHTML = `El QR no está registrado en el sistema.<br>
-            <small style="color:#999; display:block; margin-top:8px;">
-                QR leído: <strong>${rawQr}</strong><br>
-                DNI buscado: <strong>${dniBuscado}</strong>
-            </small>`;
+        msg.innerHTML = `
+            <div style="text-align: left;">
+                <p>❌ El DNI no está registrado en el sistema.</p>
+                <hr style="margin: 10px 0;">
+                <small style="color:#999; display:block;">
+                    <strong>DNI buscado:</strong> ${dniBuscado}<br>
+                    <strong>QR leído:</strong> ${rawQr}
+                </small>
+            </div>
+        `;
     }
     document.getElementById('modalNoEncontrado').style.display = 'flex';
 }
@@ -953,9 +1051,13 @@ function cerrarModalNoEncontrado() {
 function marcarAsistencia() {
     if (!asistenteActualId) return;
 
-    const btnMarcar = document.getElementById('btnMarcarAsistencia');
-    btnMarcar.disabled    = true;
-    btnMarcar.textContent = 'Guardando...';
+    const btn = document.querySelector('#modalConfirmacion .btn-marcar');
+    if (btn) {
+        btn.disabled = true;
+        btn.textContent = 'Guardando...';
+    }
+
+    mostrarToast('📝 Registrando asistencia...', 'info');
 
     fetch('/marcar-asistencia-qr', {
         method: 'POST',
@@ -969,25 +1071,39 @@ function marcarAsistencia() {
     })
     .then(r => r.json())
     .then(data => {
+        console.log('Respuesta marcar asistencia:', data);
+        
         if (data.success) {
+            // Actualizar el array local
             const idx = todosLosAprobados.findIndex(a => a.id === asistenteActualId);
-            if (idx !== -1) todosLosAprobados[idx].asistio = 1;
+            if (idx !== -1) {
+                todosLosAprobados[idx].asistio = 1;
+            }
 
             mostrarAsistentes(todosLosAprobados, false);
             actualizarTarjetas(todosLosAprobados);
-            cerrarModalAprobado();
+            
             mostrarToast('✅ Asistencia registrada correctamente', 'success');
+            
+            // Mostrar modal de éxito
+            if (asistenteActualData) {
+                abrirModalAprobado(asistenteActualData);
+            }
         } else {
-            btnMarcar.disabled    = false;
-            btnMarcar.textContent = '✅ Marcar Asistencia';
-            mostrarToast('⚠️ ' + data.message, 'error');
+            mostrarToast('⚠️ ' + (data.message || 'Error al registrar'), 'error');
         }
     })
     .catch(err => {
         console.error('Error:', err);
-        btnMarcar.disabled    = false;
-        btnMarcar.textContent = '✅ Marcar Asistencia';
         mostrarToast('❌ Error al conectar con el servidor', 'error');
+    })
+    .finally(() => {
+        if (btn) {
+            btn.disabled = false;
+            btn.textContent = '✅ Sí, marcar asistencia';
+        }
+        asistenteActualId = null;
+        asistenteActualData = null;
     });
 }
 

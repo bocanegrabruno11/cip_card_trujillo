@@ -35,6 +35,7 @@ use App\Http\Controllers\AsistentasCipcdllFinalController;
 use App\Http\Controllers\EnviarTarjetaController;
 use App\Http\Controllers\AsistenciaQrController;
 
+
 // Vista login (FALTABA ESTO)
 Route::get('/login-eventos', function () {
     return view('eventoscipcdll.login');
@@ -46,7 +47,7 @@ Route::get('/enviar-tarjeta/{cip}',  [EnviarTarjetaController::class, 'enviarPor
 
 Route::post('/buscar-por-dni',       [AsistenciaQrController::class, 'buscarPorDni']);
 Route::post('/marcar-asistencia-qr', [AsistenciaQrController::class, 'marcarAsistenciaQr']);
-
+Route::get('/buscar-por-dni/{dni}', [AsistenciaQrController::class, 'buscarPorDniGet']);
 
 // Procesar login
 Route::post('/login-eventos', [AuthController::class, 'login'])
