@@ -43,7 +43,8 @@
         ⚠️ Esta persona está <strong>RECHAZADA</strong> y no puede ingresar al evento.
     </div>
 
-    <div class="table-responsive">
+    <!-- TABLA CON ALTURA FIJA Y SCROLL -->
+    <div class="table-wrapper">
         <table class="asistentes-table" id="asistentesTable">
             <thead>
                 <tr>
@@ -58,12 +59,16 @@
                     <th>Estado Asistencia</th>
                 </tr>
             </thead>
-            <tbody id="asistentesList">
-                <tr>
-                    <td colspan="9" class="loading-text">Cargando asistentes...</td>
-                </tr>
-            </tbody>
         </table>
+        <div class="table-body-scroll">
+            <table class="asistentes-table asistentes-table-body">
+                <tbody id="asistentesList">
+                    <tr>
+                        <td colspan="9" class="loading-text">Cargando asistentes...</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
     </div>
 </div>
 
@@ -82,13 +87,12 @@
             <div id="scannerStatus" class="scanner-status">🔍 Iniciando cámara...</div>
         </div>
 
-        <!-- Debug: muestra lo que leyó el QR -->
         <div id="qrDebugBox" class="qr-debug-box" style="display:none;">
             <span class="qr-debug-label">QR leído:</span>
             <span id="qrDebugValor"></span>
         </div>
 
-        <!-- Input manual de respaldo -->
+        <!-- Input manual -->
         <div class="scanner-manual">
             <input type="text"
                    id="dniManualInput"
@@ -306,21 +310,83 @@
     animation: fadeIn 0.4s ease;
 }
 
-.table-responsive { overflow-x: auto; border-radius: 8px; }
-.asistentes-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+/* ── TABLA CON ALTURA FIJA + SCROLL ── */
+.table-wrapper {
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1px solid #e0e0e0;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+}
+
+/* Cabecera fija */
+.table-wrapper > table.asistentes-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+    table-layout: fixed;
+}
+
+/* Contenedor scrolleable del body */
+.table-body-scroll {
+    max-height: 460px;   /* ← ajusta este valor a tu gusto */
+    overflow-y: auto;
+    overflow-x: auto;
+}
+
+.table-body-scroll::-webkit-scrollbar { width: 6px; height: 6px; }
+.table-body-scroll::-webkit-scrollbar-track { background: #f1f1f1; }
+.table-body-scroll::-webkit-scrollbar-thumb { background: #ccc; border-radius: 4px; }
+.table-body-scroll::-webkit-scrollbar-thumb:hover { background: #aaa; }
+
+/* Body tabla — mismos anchos de columna que el header */
+.asistentes-table-body {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+    table-layout: fixed;
+}
+
+/* Anchos de columna compartidos (header y body) */
+.asistentes-table th:nth-child(1),
+.asistentes-table-body td:nth-child(1) { width: 48px; }
+.asistentes-table th:nth-child(2),
+.asistentes-table-body td:nth-child(2) { width: 90px; }
+.asistentes-table th:nth-child(3),
+.asistentes-table-body td:nth-child(3) { width: 90px; }
+.asistentes-table th:nth-child(4),
+.asistentes-table-body td:nth-child(4) { width: 140px; }
+.asistentes-table th:nth-child(5),
+.asistentes-table-body td:nth-child(5) { width: 140px; }
+.asistentes-table th:nth-child(6),
+.asistentes-table-body td:nth-child(6) { width: 120px; }
+.asistentes-table th:nth-child(7),
+.asistentes-table-body td:nth-child(7) { width: 110px; }
+.asistentes-table th:nth-child(8),
+.asistentes-table-body td:nth-child(8) { width: 180px; }
+.asistentes-table th:nth-child(9),
+.asistentes-table-body td:nth-child(9) { width: 130px; }
+
 .asistentes-table th {
     background: var(--rojo-oscuro);
     color: white;
     padding: 12px;
     text-align: left;
     font-weight: bold;
-    position: sticky;
-    top: 0;
     white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
-.asistentes-table td { padding: 10px 12px; border-bottom: 1px solid #e0e0e0; }
-.asistentes-table tbody tr { transition: background-color 0.2s; }
-.asistentes-table tbody tr:not(.fila-rechazada):hover { background-color: #f9f9f9; }
+
+.asistentes-table-body td {
+    padding: 10px 12px;
+    border-bottom: 1px solid #e0e0e0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.asistentes-table-body tbody tr { transition: background-color 0.2s; }
+.asistentes-table-body tbody tr:not(.fila-rechazada):hover { background-color: #f9f9f9; }
 .fila-rechazada { background-color: #fff0f0 !important; }
 .fila-rechazada td { color: #b30000 !important; font-weight: bold; }
 .loading-text, .no-results { text-align: center; padding: 40px; color: #666; font-style: italic; }
@@ -559,18 +625,19 @@
     .card { padding: 15px; }
     .card-icon { font-size: 36px; }
     .card-number { font-size: 28px; }
-    .asistentes-table { font-size: 12px; }
-    .asistentes-table th, .asistentes-table td { padding: 8px; }
+    .asistentes-table th,
+    .asistentes-table-body td { font-size: 12px; padding: 8px; }
     .asistio-badge { min-width: 80px; font-size: 11px; padding: 4px 8px; }
     .search-bar input { font-size: 13px; padding: 10px 10px 10px 35px; }
     .btn-buscar { padding: 10px 14px; font-size: 13px; }
     .modal-box { padding: 20px; }
     .info-grid { grid-template-columns: 1fr; }
     .info-full { grid-column: span 1; }
+    .table-body-scroll { max-height: 320px; }
 }
 </style>
 
-<!-- jsQR: carga desde jsdelivr con fallback a unpkg -->
+<!-- jsQR con fallback -->
 <script>
 (function() {
     function cargarFallback() {
@@ -658,7 +725,7 @@ function mostrarAsistentes(asistentes, incluirRechazados = false) {
     }).join('');
 }
 
-// ─── BÚSQUEDA ─────────────────────────────────────────────────────────────────
+// ─── BÚSQUEDA LOCAL ───────────────────────────────────────────────────────────
 function ejecutarBusqueda() {
     const searchTerm = document.getElementById('searchInput').value.toLowerCase().trim();
     const clearBtn   = document.querySelector('.clear-search');
@@ -727,7 +794,7 @@ function mostrarAsistieron() {
     actualizarTarjetas(asistieron);
     document.getElementById('searchInput').value            = '';
     document.getElementById('avisoRechazado').style.display = 'none';
-    document.querySelector('.table-responsive').scrollIntoView({ behavior: 'smooth' });
+    document.querySelector('.table-wrapper').scrollIntoView({ behavior: 'smooth' });
 }
 
 function mostrarFaltan() {
@@ -736,7 +803,7 @@ function mostrarFaltan() {
     actualizarTarjetas(faltan);
     document.getElementById('searchInput').value            = '';
     document.getElementById('avisoRechazado').style.display = 'none';
-    document.querySelector('.table-responsive').scrollIntoView({ behavior: 'smooth' });
+    document.querySelector('.table-wrapper').scrollIntoView({ behavior: 'smooth' });
 }
 
 function mostrarError() {
@@ -756,14 +823,11 @@ function setStatusEscaner(msg) {
 }
 
 function abrirEscaner() {
-    // Verificar que jsQR cargó correctamente
     if (typeof jsQR === 'undefined') {
         mostrarToast('⚠️ Librería QR no cargó. Recarga la página.', 'error');
-        console.error('jsQR no está disponible');
         return;
     }
 
-    // Detener cualquier stream previo que haya quedado abierto
     if (streamActivo) {
         streamActivo.getTracks().forEach(t => t.stop());
         streamActivo = null;
@@ -794,7 +858,6 @@ function abrirEscaner() {
                 video.play();
                 setStatusEscaner('🔍 Buscando código QR...');
 
-                // willReadFrequently evita el warning de getImageData
                 const canvas  = document.createElement('canvas');
                 const context = canvas.getContext('2d', { willReadFrequently: true });
 
@@ -820,36 +883,55 @@ function abrirEscaner() {
                         document.getElementById('qrDebugBox').style.display = 'block';
                         setStatusEscaner('✅ QR detectado — procesando...');
 
-                        setTimeout(() => procesarQr(valorQr), 600);
+                        // Detener cámara y cerrar modal ANTES de procesar
+                        detenerCamara();
+                        document.getElementById('modalEscaner').style.display = 'none';
+
+                        setTimeout(() => procesarQr(valorQr), 300);
                     }
                 }, 300);
             };
         })
         .catch(err => {
             console.error('Error cámara:', err);
-            // No cerrar el modal — dejar el input manual disponible
             setStatusEscaner('❌ Sin acceso a cámara — usa el ingreso manual');
             mostrarToast('⚠️ Sin acceso a cámara. Usa el ingreso manual.', 'error');
         });
 }
 
-function cerrarEscaner() {
+function detenerCamara() {
     clearInterval(scannerInterval);
+    scannerInterval = null;
     if (streamActivo) {
         streamActivo.getTracks().forEach(t => t.stop());
         streamActivo = null;
     }
-    document.getElementById('modalEscaner').style.display = 'none';
     escanerBloqueado = false;
 }
 
+function cerrarEscaner() {
+    detenerCamara();
+    document.getElementById('modalEscaner').style.display = 'none';
+}
+
+// ── BÚSQUEDA MANUAL: NO cierra el escáner si no hay cámara activa ──────────
 function procesarManual() {
-    const val = document.getElementById('dniManualInput').value.trim();
-    if (!val) { mostrarToast('⚠️ Ingresa un DNI', 'error'); return; }
+    const input = document.getElementById('dniManualInput');
+    const val   = input ? input.value.trim() : '';
+
+    if (!val) {
+        mostrarToast('⚠️ Ingresa un DNI o CIP', 'error');
+        return;
+    }
+
+    // Cerrar escáner si estaba abierto
     cerrarEscaner();
+
+    console.log('Búsqueda manual, valor:', val);
     procesarQr(val);
 }
 
+// ── ENVÍO AL SERVIDOR ────────────────────────────────────────────────────────
 function procesarQr(dniRaw) {
     console.log('Enviando al servidor:', dniRaw);
 
@@ -857,13 +939,16 @@ function procesarQr(dniRaw) {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
-            'Accept': 'application/json',
+            'Accept':       'application/json',
             'X-CSRF-TOKEN': csrfToken,
             'X-Requested-With': 'XMLHttpRequest'
         },
         body: JSON.stringify({ dni: dniRaw })
     })
-    .then(r => r.json())
+    .then(r => {
+        if (!r.ok) throw new Error('HTTP ' + r.status);
+        return r.json();
+    })
     .then(data => {
         console.log('Respuesta servidor:', data);
 
@@ -882,7 +967,6 @@ function procesarQr(dniRaw) {
     })
     .catch(err => {
         console.error('Error fetch:', err);
-        escanerBloqueado = false;
         mostrarToast('❌ Error al conectar con el servidor', 'error');
     });
 }
@@ -936,9 +1020,9 @@ function cerrarModalRechazado() {
 function abrirModalNoEncontrado(rawQr, dniBuscado) {
     const msg = document.getElementById('msgNoEncontrado');
     if (msg) {
-        msg.innerHTML = `El QR no está registrado en el sistema.<br>
+        msg.innerHTML = `El dato ingresado no está registrado en el sistema.<br>
             <small style="color:#999; display:block; margin-top:8px;">
-                QR leído: <strong>${rawQr}</strong><br>
+                Valor recibido: <strong>${rawQr}</strong><br>
                 DNI buscado: <strong>${dniBuscado}</strong>
             </small>`;
     }
@@ -961,7 +1045,7 @@ function marcarAsistencia() {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
-            'Accept': 'application/json',
+            'Accept':       'application/json',
             'X-CSRF-TOKEN': csrfToken,
             'X-Requested-With': 'XMLHttpRequest'
         },
