@@ -62,6 +62,15 @@ Route::get('/dashboard-eventos', function () {
     return view('eventoscipcdll.dashboard');
 })->name('dashboard.eventos');
 
+
+// Dashboard
+Route::get('/asistencia', function () {
+    if (!session('usuario')) {
+        return redirect('/login-eventos');
+    }
+    return view('eventoscipcdll.asistencia');
+})->name('dashboard.eventos');
+
 Route::get('/envio-tarjetas', [AsistentasCipcdllFinalController::class, 'index'])
     ->name('tarjetas.eventos');
 
