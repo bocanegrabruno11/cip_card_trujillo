@@ -7,29 +7,66 @@ use App\Models\AsistenteCipcdll;
 
 class AsistenciaQrController extends Controller
 {
-    /**
-     * 📱 Buscar asistente por DNI (escáner QR)
-     */
     public function buscarPorDni(Request $request)
     {
         try {
-            $dni = $request->dni;
+            $rawData = trim($request->input('dni', ''));
 
-            if (!$dni) {
+            \Log::info('QR recibido (raw): ' . $rawData);
+
+            if (!$rawData) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'DNI no proporcionado'
+                    'message' => 'Dato QR vacío'
                 ]);
             }
+
+            $dni = null;
+
+            // 1. Intentar parsear como JSON
+            $decoded = json_decode($rawData, true);
+            if (json_last_error() === JSON_ERROR_NONE && isset($decoded['dni'])) {
+                $dni = trim($decoded['dni']);
+                \Log::info('DNI extraído de JSON: ' . $dni);
+            }
+
+            // 2. Intentar extraer de URL
+            if (!$dni && filter_var($rawData, FILTER_VALIDATE_URL)) {
+                $segmentos = explode('/', rtrim($rawData, '/'));
+                $ultimo    = end($segmentos);
+                if (preg_match('/^\d{6,12}$/', $ultimo)) {
+                    $dni = $ultimo;
+                    \Log::info('DNI extraído de URL: ' . $dni);
+                }
+            }
+
+            // 3. Solo dígitos si tiene longitud válida
+            if (!$dni) {
+                $soloDigitos = preg_replace('/\D/', '', $rawData);
+                if (strlen($soloDigitos) >= 6 && strlen($soloDigitos) <= 12) {
+                    $dni = $soloDigitos;
+                    \Log::info('DNI extraído como dígitos: ' . $dni);
+                } else {
+                    $dni = $rawData;
+                    \Log::info('DNI usado tal cual: ' . $dni);
+                }
+            }
+
+            \Log::info('DNI final a buscar: ' . $dni);
 
             $asistente = AsistenteCipcdll::where('dni', $dni)->first();
 
             if (!$asistente) {
+                \Log::warning('No encontrado con DNI: ' . $dni);
                 return response()->json([
-                    'success' => false,
-                    'message' => 'No se encontró ningún registro con ese DNI'
+                    'success'     => false,
+                    'message'     => 'No encontrado',
+                    'dni_buscado' => $dni,
+                    'raw_qr'      => $rawData,
                 ]);
             }
+
+            \Log::info('Encontrado: ' . $asistente->nombres . ' - Estado: ' . $asistente->estado);
 
             return response()->json([
                 'success'   => true,
@@ -54,31 +91,26 @@ class AsistenciaQrController extends Controller
         }
     }
 
-    /**
-     * ✅ Marcar asistencia desde QR
-     */
     public function marcarAsistenciaQr(Request $request)
     {
         try {
-            $id = $request->id;
+            $id = $request->input('id');
+
+            if (!$id) {
+                return response()->json(['success' => false, 'message' => 'ID no proporcionado']);
+            }
 
             $asistente = AsistenteCipcdll::find($id);
 
             if (!$asistente) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Asistente no encontrado'
-                ]);
+                return response()->json(['success' => false, 'message' => 'Asistente no encontrado']);
             }
 
             if ($asistente->estado !== 'aprobado') {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'El asistente no está aprobado'
-                ]);
+                return response()->json(['success' => false, 'message' => 'El asistente no está aprobado']);
             }
 
-            if ($asistente->asistio === 1) {
+            if ($asistente->asistio == 1) {
                 return response()->json([
                     'success' => false,
                     'already' => true,
@@ -89,10 +121,9 @@ class AsistenciaQrController extends Controller
             $asistente->asistio = 1;
             $asistente->save();
 
-            return response()->json([
-                'success' => true,
-                'message' => 'Asistencia marcada correctamente'
-            ]);
+            \Log::info('Asistencia marcada: ' . $asistente->nombres . ' (ID: ' . $id . ')');
+
+            return response()->json(['success' => true, 'message' => 'Asistencia marcada correctamente']);
 
         } catch (\Exception $e) {
             \Log::error('Error en marcarAsistenciaQr: ' . $e->getMessage());

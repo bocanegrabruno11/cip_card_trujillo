@@ -5,7 +5,6 @@
 @section('content')
 <div class="dashboard-container">
 
-    <!-- Tarjetas de resumen -->
     <div class="stats-cards">
         <div class="card card-asistieron" onclick="mostrarAsistieron()">
             <div class="card-icon">✅</div>
@@ -25,14 +24,12 @@
         </div>
     </div>
 
-    <!-- Botón QR -->
     <div style="margin-bottom: 15px;">
         <button class="btn-qr" onclick="abrirEscaner()">
             📷 Escanear QR
         </button>
     </div>
 
-    <!-- Barra de búsqueda -->
     <div class="search-bar">
         <div class="search-icon">🔍</div>
         <input type="text" id="searchInput"
@@ -42,12 +39,10 @@
         <button class="clear-search" onclick="limpiarBusqueda()" style="display:none;">✖</button>
     </div>
 
-    <!-- Aviso rechazado búsqueda manual -->
     <div id="avisoRechazado" style="display:none;" class="aviso-rechazado">
         ⚠️ Esta persona está <strong>RECHAZADA</strong> y no puede ingresar al evento.
     </div>
 
-    <!-- Tabla -->
     <div class="table-responsive">
         <table class="asistentes-table" id="asistentesTable">
             <thead>
@@ -72,9 +67,7 @@
     </div>
 </div>
 
-<!-- ══════════════════════════════════════════
-     MODAL ESCÁNER QR
-══════════════════════════════════════════ -->
+<!-- MODAL ESCÁNER QR -->
 <div id="modalEscaner" class="modal-overlay" style="display:none;">
     <div class="modal-box modal-escaner">
         <div class="modal-header-scanner">
@@ -82,18 +75,34 @@
             <button class="modal-close" onclick="cerrarEscaner()">✖</button>
         </div>
         <div class="scanner-area">
-            <video id="scannerVideo" autoplay playsinline></video>
+            <video id="scannerVideo" autoplay playsinline muted></video>
             <div class="scanner-frame">
                 <div class="scanner-line"></div>
             </div>
+            <div id="scannerStatus" class="scanner-status">🔍 Iniciando cámara...</div>
         </div>
+
+        <!-- Debug: muestra lo que leyó el QR -->
+        <div id="qrDebugBox" class="qr-debug-box" style="display:none;">
+            <span class="qr-debug-label">QR leído:</span>
+            <span id="qrDebugValor"></span>
+        </div>
+
+        <!-- Input manual de respaldo -->
+        <div class="scanner-manual">
+            <input type="text"
+                   id="dniManualInput"
+                   placeholder="O ingresa el DNI manualmente..."
+                   maxlength="15"
+                   onkeyup="if(event.key==='Enter') procesarManual()">
+            <button onclick="procesarManual()">Buscar</button>
+        </div>
+
         <p class="scanner-hint">Apunta la cámara al código QR del asistente</p>
     </div>
 </div>
 
-<!-- ══════════════════════════════════════════
-     MODAL APROBADO
-══════════════════════════════════════════ -->
+<!-- MODAL APROBADO -->
 <div id="modalAprobado" class="modal-overlay" style="display:none;">
     <div class="modal-box modal-aprobado">
         <button class="modal-close modal-close-dark" onclick="cerrarModalAprobado()">✖</button>
@@ -121,7 +130,6 @@
                 <span class="info-value" id="qrCapitulo">-</span>
             </div>
         </div>
-        <!-- Estado asistencia -->
         <div id="yaAsistioAviso" class="ya-asistio-aviso" style="display:none;">
             ✅ Esta persona <strong>ya registró su asistencia</strong>
         </div>
@@ -129,16 +137,12 @@
             <button id="btnMarcarAsistencia" class="btn-marcar" onclick="marcarAsistencia()">
                 ✅ Marcar Asistencia
             </button>
-            <button class="btn-cancelar-modal" onclick="cerrarModalAprobado()">
-                Cerrar
-            </button>
+            <button class="btn-cancelar-modal" onclick="cerrarModalAprobado()">Cerrar</button>
         </div>
     </div>
 </div>
 
-<!-- ══════════════════════════════════════════
-     MODAL RECHAZADO
-══════════════════════════════════════════ -->
+<!-- MODAL RECHAZADO -->
 <div id="modalRechazado" class="modal-overlay" style="display:none;">
     <div class="modal-box modal-rechazado">
         <button class="modal-close modal-close-dark" onclick="cerrarModalRechazado()">✖</button>
@@ -173,16 +177,14 @@
     </div>
 </div>
 
-<!-- ══════════════════════════════════════════
-     MODAL NO ENCONTRADO
-══════════════════════════════════════════ -->
+<!-- MODAL NO ENCONTRADO -->
 <div id="modalNoEncontrado" class="modal-overlay" style="display:none;">
     <div class="modal-box modal-noEncontrado">
         <button class="modal-close modal-close-dark" onclick="cerrarModalNoEncontrado()">✖</button>
         <div class="modal-icono-grande gris">❓</div>
         <h2 class="modal-titulo gris">NO ENCONTRADO</h2>
-        <p style="text-align:center; color:#666; margin: 10px 0 20px;">
-            El DNI escaneado no está registrado en el sistema.
+        <p id="msgNoEncontrado" style="text-align:center; color:#666; margin: 10px 0 20px;">
+            El QR escaneado no está registrado en el sistema.
         </p>
         <div class="modal-acciones">
             <button class="btn-cancelar-modal" onclick="cerrarModalNoEncontrado()">Cerrar</button>
@@ -190,21 +192,16 @@
     </div>
 </div>
 
-<!-- ══════════════════════════════════════════
-     TOAST NOTIFICACIÓN
-══════════════════════════════════════════ -->
+<!-- TOAST -->
 <div id="toast" class="toast" style="display:none;"></div>
 
 <style>
-/* ── GENERAL ── */
 .dashboard-container {
     background: white;
     border-radius: 8px;
     padding: 20px;
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
-
-/* ── TARJETAS ── */
 .stats-cards {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -235,7 +232,6 @@
 .card-link { font-size: 12px; color: #999; transition: color 0.3s; }
 .card:hover .card-link { color: var(--rojo); }
 
-/* ── BOTÓN QR ── */
 .btn-qr {
     padding: 12px 24px;
     background: #1565c0;
@@ -249,7 +245,6 @@
 }
 .btn-qr:hover { background: #0d47a1; }
 
-/* ── BARRA DE BÚSQUEDA ── */
 .search-bar {
     position: relative;
     margin-bottom: 15px;
@@ -300,7 +295,6 @@
 }
 .clear-search:hover { color: var(--rojo); }
 
-/* ── AVISO RECHAZADO ── */
 .aviso-rechazado {
     background: #fff0f0;
     border: 2px solid #b30000;
@@ -312,7 +306,6 @@
     animation: fadeIn 0.4s ease;
 }
 
-/* ── TABLA ── */
 .table-responsive { overflow-x: auto; border-radius: 8px; }
 .asistentes-table { width: 100%; border-collapse: collapse; font-size: 14px; }
 .asistentes-table th {
@@ -332,7 +325,6 @@
 .fila-rechazada td { color: #b30000 !important; font-weight: bold; }
 .loading-text, .no-results { text-align: center; padding: 40px; color: #666; font-style: italic; }
 
-/* ── BADGES ── */
 .asistio-badge {
     display: inline-block;
     padding: 5px 12px;
@@ -342,18 +334,16 @@
     text-align: center;
     min-width: 100px;
 }
-.asistio-si       { background:#e8f5e9; color:#2e7d32; border:1px solid #a5d6a7; }
-.asistio-no       { background:#ffebee; color:#c62828; border:1px solid #ef9a9a; }
-.asistio-pendiente{ background:#fff3e0; color:#e65100; border:1px solid #ffcc80; }
-.badge-rechazado  {
+.asistio-si        { background:#e8f5e9; color:#2e7d32; border:1px solid #a5d6a7; }
+.asistio-no        { background:#ffebee; color:#c62828; border:1px solid #ef9a9a; }
+.asistio-pendiente { background:#fff3e0; color:#e65100; border:1px solid #ffcc80; }
+.badge-rechazado {
     display:inline-block; padding:5px 12px; border-radius:20px;
     font-size:12px; font-weight:bold; min-width:100px; text-align:center;
     background:#ffebee; color:#b30000; border:1px solid #b30000;
 }
 
-/* ══════════════════════════════════════════
-   MODALES
-══════════════════════════════════════════ */
+/* MODALES */
 .modal-overlay {
     position: fixed;
     inset: 0;
@@ -397,7 +387,6 @@
 .modal-titulo.gris  { color: #666; }
 .modal-subtitulo-rojo { color: #b30000; margin: -15px 0 20px; font-size: 14px; }
 
-/* Info grid dentro modal */
 .info-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -414,7 +403,6 @@
 .info-label { display: block; font-size: 11px; color: #999; text-transform: uppercase; margin-bottom: 4px; }
 .info-value { display: block; font-size: 15px; font-weight: bold; color: #333; }
 
-/* Ya asistió aviso */
 .ya-asistio-aviso {
     background: #e8f5e9;
     border: 1px solid #a5d6a7;
@@ -425,7 +413,6 @@
     margin-bottom: 15px;
 }
 
-/* Botones modal */
 .modal-acciones { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
 .btn-marcar {
     padding: 12px 28px;
@@ -438,11 +425,8 @@
     cursor: pointer;
     transition: background 0.3s;
 }
-.btn-marcar:hover { background: #1b5e20; }
-.btn-marcar:disabled {
-    background: #aaa;
-    cursor: not-allowed;
-}
+.btn-marcar:hover    { background: #1b5e20; }
+.btn-marcar:disabled { background: #aaa; cursor: not-allowed; }
 .btn-cancelar-modal {
     padding: 12px 28px;
     background: #e0e0e0;
@@ -455,9 +439,7 @@
 }
 .btn-cancelar-modal:hover { background: #bdbdbd; }
 
-/* ══════════════════════════════════════════
-   ESCÁNER
-══════════════════════════════════════════ */
+/* ESCÁNER */
 .modal-escaner { max-width: 480px; padding: 20px; }
 .modal-header-scanner {
     display: flex;
@@ -494,6 +476,54 @@
     background: linear-gradient(90deg, transparent, #1565c0, transparent);
     animation: scanLine 2s linear infinite;
 }
+.scanner-status {
+    position: absolute;
+    bottom: 8px;
+    left: 0;
+    right: 0;
+    text-align: center;
+    color: #fff;
+    background: rgba(0,0,0,0.55);
+    font-size: 13px;
+    padding: 6px 0;
+    border-radius: 0 0 12px 12px;
+}
+.qr-debug-box {
+    margin: 10px 0 4px;
+    background: #e8f5e9;
+    border: 1px solid #a5d6a7;
+    border-radius: 8px;
+    padding: 8px 12px;
+    font-size: 13px;
+    color: #2e7d32;
+    word-break: break-all;
+    text-align: left;
+}
+.qr-debug-label { font-weight: bold; margin-right: 6px; }
+.scanner-manual {
+    display: flex;
+    gap: 8px;
+    margin-top: 10px;
+}
+.scanner-manual input {
+    flex: 1;
+    padding: 9px 12px;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    font-size: 14px;
+}
+.scanner-manual input:focus { outline: none; border-color: #1565c0; }
+.scanner-manual button {
+    padding: 9px 16px;
+    background: #1565c0;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+}
+.scanner-manual button:hover { background: #0d47a1; }
 .scanner-hint {
     text-align: center;
     color: #666;
@@ -501,9 +531,7 @@
     margin-top: 12px;
 }
 
-/* ══════════════════════════════════════════
-   TOAST
-══════════════════════════════════════════ */
+/* TOAST */
 .toast {
     position: fixed;
     bottom: 30px;
@@ -521,15 +549,10 @@
 .toast-success { background: #2e7d32; }
 .toast-error   { background: #b30000; }
 
-/* ══════════════════════════════════════════
-   ANIMACIONES
-══════════════════════════════════════════ */
 @keyframes fadeIn  { from { opacity: 0; } to { opacity: 1; } }
 @keyframes slideUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
-@keyframes scanLine{ from { top: 0; } to { top: 100%; } }
-@keyframes parpadeo{ 0% { opacity:0; transform:translateY(-5px); } 100% { opacity:1; transform:translateY(0); } }
+@keyframes scanLine { from { top: 0; } to { top: 100%; } }
 
-/* ── RESPONSIVE ── */
 @media (max-width: 768px) {
     .dashboard-container { padding: 15px; }
     .stats-cards { grid-template-columns: 1fr; gap: 15px; }
@@ -547,7 +570,20 @@
 }
 </style>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jsQR/1.4.0/jsQR.min.js"></script>
+<!-- jsQR: carga desde jsdelivr con fallback a unpkg -->
+<script>
+(function() {
+    function cargarFallback() {
+        var s = document.createElement('script');
+        s.src = 'https://unpkg.com/jsqr@1.4.0/dist/jsQR.min.js';
+        document.head.appendChild(s);
+    }
+    var s = document.createElement('script');
+    s.src = 'https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js';
+    s.onerror = cargarFallback;
+    document.head.appendChild(s);
+})();
+</script>
 
 <script>
 let todosLosAprobados  = [];
@@ -557,14 +593,13 @@ let scannerInterval    = null;
 let asistenteActualId  = null;
 let escanerBloqueado   = false;
 
-// ─── CSRF TOKEN ───────────────────────────────────────────────────────────────
 const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content || '';
 
 document.addEventListener('DOMContentLoaded', function () {
     cargarDatos();
 });
 
-// ─── CARGA PARALELA ───────────────────────────────────────────────────────────
+// ─── CARGA DE DATOS ───────────────────────────────────────────────────────────
 function cargarDatos() {
     Promise.all([
         fetch('/ver-aprobados',  { headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' } }).then(r => r.json()),
@@ -582,7 +617,7 @@ function cargarDatos() {
     });
 }
 
-// ─── RENDERIZAR FILAS ────────────────────────────────────────────────────────
+// ─── TABLA ────────────────────────────────────────────────────────────────────
 function mostrarAsistentes(asistentes, incluirRechazados = false) {
     const tbody = document.getElementById('asistentesList');
     document.getElementById('avisoRechazado').style.display = 'none';
@@ -623,7 +658,7 @@ function mostrarAsistentes(asistentes, incluirRechazados = false) {
     }).join('');
 }
 
-// ─── BÚSQUEDA MANUAL ─────────────────────────────────────────────────────────
+// ─── BÚSQUEDA ─────────────────────────────────────────────────────────────────
 function ejecutarBusqueda() {
     const searchTerm = document.getElementById('searchInput').value.toLowerCase().trim();
     const clearBtn   = document.querySelector('.clear-search');
@@ -678,7 +713,7 @@ function limpiarBusqueda() {
     actualizarTarjetas(todosLosAprobados);
 }
 
-// ─── TARJETAS ────────────────────────────────────────────────────────────────
+// ─── TARJETAS ─────────────────────────────────────────────────────────────────
 function actualizarTarjetas(asistentes) {
     const asistieron = asistentes.filter(a => a.asistio === 1).length;
     const faltan     = asistentes.filter(a => a.asistio === null || a.asistio === 0).length;
@@ -704,7 +739,6 @@ function mostrarFaltan() {
     document.querySelector('.table-responsive').scrollIntoView({ behavior: 'smooth' });
 }
 
-// ─── ERROR ───────────────────────────────────────────────────────────────────
 function mostrarError() {
     document.getElementById('asistentesList').innerHTML =
         '<tr><td colspan="9" class="loading-text">❌ Error al cargar los datos. Intente nuevamente.</td></tr>';
@@ -716,44 +750,86 @@ function mostrarError() {
 // ESCÁNER QR
 // ══════════════════════════════════════════════════════════════════════════════
 
+function setStatusEscaner(msg) {
+    const el = document.getElementById('scannerStatus');
+    if (el) el.textContent = msg;
+}
+
 function abrirEscaner() {
-    document.getElementById('modalEscaner').style.display = 'flex';
+    // Verificar que jsQR cargó correctamente
+    if (typeof jsQR === 'undefined') {
+        mostrarToast('⚠️ Librería QR no cargó. Recarga la página.', 'error');
+        console.error('jsQR no está disponible');
+        return;
+    }
+
+    // Detener cualquier stream previo que haya quedado abierto
+    if (streamActivo) {
+        streamActivo.getTracks().forEach(t => t.stop());
+        streamActivo = null;
+    }
+    clearInterval(scannerInterval);
+
+    document.getElementById('modalEscaner').style.display  = 'flex';
+    document.getElementById('qrDebugBox').style.display    = 'none';
+    document.getElementById('dniManualInput').value        = '';
+    setStatusEscaner('🔍 Iniciando cámara...');
     escanerBloqueado = false;
 
-    navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
+    const constraints = {
+        video: {
+            facingMode: { ideal: 'environment' },
+            width:  { ideal: 1280 },
+            height: { ideal: 720 }
+        }
+    };
+
+    navigator.mediaDevices.getUserMedia(constraints)
         .then(stream => {
             streamActivo = stream;
             const video  = document.getElementById('scannerVideo');
             video.srcObject = stream;
-            video.play();
 
-            // Canvas oculto para leer frames
-            const canvas  = document.createElement('canvas');
-            const context = canvas.getContext('2d');
+            video.onloadedmetadata = function () {
+                video.play();
+                setStatusEscaner('🔍 Buscando código QR...');
 
-            scannerInterval = setInterval(() => {
-                if (escanerBloqueado) return;
-                if (video.readyState !== video.HAVE_ENOUGH_DATA) return;
+                // willReadFrequently evita el warning de getImageData
+                const canvas  = document.createElement('canvas');
+                const context = canvas.getContext('2d', { willReadFrequently: true });
 
-                canvas.width  = video.videoWidth;
-                canvas.height = video.videoHeight;
-                context.drawImage(video, 0, 0, canvas.width, canvas.height);
+                scannerInterval = setInterval(() => {
+                    if (escanerBloqueado) return;
+                    if (video.readyState !== video.HAVE_ENOUGH_DATA) return;
 
-                const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
-                const code      = jsQR(imageData.data, imageData.width, imageData.height, {
-                    inversionAttempts: 'dontInvert'
-                });
+                    canvas.width  = video.videoWidth;
+                    canvas.height = video.videoHeight;
+                    context.drawImage(video, 0, 0, canvas.width, canvas.height);
 
-                if (code && code.data) {
-                    escanerBloqueado = true;
-                    procesarQr(code.data.trim());
-                }
-            }, 300);
+                    const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
+                    const code      = jsQR(imageData.data, imageData.width, imageData.height, {
+                        inversionAttempts: 'dontInvert'
+                    });
+
+                    if (code && code.data && code.data.trim() !== '') {
+                        escanerBloqueado = true;
+                        const valorQr    = code.data.trim();
+
+                        console.log('QR detectado:', valorQr);
+                        document.getElementById('qrDebugValor').textContent = valorQr;
+                        document.getElementById('qrDebugBox').style.display = 'block';
+                        setStatusEscaner('✅ QR detectado — procesando...');
+
+                        setTimeout(() => procesarQr(valorQr), 600);
+                    }
+                }, 300);
+            };
         })
         .catch(err => {
             console.error('Error cámara:', err);
-            cerrarEscaner();
-            mostrarToast('❌ No se pudo acceder a la cámara', 'error');
+            // No cerrar el modal — dejar el input manual disponible
+            setStatusEscaner('❌ Sin acceso a cámara — usa el ingreso manual');
+            mostrarToast('⚠️ Sin acceso a cámara. Usa el ingreso manual.', 'error');
         });
 }
 
@@ -764,10 +840,18 @@ function cerrarEscaner() {
         streamActivo = null;
     }
     document.getElementById('modalEscaner').style.display = 'none';
+    escanerBloqueado = false;
 }
 
-function procesarQr(dni) {
+function procesarManual() {
+    const val = document.getElementById('dniManualInput').value.trim();
+    if (!val) { mostrarToast('⚠️ Ingresa un DNI', 'error'); return; }
     cerrarEscaner();
+    procesarQr(val);
+}
+
+function procesarQr(dniRaw) {
+    console.log('Enviando al servidor:', dniRaw);
 
     fetch('/buscar-por-dni', {
         method: 'POST',
@@ -777,12 +861,14 @@ function procesarQr(dni) {
             'X-CSRF-TOKEN': csrfToken,
             'X-Requested-With': 'XMLHttpRequest'
         },
-        body: JSON.stringify({ dni })
+        body: JSON.stringify({ dni: dniRaw })
     })
     .then(r => r.json())
     .then(data => {
+        console.log('Respuesta servidor:', data);
+
         if (!data.success) {
-            abrirModalNoEncontrado();
+            abrirModalNoEncontrado(data.raw_qr || dniRaw, data.dni_buscado || dniRaw);
             return;
         }
 
@@ -791,17 +877,17 @@ function procesarQr(dni) {
         } else if (data.estado === 'rechazado') {
             abrirModalRechazado(data);
         } else {
-            // Estado registrado u otro: tratar como no encontrado en este contexto
-            abrirModalNoEncontrado();
+            abrirModalNoEncontrado(dniRaw, dniRaw);
         }
     })
     .catch(err => {
-        console.error('Error al buscar DNI:', err);
-        mostrarToast('❌ Error al consultar el servidor', 'error');
+        console.error('Error fetch:', err);
+        escanerBloqueado = false;
+        mostrarToast('❌ Error al conectar con el servidor', 'error');
     });
 }
 
-// ── MODAL APROBADO ────────────────────────────────────────────────────────────
+// ─── MODAL APROBADO ───────────────────────────────────────────────────────────
 function abrirModalAprobado(data) {
     asistenteActualId = data.id;
 
@@ -814,8 +900,7 @@ function abrirModalAprobado(data) {
     const btnMarcar    = document.getElementById('btnMarcarAsistencia');
     const yaAsistioDiv = document.getElementById('yaAsistioAviso');
 
-    if (data.asistio === 1) {
-        // Ya asistió
+    if (data.asistio == 1) {
         yaAsistioDiv.style.display = 'block';
         btnMarcar.style.display    = 'none';
     } else {
@@ -833,14 +918,13 @@ function cerrarModalAprobado() {
     asistenteActualId = null;
 }
 
-// ── MODAL RECHAZADO ───────────────────────────────────────────────────────────
+// ─── MODAL RECHAZADO ──────────────────────────────────────────────────────────
 function abrirModalRechazado(data) {
     document.getElementById('qrRCip').textContent       = data.cip       || '-';
     document.getElementById('qrRDni').textContent       = data.dni       || '-';
     document.getElementById('qrRNombres').textContent   = data.nombres   || '-';
     document.getElementById('qrRApellidos').textContent = data.apellidos || '-';
     document.getElementById('qrRCapitulo').textContent  = data.capitulo  || '-';
-
     document.getElementById('modalRechazado').style.display = 'flex';
 }
 
@@ -848,8 +932,16 @@ function cerrarModalRechazado() {
     document.getElementById('modalRechazado').style.display = 'none';
 }
 
-// ── MODAL NO ENCONTRADO ───────────────────────────────────────────────────────
-function abrirModalNoEncontrado() {
+// ─── MODAL NO ENCONTRADO ──────────────────────────────────────────────────────
+function abrirModalNoEncontrado(rawQr, dniBuscado) {
+    const msg = document.getElementById('msgNoEncontrado');
+    if (msg) {
+        msg.innerHTML = `El QR no está registrado en el sistema.<br>
+            <small style="color:#999; display:block; margin-top:8px;">
+                QR leído: <strong>${rawQr}</strong><br>
+                DNI buscado: <strong>${dniBuscado}</strong>
+            </small>`;
+    }
     document.getElementById('modalNoEncontrado').style.display = 'flex';
 }
 
@@ -857,7 +949,7 @@ function cerrarModalNoEncontrado() {
     document.getElementById('modalNoEncontrado').style.display = 'none';
 }
 
-// ── MARCAR ASISTENCIA ─────────────────────────────────────────────────────────
+// ─── MARCAR ASISTENCIA ────────────────────────────────────────────────────────
 function marcarAsistencia() {
     if (!asistenteActualId) return;
 
@@ -878,13 +970,11 @@ function marcarAsistencia() {
     .then(r => r.json())
     .then(data => {
         if (data.success) {
-            // Actualizar en memoria
             const idx = todosLosAprobados.findIndex(a => a.id === asistenteActualId);
             if (idx !== -1) todosLosAprobados[idx].asistio = 1;
 
             mostrarAsistentes(todosLosAprobados, false);
             actualizarTarjetas(todosLosAprobados);
-
             cerrarModalAprobado();
             mostrarToast('✅ Asistencia registrada correctamente', 'success');
         } else {
@@ -901,11 +991,11 @@ function marcarAsistencia() {
     });
 }
 
-// ── TOAST ─────────────────────────────────────────────────────────────────────
+// ─── TOAST ────────────────────────────────────────────────────────────────────
 function mostrarToast(mensaje, tipo = 'success') {
     const toast = document.getElementById('toast');
-    toast.textContent  = mensaje;
-    toast.className    = `toast toast-${tipo}`;
+    toast.textContent   = mensaje;
+    toast.className     = `toast toast-${tipo}`;
     toast.style.display = 'block';
     setTimeout(() => { toast.style.display = 'none'; }, 3500);
 }
