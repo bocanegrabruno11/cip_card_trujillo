@@ -393,12 +393,28 @@ function cargarDocumentos() {
 
 function renderDocumentos(documentos) {
     const container = document.getElementById('listaDocumentos');
+    const userId = {{ auth()->id() }};
     
-    if (!documentos || documentos.length === 0) {
+    // Filtrar: solo documentos del usuario actual O del administrador
+    const documentosFiltrados = documentos.filter(doc => {
+        // Identificar al admin por nombre o ID
+        const esAdmin = doc.user && (
+            doc.user.name === 'Administrador del Sistema' ||
+            doc.user.name === 'ADMINISTRADOR DEL SISTEMA' ||
+            (doc.user.name && doc.user.name.toLowerCase() === 'administrador del sistema') ||
+            doc.user.id === 14  // ID del administrador
+        );
+        
+        const esMiDocumento = doc.user_id === userId;
+        
+        return esAdmin || esMiDocumento;
+    });
+    
+    if (!documentosFiltrados || documentosFiltrados.length === 0) {
         container.innerHTML = `
             <div class="text-center py-4 text-muted">
                 <i class="fas fa-inbox fa-2x mb-2 d-block"></i>
-                No hay documentos subidos en este proceso aún
+                No hay documentos disponibles
             </div>
         `;
         return;
@@ -416,7 +432,7 @@ function renderDocumentos(documentos) {
                     </tr>
                 </thead>
                 <tbody>
-                    ${documentos.map(doc => {
+                    ${documentosFiltrados.map(doc => {
                         let icono = 'fa-file-alt';
                         if (doc.tipo_documento === 'voucher') icono = 'fa-receipt';
                         else if (doc.tipo_documento === 'pdf') icono = 'fa-file-pdf';
@@ -459,7 +475,6 @@ function renderDocumentos(documentos) {
         </div>
     `;
 }
-
 // ─── Manejo de tipo de documento en formulario ──────────────────────────────
 document.getElementById('tipo_documento').addEventListener('change', function() {
     const campoArchivo = document.getElementById('campo_archivo');

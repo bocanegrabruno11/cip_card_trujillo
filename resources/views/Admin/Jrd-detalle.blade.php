@@ -155,24 +155,51 @@
                             <div class="card border-start border-4 {{ $persona->tipo === 'Solicitante' ? 'border-success' : 'border-warning' }}">
                                 <div class="card-body">
                                     <div class="d-flex justify-content-between align-items-center">
-                                        <div>
-                                            <span class="badge {{ $persona->tipo === 'Solicitante' ? 'bg-success' : 'bg-warning text-dark' }} mb-2">
-                                                {{ $persona->tipo }}
-                                            </span>
-                                            <h6 class="mb-0">DNI: {{ $persona->dni }}</h6>
-                                            @if($persona->nombres)
-                                                <small class="text-muted">{{ $persona->nombres }} {{ $persona->apellidos }}</small>
-                                            @endif
-                                            @if($persona->correo)
-                                                <br><small class="text-muted"><i class="fas fa-envelope me-1"></i>{{ $persona->correo }}</small>
-                                            @endif
-                                            @if($persona->telefono)
-                                                <br><small class="text-muted"><i class="fas fa-phone me-1"></i>{{ $persona->telefono }}</small>
-                                            @endif
-                                             @if($persona->direccion)
-                                                <br><small class="text-muted"><i class="fas fa-home me-1"></i>{{ $persona->direccion }}</small>
-                                            @endif
-                                        </div>
+                                    <div>
+                                        <span class="badge {{ $persona->tipo === 'Solicitante' ? 'bg-success' : 'bg-warning text-dark' }} mb-2">
+                                            {{ $persona->tipo }}
+                                        </span>
+                                        {{-- Nombres Completos --}}
+                                        <h6 class="mb-0">
+                                            <i class="fas fa-user me-1"></i> {{ $persona->nombres_completos ?? 'Sin nombre' }}
+                                        </h6>
+                                        
+                                        {{-- DNI --}}
+                                        @if($persona->dni)
+                                            <small class="text-muted d-block">
+                                                <i class="fas fa-id-card me-1"></i>DNI: {{ $persona->dni }}
+                                            </small>
+                                        @endif
+                                        
+                                        {{-- Razón Social --}}
+                                        @if($persona->razon_social)
+                                            <small class="text-muted d-block">
+                                                <i class="fas fa-building me-1"></i>Razón Social: {{ $persona->razon_social }}
+                                            </small>
+                                        @endif
+                                        
+                                        {{-- RUC --}}
+                                        @if($persona->ruc)
+                                            <small class="text-muted d-block">
+                                                <i class="fas fa-id-card me-1"></i>RUC: {{ $persona->ruc }}
+                                            </small>
+                                        @endif
+                                        
+                                        {{-- Correo --}}
+                                        @if($persona->correo)
+                                            <small class="text-muted"><i class="fas fa-envelope me-1"></i>{{ $persona->correo }}</small>
+                                        @endif
+                                        
+                                        {{-- Teléfono --}}
+                                        @if($persona->telefono)
+                                            <br><small class="text-muted"><i class="fas fa-phone me-1"></i>{{ $persona->telefono }}</small>
+                                        @endif
+                                        
+                                        {{-- Dirección --}}
+                                        @if($persona->direccion)
+                                            <br><small class="text-muted"><i class="fas fa-home me-1"></i>{{ $persona->direccion }}</small>
+                                        @endif
+                                    </div>
                                         <i class="fas fa-user fa-2x text-muted"></i>
                                     </div>
                                 </div>
