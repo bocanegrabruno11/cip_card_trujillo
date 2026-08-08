@@ -311,8 +311,27 @@
                 @endif
                 <div class="hero-buttons">
                     <a href="{{ route('institucion-arbitral') }}" class="btn-hero btn-red-light">Arbitraje</a>
-                    <a href="{{ route('junta-prevencion') }}" class="btn-hero btn-gold">Junta de Prevención</a>
-                    <a href="{{ route('login') }}" class="btn-hero btn-red-light">Mesa de partes</a>
+                    <a href="{{ route('junta-prevencion') }}" class="btn-hero btn-gold">Junta de Prevención y Resolución de Disputas</a>
+                    @guest
+                        {{-- Si NO ha iniciado sesión, lo manda al login --}}
+                        <a href="{{ route('login') }}" class="btn-hero btn-red-light">Mesa de partes</a>
+                    @endguest
+
+                    @auth
+                        {{-- Si SÍ ha iniciado sesión, lo manda a su panel correspondiente manteniendo tus estilos --}}
+                        @if(Auth::user()->hasRole('admin'))
+                            <a href="{{ route('Admin.dashboard') }}" class="btn-hero btn-red-light">Ir a mi Panel</a>
+                            
+                        @elseif(Auth::user()->hasRole('gestor_contenido'))
+                            <a href="{{ route('gestion-contenido') }}" class="btn-hero btn-red-light">Ir a mi Panel</a>
+                            
+                        @elseif(Auth::user()->hasRole('mesa_partes'))
+                            <a href="{{ route('dashboard') }}" class="btn-hero btn-red-light">Ir a Mesa de Partes</a>
+                            
+                        @else
+                            <a href="{{ url('/') }}" class="btn-hero btn-red-light">Ir al Inicio</a>
+                        @endif
+                    @endauth
                 </div>
             </div>
         </div>

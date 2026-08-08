@@ -324,83 +324,6 @@
         font-size: 14px; font-weight: bold; color: #333; transition: 0.3s;
     }
     .social-bubble:hover .social-text { opacity: 1; }
-    .custom-modal-overlay {
-        position: fixed; 
-        top: 0; 
-        left: 0; 
-        width: 100%; 
-        height: 100%;
-        background: rgba(0,0,0,0.6);
-        z-index: 2000; /* Por encima de todo */
-        display: none; /* Oculto por defecto */
-        align-items: center; 
-        justify-content: center;
-        backdrop-filter: blur(3px);
-    }
-    .custom-modal-overlay.active { display: flex; }
-    
-    .custom-modal-box {
-        background: white;
-        width: 90%; 
-        max-width: 420px;
-        border-radius: 8px;
-        padding: 30px 25px;
-        text-align: center;
-        box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-        position: relative;
-        animation: modalFadeIn 0.3s ease;
-    }
-    
-    @keyframes modalFadeIn {
-        from { opacity: 0; transform: translateY(-20px); }
-        to { opacity: 1; transform: translateY(0); }
-    }
-
-    .custom-modal-close {
-        position: absolute; 
-        top: 10px; 
-        right: 15px;
-        font-size: 28px; 
-        cursor: pointer; 
-        color: #888;
-        transition: color 0.3s;
-        line-height: 1;
-    }
-    .custom-modal-close:hover { color: #AD2B2E; }
-    
-    .custom-modal-title {
-        color: #AD2B2E; 
-        font-size: 22px; 
-        font-weight: bold; 
-        margin-bottom: 15px;
-    }
-    
-    .custom-modal-text {
-        color: #444; 
-        font-size: 16px; 
-        margin-bottom: 25px; 
-        line-height: 1.6;
-    }
-    
-    .custom-modal-btn {
-        display: inline-block;
-        background-color: #AD2B2E; 
-        color: white;
-        padding: 12px 25px; 
-        border-radius: 5px;
-        text-decoration: none !important; 
-        font-weight: bold;
-        transition: background 0.3s;
-        width: 100%;
-    }
-    .custom-modal-btn:hover { background-color: #8B0000; color: white; }
-    
-    .email-highlight { 
-        font-weight: bold; 
-        color: #AD2B2E; 
-        font-size: 18px;
-        word-break: break-all;
-    }
 
     /* =========================================
        6.1 BURBUJA IZQUIERDA (MANUAL)
@@ -626,23 +549,14 @@
 
         <!-- Botón 2: Denuncias -->
         <div class="social-bubble" onclick="openCustomModal('modalDenuncia')">
-<<<<<<< HEAD
-=======
-            <!-- Icono de correo/alerta de Flaticon -->
->>>>>>> 3a7da446d4c5c606bc7660da95eb11d606b63d1f
             <img src="https://cdn-icons-png.flaticon.com/512/732/732200.png" alt="Denuncias">
             <span class="social-text">Denuncias</span>
         </div>
 
         <!-- Botón 3: Solicitudes (Mesa de Partes) -->
         <div class="social-bubble" onclick="openCustomModal('modalSolicitud')">
-<<<<<<< HEAD
             <!-- Icono cambiado a un Formulario/Documento de Flaticon -->
             <img src="https://cdn-icons-png.flaticon.com/512/2921/2921222.png" alt="Solicitudes">
-=======
-            <!-- Icono de documento/registro de Flaticon -->
-            <img src="https://cdn-icons-png.flaticon.com/512/2965/2965306.png" alt="Solicitudes">
->>>>>>> 3a7da446d4c5c606bc7660da95eb11d606b63d1f
             <span class="social-text">Solicitudes</span>
         </div>
         
@@ -659,10 +573,6 @@
                 Cualquier denuncia o comunicación de carácter ético debe ser enviada a nuestro correo oficial:<br><br>
                 <span class="email-highlight">eticacardcdll@cip.org.pe</span>
             </div>
-<<<<<<< HEAD
-=======
-            <!-- Botón que abre el cliente de correo por defecto -->
->>>>>>> 3a7da446d4c5c606bc7660da95eb11d606b63d1f
             <a href="mailto:eticacardcdll@cip.org.pe" class="custom-modal-btn">Enviar Correo</a>
         </div>
     </div>
@@ -678,10 +588,6 @@
                 Registra tu solicitud aquí. Serás redirigido al sistema para continuar con tu trámite.
             </div>
             
-<<<<<<< HEAD
-=======
-            {{-- Lógica de redirección calcada de tu Menú de Navegación --}}
->>>>>>> 3a7da446d4c5c606bc7660da95eb11d606b63d1f
             @guest
                 <a href="{{ route('login') }}" class="custom-modal-btn">Ingresar al Sistema</a>
             @endguest
@@ -784,26 +690,14 @@
 
         function openCustomModal(modalId) {
             document.getElementById(modalId).classList.add('active');
-<<<<<<< HEAD
-=======
-            // Opcional: Ocultar el scroll del body cuando el modal está abierto
->>>>>>> 3a7da446d4c5c606bc7660da95eb11d606b63d1f
             document.body.style.overflow = 'hidden';
         }
 
         function closeCustomModal(modalId) {
             document.getElementById(modalId).classList.remove('active');
-<<<<<<< HEAD
             document.body.style.overflow = 'auto';
         }
 
-=======
-            // Devolver el scroll al body
-            document.body.style.overflow = 'auto';
-        }
-
-        // Permitir cerrar el modal haciendo clic afuera de la caja blanca
->>>>>>> 3a7da446d4c5c606bc7660da95eb11d606b63d1f
         window.addEventListener('click', function(event) {
             if (event.target.classList.contains('custom-modal-overlay')) {
                 event.target.classList.remove('active');
