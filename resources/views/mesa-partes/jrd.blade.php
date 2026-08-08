@@ -151,13 +151,13 @@
                 </div>
 
                 <div class="col-md-3">
-                    <label class="form-label">Nombres <span class="text-danger">*</span></label>
-                    <input type="text" class="form-control" id="solicitante-nombres" placeholder="Nombres" required>
+                    <label class="form-label">Nombres Completos <span class="text-danger">*</span></label>
+                    <input type="text" class="form-control" id="solicitante-nombres-completos" placeholder="Nombres completos" required>
                 </div>
 
                 <div class="col-md-3">
-                    <label class="form-label">Apellidos <span class="text-danger">*</span></label>
-                    <input type="text" class="form-control" id="solicitante-apellidos" placeholder="Apellidos" required>
+                    <label class="form-label">Razón Social <span class="text-danger">*</span></label>
+                    <input type="text" class="form-control" id="solicitante-razon-social" placeholder="Razón social" required>
                 </div>
 
                 <div class="col-md-3">
@@ -357,8 +357,11 @@ document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('solicitante-telefono').value   = data.persona.celular         || '';
             document.getElementById('solicitante-correo').value     = data.persona.correo_contacto || '';
 
-            if (data.persona.nombres)   document.getElementById('solicitante-nombres').value   = data.persona.nombres;
-            if (data.persona.apellidos) document.getElementById('solicitante-apellidos').value  = data.persona.apellidos;
+            if (data.persona.nombres_completos)
+            document.getElementById('solicitante-nombres-completos').value = data.persona.nombres_completos;
+
+            if (data.persona.razon_social)
+                document.getElementById('solicitante-razon-social').value = data.persona.razon_social;
             if (data.persona.email)     document.getElementById('solicitante-correo').value     = data.persona.email;
             if (data.persona.telefono)  document.getElementById('solicitante-telefono').value   = data.persona.telefono;
             if (data.persona.ruc)       document.getElementById('solicitante-ruc').value        = data.persona.ruc;
@@ -424,12 +427,12 @@ function agregarParte() {
                 <small class="text-danger campo-error" id="error-dni-${id}" style="display:none;"></small>
             </div>
             <div class="col-md-3">
-                <label class="form-label">Nombres <span class="text-danger">*</span></label>
-                <input type="text" class="form-control campo-nombres" placeholder="Nombres" data-id="${id}">
+                <label class="form-label">Nombres  completos<span class="text-danger">*</span></label>
+                <input type="text" class="form-control campo-nombres-completos" placeholder="Nombres completos" data-id="${id}">
             </div>
             <div class="col-md-3">
-                <label class="form-label">Apellidos <span class="text-danger">*</span></label>
-                <input type="text" class="form-control campo-apellidos" placeholder="Apellidos" data-id="${id}">
+                <label class="form-label">Razón social <span class="text-danger">*</span></label>
+            <input type="text" class="form-control campo-razon-social" placeholder="Razón social" data-id="${id}">            
             </div>
             <div class="col-md-3">
                 <label class="form-label">RUC <span class="text-muted small">(opcional)</span></label>
@@ -465,22 +468,22 @@ document.getElementById('jrdForm').addEventListener('submit', function (e) {
 
     const personasArray = [];
 
-    const nombresS   = document.getElementById('solicitante-nombres').value.trim();
-    const apellidosS = document.getElementById('solicitante-apellidos').value.trim();
+    const nombresCompletosS = document.getElementById('solicitante-nombres-completos').value.trim();
+    const razonSocialS      = document.getElementById('solicitante-razon-social').value.trim();
     const correoS    = document.getElementById('solicitante-correo').value.trim();
     const telefonoS  = document.getElementById('solicitante-telefono').value.trim();
     const rucS       = document.getElementById('solicitante-ruc').value.trim();
     const direccionS = document.getElementById('solicitante-direccion')?.value.trim() || '';
 
-    if (!nombresS || !apellidosS) {
-        showError('Los nombres y apellidos del solicitante son obligatorios.');
+    if (!nombresCompletosS || !razonSocialS) {
+        showError('Los nombres completos y razón social del solicitante son obligatorios.');
         return;
     }
 
     personasArray.push({
         dni: dniSolicitante,
-        nombres: nombresS,
-        apellidos: apellidosS,
+        nombres_completos: nombresCompletosS,
+        razon_social: razonSocialS,
         correo: correoS,
         telefono: telefonoS,
         ruc: rucS,
@@ -495,8 +498,8 @@ document.getElementById('jrdForm').addEventListener('submit', function (e) {
         const id             = div.getAttribute('data-id');
         const tipoSelect     = div.querySelector('.campo-tipo');
         const dniInput       = div.querySelector('.campo-dni');
-        const nombresInput   = div.querySelector('.campo-nombres');
-        const apellidosInput = div.querySelector('.campo-apellidos');
+        const nombresInput   = div.querySelector('.campo-nombres-completos');
+        const apellidosInput = div.querySelector('.campo-razon-social');
         const correoInput    = div.querySelector('.campo-correo');
         const telefonoInput  = div.querySelector('.campo-telefono');
         const rucInput       = div.querySelector('.campo-ruc');
@@ -508,8 +511,8 @@ document.getElementById('jrdForm').addEventListener('submit', function (e) {
 
         const tipo      = tipoSelect     ? tipoSelect.value           : 'Demandado';
         const dni       = dniInput.value.trim();
-        const nombres   = nombresInput.value.trim();
-        const apellidos = apellidosInput.value.trim();
+        const nombres_completos = nombresInput.value.trim();
+        const razon_social      = apellidosInput.value.trim();
         const correo    = correoInput    ? correoInput.value.trim()    : '';
         const telefono  = telefonoInput  ? telefonoInput.value.trim()  : '';
         const ruc       = rucInput       ? rucInput.value.trim()       : '';
@@ -535,13 +538,13 @@ document.getElementById('jrdForm').addEventListener('submit', function (e) {
             return;
         }
 
-        if (!nombres || !apellidos) {
+        if (!nombres_completos || !razon_social) {
             hayError = true;
-            errores.push('Nombres y Apellidos son obligatorios en todas las partes.');
+            errores.push('Nombres completos y razón social son obligatorios en todas las partes.');
             return;
         }
 
-        personasArray.push({ dni, nombres, apellidos, correo, telefono, ruc, tipo, direccion });
+        personasArray.push({ dni, nombres_completos, razon_social, correo, telefono, ruc, tipo, direccion });
     });
 
     if (hayError) {
@@ -587,8 +590,8 @@ document.getElementById('jrdForm').addEventListener('submit', function (e) {
 
     personasArray.forEach((p, i) => {
         formData.append(`personas[${i}][dni]`,       p.dni);
-        formData.append(`personas[${i}][nombres]`,   p.nombres);
-        formData.append(`personas[${i}][apellidos]`, p.apellidos);
+        formData.append(`personas[${i}][nombres_completos]`, p.nombres_completos);
+        formData.append(`personas[${i}][razon_social]`,      p.razon_social);
         formData.append(`personas[${i}][correo]`,    p.correo    || '');
         formData.append(`personas[${i}][telefono]`,  p.telefono  || '');
         formData.append(`personas[${i}][ruc]`,       p.ruc       || '');

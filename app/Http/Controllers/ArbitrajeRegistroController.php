@@ -36,8 +36,8 @@ class ArbitrajeRegistroController extends Controller
                 // Personas
                 'personas'               => 'required|array|min:2',
                 'personas.*.dni'         => 'required|string|size:8',
-                'personas.*.nombres'     => 'required|string|max:255',
-                'personas.*.apellidos'   => 'required|string|max:255',
+                'personas.*.nombres_apellidos'     => 'required|string|max:255',
+                'personas.*.razon_social'   => 'required|string|max:255',
                 'personas.*.tipo'        => 'required|in:Demandante,Demandado',
                 'personas.*.correo'      => 'nullable|email|max:255',
                 'personas.*.telefono'    => 'nullable|string|max:20',
@@ -101,8 +101,8 @@ class ArbitrajeRegistroController extends Controller
                 ProcesoArbitrajePersona::create([
                     'arbitraje_id' => $arbitraje->id_arbitraje,
                     'dni'          => $persona['dni'],
-                    'nombres'      => $persona['nombres'],
-                    'apellidos'    => $persona['apellidos'],
+                    'nombres_apellidos'      => $persona['nombres_apellidos'],
+                    'razon_social'    => $persona['razon_social'],
                     'correo'       => $persona['correo']    ?? null,
                     'telefono'     => $persona['telefono']  ?? null,
                     'ruc'          => $persona['ruc']       ?? null,

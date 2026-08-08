@@ -171,7 +171,7 @@
 
     <div class="link-center-container">
         <p class="text-muted mb-4 fw-bold">Si desea acceder al portal externo del repositorio, haga clic a continuación:</p>
-        <a href="https://tu-enlace-aqui.com" target="_blank" class="btn-external-link">
+        <a href="https://drive.google.com/drive/folders/1zgjszv87CPIt7Q2ihz9VxLa2t1ZghV3p" target="_blank" class="btn-external-link">
             <i class="fas fa-external-link-alt me-2"></i> ACCEDER AL PORTAL DE LAUDOS
         </a>
     </div>

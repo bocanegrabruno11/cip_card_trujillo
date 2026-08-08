@@ -19,10 +19,14 @@
 
     /* Contenido Principal */
     .main-image-wrapper {
-        width: 100%; height: 400px; overflow: hidden; border-radius: 8px; margin-bottom: 40px;
+        width: 100%; height: auto; overflow: hidden; border-radius: 8px; margin-bottom: 40px;
         box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        background-color: #f8f9fa; /* Fondo suave en caso de que la imagen sea muy vertical */
     }
-    .main-image { width: 100%; height: 100%; object-fit: cover; cursor: pointer; }
+    .main-image { 
+        width: 100%; height: auto; max-height: 600px; 
+        object-fit: contain; cursor: pointer; display: block; margin: 0 auto; 
+    }
 
     /* === ESTILOS CUERPO DEL EVENTO (Importante para CKEditor) === */
     .event-body {
@@ -60,7 +64,7 @@
 
     @media (max-width: 768px) {
         .event-title { font-size: 28px; }
-        .main-image-wrapper { height: 250px; }
+        .main-image-wrapper { height: auto; }
     }
 </style>
 @endsection

@@ -31,6 +31,9 @@ use App\Http\Controllers\ProcesoDeArbitrajeController;
 use App\Http\Controllers\EtapaJrdController;
 use App\Http\Controllers\UsuariosController;
 use App\Http\Controllers\CipcdllController;
+use App\Http\Controllers\AsistentasCipcdllFinalController;
+use App\Http\Controllers\EnviarTarjetaController;
+use App\Http\Controllers\AsistenciaQrController;
 
 
 // Vista login (FALTABA ESTO)
@@ -38,9 +41,23 @@ Route::get('/login-eventos', function () {
     return view('eventoscipcdll.login');
 })->name('login.eventos');
 
+
+Route::post('/enviar-tarjetas',      [EnviarTarjetaController::class, 'enviarATodos']);
+Route::get('/enviar-tarjeta/{cip}',  [EnviarTarjetaController::class, 'enviarPorCip']);
+
+Route::post('/buscar-por-dni',       [AsistenciaQrController::class, 'buscarPorDni']);
+Route::post('/marcar-asistencia-qr/{dni}', [AsistenciaQrController::class, 'marcarAsistenciaQr']);
+Route::get('/buscar-por-dni/{dni}', [AsistenciaQrController::class, 'buscarPorDniGet']);
+
 // Procesar login
 Route::post('/login-eventos', [AuthController::class, 'login'])
     ->name('login.eventos.post');
+
+Route::get('/envio-tarjetas', [AsistentasCipcdllFinalController::class, 'index'])
+    ->name('tarjetas.eventos');
+    
+Route::post('/generar-tarjetas', [AsistentasCipcdllFinalController::class, 'generarTarjetas'])
+    ->name('tarjetas.generar');
 
 // Dashboard
 Route::get('/dashboard-eventos', function () {
@@ -49,6 +66,18 @@ Route::get('/dashboard-eventos', function () {
     }
     return view('eventoscipcdll.dashboard');
 })->name('dashboard.eventos');
+
+
+// Dashboard
+Route::get('/asistencia', function () {
+    if (!session('usuario')) {
+        return redirect('/login-eventos');
+    }
+    return view('eventoscipcdll.asistencia');
+})->name('dashboard.eventos');
+
+Route::get('/envio-tarjetas', [AsistentasCipcdllFinalController::class, 'index'])
+    ->name('tarjetas.eventos');
 
 // ✅ Validar múltiples asistencias en BATCH (más rápido)
 Route::post('/validar-asistencias-batch', function () {

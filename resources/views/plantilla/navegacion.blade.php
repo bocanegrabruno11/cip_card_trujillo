@@ -193,8 +193,7 @@
     }
     .nav-overlay.active { display: block; }
 
-    /* === AJUSTE PARA PANTALLAS MEDIANAS (TABLET HORIZONTAL / LAPTOP PEQUEÑA) === */
-    /* Cuando el ancho es menor a 1250px pero mayor a 1024px (que es cuando entra el móvil) */
+    /* === AJUSTE PARA PANTALLAS MEDIANAS === */
     @media (max-width: 1350px) and (min-width: 1025px) {
         .logo-text {
             font-size: 11px; /* Reduce el texto del logo */
@@ -239,7 +238,6 @@
             right: 0; 
         }
 
-        /* Items del menú en móvil */
         .nav-menu > li {
             width: 100%;
             height: auto;
@@ -259,7 +257,6 @@
             color: #AD2B2E;
         }
         
-        /* Flecha automática */
         .nav-menu > li.has-dropdown > a::after {
             content: '▼'; 
             font-size: 12px;
@@ -272,8 +269,6 @@
             transform: rotate(180deg);
         }
 
-        /* Dropdowns estáticos en móvil */
-        /* En móvil mantenemos fondo claro para legibilidad, pero sin subrayado */
         .dropdown-menu {
             position: static; 
             box-shadow: none;
@@ -288,7 +283,7 @@
         }
         
         .dropdown-menu li a {
-            color: #555; /* Texto gris oscuro en móvil */
+            color: #555; 
             padding-left: 30px; 
             text-decoration: none !important;
         }
@@ -309,7 +304,7 @@
     }
 
     /* =========================================
-       6. BURBUJAS SOCIALES
+       6. BURBUJAS SOCIALES DERECHAS
        ========================================= */
     .social-bubbles {
         position: fixed; bottom: 20px; right: 20px; z-index: 999;
@@ -330,12 +325,115 @@
     }
     .social-bubble:hover .social-text { opacity: 1; }
 
+    /* =========================================
+       6.1 BURBUJA IZQUIERDA (MANUAL)
+       ========================================= */
+    .social-bubbles-left {
+        position: fixed; bottom: 20px; left: 20px; z-index: 999;
+        display: flex; flex-direction: column; gap: 10px;
+    }
+    .social-bubble-left {
+        width: 45px; height: 45px; border-radius: 50%;
+        display: flex; align-items: center; justify-content: center;
+        cursor: pointer; position: relative; overflow: hidden;
+        transition: width 0.3s ease; background: rgba(255,255,255,0.1);
+        border: 2px solid rgba(0,0,0,0.1); backdrop-filter: blur(2px);
+    }
+    /* Se aumentó el width en hover a 190px porque el texto es más largo */
+    .social-bubble-left:hover { width: 190px; border-radius: 25px; justify-content: flex-start; padding-left: 10px; background: white; }
+    .social-bubble-left img { width: 25px; height: 25px; }
+    .social-text-left { 
+        position: absolute; left: 45px; white-space: nowrap; opacity: 0; 
+        font-size: 14px; font-weight: bold; color: #333; transition: 0.3s;
+    }
+    .social-bubble-left:hover .social-text-left { opacity: 1; }
+
+    /* =========================================
+       7. MODALES
+       ========================================= */
+    .custom-modal-overlay {
+        position: fixed; 
+        top: 0; 
+        left: 0; 
+        width: 100%; 
+        height: 100%;
+        background: rgba(0,0,0,0.6);
+        z-index: 2000;
+        display: none; 
+        align-items: center; 
+        justify-content: center;
+        backdrop-filter: blur(3px);
+    }
+    .custom-modal-overlay.active { display: flex; }
+    
+    .custom-modal-box {
+        background: white;
+        width: 90%; 
+        max-width: 420px;
+        border-radius: 8px;
+        padding: 30px 25px;
+        text-align: center;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        position: relative;
+        animation: modalFadeIn 0.3s ease;
+    }
+    
+    @keyframes modalFadeIn {
+        from { opacity: 0; transform: translateY(-20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .custom-modal-close {
+        position: absolute; 
+        top: 10px; 
+        right: 15px;
+        font-size: 28px; 
+        cursor: pointer; 
+        color: #888;
+        transition: color 0.3s;
+        line-height: 1;
+    }
+    .custom-modal-close:hover { color: #AD2B2E; }
+    
+    .custom-modal-title {
+        color: #AD2B2E; 
+        font-size: 22px; 
+        font-weight: bold; 
+        margin-bottom: 15px;
+    }
+    
+    .custom-modal-text {
+        color: #444; 
+        font-size: 16px; 
+        margin-bottom: 25px; 
+        line-height: 1.6;
+    }
+    
+    .custom-modal-btn {
+        display: inline-block;
+        background-color: #AD2B2E; 
+        color: white;
+        padding: 12px 25px; 
+        border-radius: 5px;
+        text-decoration: none !important; 
+        font-weight: bold;
+        transition: background 0.3s;
+        width: 100%;
+    }
+    .custom-modal-btn:hover { background-color: #8B0000; color: white; }
+    
+    .email-highlight { 
+        font-weight: bold; 
+        color: #AD2B2E; 
+        font-size: 18px;
+        word-break: break-all;
+    }
+
 </style>
     @yield('styles')
 
     <div class="header-container">
-      
-
+        
         <div class="main-nav-container">
             <div class="logo-container">
                 <img src="{{ asset('img/logo.png') }}" alt="Logo CIP">
@@ -399,15 +497,14 @@
                 
                 {{-- 7. CONTACTOS --}}
                 <li><a href="{{ route('contactos') }}" onclick="handleMenuClick(event, this)">CONTACTOS</a></li>
+                
                 {{-- 8. MESA DE PARTES VIRTUAL (Dinámico) --}}
                 <li>
                     @guest
-                        {{-- Si NO está logueado -> Login --}}
                         <a href="{{ route('login') }}" onclick="handleMenuClick(event, this)">CARD-CIPCDLL</a>
                     @endguest
 
                     @auth
-                        {{-- Si SÍ está logueado -> Redirigir según Rol --}}
                         @if(Auth::user()->hasRole('admin'))
                             <a href="{{ route('Admin.dashboard') }}" onclick="handleMenuClick(event, this)">CARD-CIPCDLLL</a>
                         
@@ -418,7 +515,6 @@
                             <a href="{{ route('dashboard') }}" onclick="handleMenuClick(event, this)">CARD-CIPCDLLL</a>
                         
                         @else
-                            {{-- Default si tiene otro rol (o ninguno) --}}
                             <a href="{{ url('/') }}" onclick="handleMenuClick(event, this)">CARD-CIPCDLL</a>
                         @endif
                     @endauth
@@ -428,15 +524,89 @@
         </div>
     </div>
 
-    
+    <!-- =========================================
+         BURBUJA IZQUIERDA: MANUAL DEL USUARIO
+         ========================================= -->
+    <div class="social-bubbles-left">
+        <!-- Reemplaza 'manual_usuario.pdf' con el nombre exacto de tu archivo en storage -->
+        <div class="social-bubble-left" onclick="window.open('{{ asset('docs/manuales/Manual_de_Usuario_2026_CARDCIPCDLL.pdf') }}', '_blank')">
+            <!-- Icono de manual/libro de Flaticon -->
+            <img src="https://cdn-icons-png.flaticon.com/512/3389/3389081.png" alt="Manual del Usuario">
+            <span class="social-text-left">Manual del Usuario</span>
+        </div>
+    </div>
+
+    <!-- =========================================
+         BURBUJAS DERECHAS
+         ========================================= -->
     <div class="social-bubbles">
-       
-    
+        
+        <!-- Botón 1: Facebook -->
         <div class="social-bubble facebook" onclick="window.open('https://www.facebook.com/CIPLaLibertad?locale=es_LA', '_blank')">
             <img src="https://cdn-icons-png.flaticon.com/512/733/733547.png" alt="Facebook">
             <span class="social-text">Facebook</span>
         </div>
-       
+
+        <!-- Botón 2: Denuncias -->
+        <div class="social-bubble" onclick="openCustomModal('modalDenuncia')">
+            <img src="https://cdn-icons-png.flaticon.com/512/732/732200.png" alt="Denuncias">
+            <span class="social-text">Denuncias</span>
+        </div>
+
+        <!-- Botón 3: Solicitudes (Mesa de Partes) -->
+        <div class="social-bubble" onclick="openCustomModal('modalSolicitud')">
+            <!-- Icono cambiado a un Formulario/Documento de Flaticon -->
+            <img src="https://cdn-icons-png.flaticon.com/512/2921/2921222.png" alt="Solicitudes">
+            <span class="social-text">Solicitudes</span>
+        </div>
+        
+    </div>
+
+    <!-- =========================================
+         MODAL 1: DENUNCIAS
+         ========================================= -->
+    <div class="custom-modal-overlay" id="modalDenuncia">
+        <div class="custom-modal-box">
+            <span class="custom-modal-close" onclick="closeCustomModal('modalDenuncia')">&times;</span>
+            <div class="custom-modal-title">Canal de Denuncias</div>
+            <div class="custom-modal-text">
+                Cualquier denuncia o comunicación de carácter ético debe ser enviada a nuestro correo oficial:<br><br>
+                <span class="email-highlight">eticacardcdll@cip.org.pe</span>
+            </div>
+            <a href="mailto:eticacardcdll@cip.org.pe" class="custom-modal-btn">Enviar Correo</a>
+        </div>
+    </div>
+
+    <!-- =========================================
+         MODAL 2: SOLICITUDES (Dinámico con Blade)
+         ========================================= -->
+    <div class="custom-modal-overlay" id="modalSolicitud">
+        <div class="custom-modal-box">
+            <span class="custom-modal-close" onclick="closeCustomModal('modalSolicitud')">&times;</span>
+            <div class="custom-modal-title">Mesa de Partes Virtual</div>
+            <div class="custom-modal-text">
+                Registra tu solicitud aquí. Serás redirigido al sistema para continuar con tu trámite.
+            </div>
+            
+            @guest
+                <a href="{{ route('login') }}" class="custom-modal-btn">Ingresar al Sistema</a>
+            @endguest
+
+            @auth
+                @if(Auth::user()->hasRole('admin'))
+                    <a href="{{ route('Admin.dashboard') }}" class="custom-modal-btn">Ir a mi Panel de Control</a>
+                
+                @elseif(Auth::user()->hasRole('gestor_contenido'))
+                    <a href="{{ route('gestion-contenido') }}" class="custom-modal-btn">Ir a mi Panel</a>
+                
+                @elseif(Auth::user()->hasRole('mesa_partes'))
+                    <a href="{{ route('dashboard') }}" class="custom-modal-btn">Ir a mi Panel</a>
+                
+                @else
+                    <a href="{{ url('/') }}" class="custom-modal-btn">Ir a mi Panel</a>
+                @endif
+            @endauth
+        </div>
     </div>
 
     <script>
@@ -460,24 +630,6 @@
 
         window.addEventListener('load', adjustMargin);
         window.addEventListener('resize', adjustMargin);
-        
-        // Función para manejar el scroll (Opcional si quieres ocultar al bajar)
-        /*
-        function handleScroll() {
-            const currentScrollPosition = window.pageYOffset || document.documentElement.scrollTop;
-            if (window.innerWidth > 1024) { 
-                if (currentScrollPosition > lastScrollPosition && currentScrollPosition > totalHeaderHeight) {
-                    headerContainer.style.top = '-40px'; // Esconder top-bar
-                } else {
-                    headerContainer.style.top = '0';
-                }
-            } else {
-                headerContainer.style.top = '0';
-            }
-            lastScrollPosition = currentScrollPosition;
-        }
-        window.addEventListener('scroll', handleScroll);
-        */
         
         // Lógica de Menú Móvil (Hamburguesa)
         function toggleMenu() {
@@ -509,21 +661,17 @@
         }
         
         function toggleMobileDropdown(element) {
-            // Solo actuar en pantallas móviles
             if (window.innerWidth <= 1024) { 
-                // Cierra otros abiertos
                 const allItems = document.querySelectorAll('.nav-menu > li');
                 allItems.forEach(item => {
                     if (item !== element) item.classList.remove('open');
                 });
                 
-                // Alterna el actual
                 element.classList.toggle('open');
             }
         }
        
         function handleMenuClick(event, element) {
-            // Si es enlace directo, no detener propagación excesivamente, pero cerrar menú
             if (window.innerWidth <= 1024) {
                 setTimeout(() => {
                     closeMenu();
@@ -536,9 +684,25 @@
             allItems.forEach(li => li.classList.remove('open'));
         }
         
-        // Prevenir cierre al hacer clic dentro del menú
         document.querySelector('.nav-menu').addEventListener('click', function(event) {
              event.stopPropagation();
+        });
+
+        function openCustomModal(modalId) {
+            document.getElementById(modalId).classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeCustomModal(modalId) {
+            document.getElementById(modalId).classList.remove('active');
+            document.body.style.overflow = 'auto';
+        }
+
+        window.addEventListener('click', function(event) {
+            if (event.target.classList.contains('custom-modal-overlay')) {
+                event.target.classList.remove('active');
+                document.body.style.overflow = 'auto';
+            }
         });
     </script>
     @yield('scripts')

@@ -523,26 +523,77 @@ function renderJrd(data) {
 
                     <div class="row mb-4">
                         <div class="col-md-12">
-                            <h6 class="text-danger border-bottom pb-2 mb-3">
-                                <i class="fas fa-users me-2"></i>Personas Involucradas
-                            </h6>
-                            <div class="row">
-                                ${jrd.personas && jrd.personas.length > 0 ? jrd.personas.map(persona => {
-                                    let badgeClass = 'bg-secondary';
-                                    if (persona.tipo === 'Solicitante')  badgeClass = 'bg-success';
-                                    else if (persona.tipo === 'Demandado')   badgeClass = 'bg-warning text-dark';
-                                    else if (persona.tipo === 'Contraparte') badgeClass = 'bg-info';
-                                    return `
-                                    <div class="col-md-6 mb-2">
-                                        <div class="p-2 bg-light rounded">
-                                            <span class="badge ${badgeClass} me-2">${persona.tipo}</span>
-                                            <strong>${persona.nombres || ''} ${persona.apellidos || ''}</strong><br>
-                                            <small class="text-muted">DNI: ${persona.dni || ''}</small>
-                                            ${persona.correo ? `<br><small><i class="fas fa-envelope me-1"></i>${persona.correo}</small>` : ''}
-                                        </div>
-                                    </div>`;
-                                }).join('') : '<p class="text-muted">No hay personas registradas</p>'}
-                            </div>
+<div class="row mb-4">
+    <div class="col-md-12">
+        <h6 class="text-danger border-bottom pb-2 mb-3">
+            <i class="fas fa-users me-2"></i>Personas Involucradas
+        </h6>
+        <div class="row">
+            ${jrd.personas && jrd.personas.length > 0 ? jrd.personas.map(persona => {
+                let badgeClass = 'bg-secondary';
+                if (persona.tipo === 'Solicitante')  badgeClass = 'bg-success';
+                else if (persona.tipo === 'Demandado')   badgeClass = 'bg-warning text-dark';
+                else if (persona.tipo === 'Contraparte') badgeClass = 'bg-info';
+                else if (persona.tipo === 'Demandante')  badgeClass = 'bg-primary';
+                else if (persona.tipo === 'Tercero')     badgeClass = 'bg-secondary';
+                
+                // Determinar el nombre a mostrar (prioridad: razón social > nombres_completos > nombres + apellidos)
+                let nombreMostrar = '';
+                if (persona.razon_social) {
+                    nombreMostrar = persona.razon_social;
+                } else if (persona.nombres_completos) {
+                    nombreMostrar = persona.nombres_completos;
+                } else {
+                    nombreMostrar = `${persona.nombres || ''} ${persona.apellidos || ''}`.trim();
+                }
+                
+                return `
+                <div class="col-md-6 mb-3">
+                    <div class="p-3 bg-light rounded border h-100">
+                        <div class="mb-2">
+                            <span class="badge ${badgeClass} me-2">${persona.tipo}</span>
+                        </div>
+                        
+                        <div class="mb-2">
+                            <i class="fas fa-user text-secondary me-2"></i>
+                            <strong>${nombreMostrar || 'No especificado'}</strong>
+                        </div>
+                        
+                        ${persona.dni ? `
+                        <div class="mb-1">
+                            <i class="fas fa-id-card text-secondary me-2"></i>
+                            <small>DNI: ${persona.dni}</small>
+                        </div>
+                        ` : ''}
+                        
+                        ${persona.ruc ? `
+                        <div class="mb-1">
+                            <i class="fas fa-building text-secondary me-2"></i>
+                            <small>RUC: ${persona.ruc}</small>
+                        </div>
+                        ` : ''}
+                        
+                        ${persona.razon_social ? `
+                        <div class="mb-1">
+                            <i class="fas fa-industry text-secondary me-2"></i>
+                            <small>Razón Social: ${persona.razon_social}</small>
+                        </div>
+                        ` : ''}
+                        
+                        ${persona.correo ? `
+                        <div class="mb-1">
+                            <i class="fas fa-envelope text-secondary me-2"></i>
+                            <small>Email: ${persona.correo}</small>
+                        </div>
+                        ` : ''}
+                        
+                    </div>
+                </div>`;
+            }).join('') : '<p class="text-muted">No hay personas registradas</p>'}
+        </div>
+    </div>
+</div>
+
                         </div>
                     </div>
 
@@ -584,59 +635,79 @@ function renderJrd(data) {
                                                     ${(proceso.estado || 'iniciado').toUpperCase()}
                                                 </span>
                                             </div>
+                                            
 
-                                            ${proceso.documentos && proceso.documentos.length > 0 ? `
-                                                <div class="mt-3 pt-3 border-top">
-                                                    <small class="text-muted d-block mb-2">
-                                                        <i class="fas fa-paperclip me-1"></i>
-                                                        Documentos adjuntos (${proceso.documentos.length}):
-                                                    </small>
-                                                    <div class="d-flex flex-column gap-2">
-                                                        ${proceso.documentos.map(doc => {
-                                                            const fechaSubida = doc.fecha_subida
-                                                                ? formatFechaCorta(doc.fecha_subida)
-                                                                : 'Fecha no disponible';
-                                                            let icon = 'fa-link text-warning';
-                                                            if (doc.tipo_documento === 'voucher')       icon = 'fa-receipt text-success';
-                                                            else if (doc.tipo_documento === 'pdf')      icon = 'fa-file-pdf text-danger';
-                                                            else if (doc.tipo_documento === 'imagen')   icon = 'fa-file-image text-primary';
-                                                            else if (doc.ruta_archivo && doc.ruta_archivo.includes('drive.google.com'))
-                                                                icon = 'fa-brands fa-google-drive text-warning';
+${(() => {
+    
+    // Filtrar: solo documentos del usuario actual O del administrador
+    const documentosPermitidos = proceso.documentos.filter(doc => {
+    const esAdmin = doc.user && (
+        doc.user.name === 'Administrador del Sistema' ||
+        doc.user.name === 'ADMINISTRADOR DEL SISTEMA' ||
+        doc.user.name?.toLowerCase() === 'administrador del sistema' ||
+        doc.user.id === 14  // ID del administrador
+    );    
+const esMiDocumento = doc.user_id === {{ auth()->id() }};
+        return esAdmin || esMiDocumento;  // 👈 Solo míos o del admin
+    });
+    
+    if (documentosPermitidos.length === 0) {
+        return '<p class="text-muted mt-2 mb-0 small">No hay documentos disponibles</p>';
+    }
+    
+    return `
+        <div class="mt-3 pt-3 border-top">
+            <small class="text-muted d-block mb-2">
+                <i class="fas fa-paperclip me-1"></i>
+                Documentos adjuntos (${documentosPermitidos.length}):
+            </small>
+            <div class="d-flex flex-column gap-2">
+                ${documentosPermitidos.map(doc => {
+                    const fechaSubida = doc.fecha_subida
+                        ? formatFechaCorta(doc.fecha_subida)
+                        : 'Fecha no disponible';
+                    let icon = 'fa-link text-warning';
+                    if (doc.tipo_documento === 'voucher')       icon = 'fa-receipt text-success';
+                    else if (doc.tipo_documento === 'pdf')      icon = 'fa-file-pdf text-danger';
+                    else if (doc.tipo_documento === 'imagen')   icon = 'fa-file-image text-primary';
+                    else if (doc.ruta_archivo && doc.ruta_archivo.includes('drive.google.com'))
+                        icon = 'fa-brands fa-google-drive text-warning';
 
-                                                            const uploaderBadge = badgeSubidoPor(doc);
+                    const uploaderBadge = badgeSubidoPor(doc);
 
-                                                            return `
-                                                            <div class="p-2 bg-light rounded documento-item">
-                                                                <div class="d-flex align-items-center justify-content-between">
-                                                                    <div class="d-flex flex-column gap-1 flex-grow-1">
-                                                                        <div class="d-flex align-items-center gap-2 flex-wrap">
-                                                                            <i class="fas ${icon}"></i>
-                                                                            <span class="small fw-semibold">${doc.nombre_original}</span>
-                                                                            ${uploaderBadge}
-                                                                        </div>
-                                                                        <small class="text-muted ms-4 fecha-subida">
-                                                                            <i class="far fa-calendar-alt me-1"></i>Subido: ${fechaSubida}
-                                                                        </small>
-                                                                    </div>
-                                                                    <a href="${doc.ruta_archivo}"
-                                                                       target="_blank"
-                                                                       rel="noopener noreferrer"
-                                                                       class="btn btn-sm btn-outline-secondary ms-2 flex-shrink-0">
-                                                                        <i class="fas fa-eye me-1"></i>Ver
-                                                                    </a>
-                                                                </div>
-                                                                ${doc.observaciones ? `
-                                                                <div class="mt-2 ms-1 p-2 rounded observacion-doc">
-                                                                    <small class="text-secondary">
-                                                                        <i class="fas fa-comment-dots me-1 text-warning"></i>
-                                                                        <strong>Observación:</strong> ${doc.observaciones}
-                                                                    </small>
-                                                                </div>` : ''}
-                                                            </div>`;
-                                                        }).join('')}
-                                                    </div>
-                                                </div>
-                                            ` : '<p class="text-muted mt-2 mb-0 small">Sin documentos subidos</p>'}
+                    return `
+                    <div class="p-2 bg-light rounded documento-item">
+                        <div class="d-flex align-items-center justify-content-between">
+                            <div class="d-flex flex-column gap-1 flex-grow-1">
+                                <div class="d-flex align-items-center gap-2 flex-wrap">
+                                    <i class="fas ${icon}"></i>
+                                    <span class="small fw-semibold">${doc.nombre_original}</span>
+                                    ${uploaderBadge}
+                                </div>
+                                <small class="text-muted ms-4 fecha-subida">
+                                    <i class="far fa-calendar-alt me-1"></i>Subido: ${fechaSubida}
+                                </small>
+                            </div>
+                            <a href="${doc.ruta_archivo}"
+                               target="_blank"
+                               rel="noopener noreferrer"
+                               class="btn btn-sm btn-outline-secondary ms-2 flex-shrink-0">
+                                <i class="fas fa-eye me-1"></i>Ver
+                            </a>
+                        </div>
+                        ${doc.observaciones ? `
+                        <div class="mt-2 ms-1 p-2 rounded observacion-doc">
+                            <small class="text-secondary">
+                                <i class="fas fa-comment-dots me-1 text-warning"></i>
+                                <strong>Observación:</strong> ${doc.observaciones}
+                            </small>
+                        </div>` : ''}
+                    </div>`;
+                }).join('')}
+            </div>
+        </div>
+    `;
+})()}
 
                                             ${puedeSubir ? `
                                                 <div class="mt-3 text-end">

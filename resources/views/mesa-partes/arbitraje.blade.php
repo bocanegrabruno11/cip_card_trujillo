@@ -69,9 +69,6 @@
 
 <div class="container mt-4">
 
-    {{-- novalidate: desactiva validacion nativa del browser para evitar el error
-         "invalid form control is not focusable" en inputs ocultos. Toda la
-         validacion la maneja el JS del submit. --}}
     <form id="arbitrajeForm" novalidate>
         @csrf
 
@@ -145,14 +142,13 @@
                     <input type="text" class="form-control" id="demandante-dni" readonly>
                 </div>
 
-                <div class="col-md-3">
-                    <label class="form-label">Nombres <span class="text-danger">*</span></label>
-                    <input type="text" class="form-control" id="demandante-nombres" placeholder="Nombres">
+                <div class="col-md-6">
+                    <label class="form-label">Nombres y Apellidos <span class="text-danger">*</span></label>
+                    <input type="text" class="form-control" id="demandante-nombres_apellidos" placeholder="Ej: Juan Carlos Pérez Gómez">
                 </div>
-
-                <div class="col-md-3">
-                    <label class="form-label">Apellidos <span class="text-danger">*</span></label>
-                    <input type="text" class="form-control" id="demandante-apellidos" placeholder="Apellidos">
+                <div class="col-md-6">
+                    <label class="form-label">Razón Social <span class="text-danger">*</span></label>
+                    <input type="text" class="form-control" id="demandante-razon_social" placeholder="Ej: Empresa SAC">
                 </div>
 
                 <div class="col-md-3">
@@ -225,8 +221,6 @@
         </div>
 
         <!-- Voucher de pago (obligatorio) -->
-        <!-- SIN required en el input: evita "invalid form control not focusable" -->
-        <!-- La validacion obligatoria la maneja el JS -->
         <div class="mb-4">
             <label class="form-label">Voucher de Pago <span class="text-danger">*</span></label>
             <div class="file-upload-area p-3 border rounded" id="voucher-area"
@@ -428,9 +422,9 @@ function construirResumen() {
         ? resumen.ok.push(`Designacion arbitral: <strong>${designacion}</strong>`)
         : resumen.alertas.push('No se ingreso designacion arbitral (campo opcional).');
 
-    const nombreDemandante   = document.getElementById('demandante-nombres').value.trim();
-    const apellidoDemandante = document.getElementById('demandante-apellidos').value.trim();
-    resumen.ok.push(`Demandante registrado: <strong>${nombreDemandante} ${apellidoDemandante}</strong>`);
+    const nombresApellidosDemandante = document.getElementById('demandante-nombres_apellidos').value.trim();
+    const razonSocialDemandante      = document.getElementById('demandante-razon_social').value.trim();
+    resumen.ok.push(`Demandante registrado: <strong>${nombresApellidosDemandante} - ${razonSocialDemandante}</strong>`);
 
     const totalDemandados = document.querySelectorAll('.demandado-item').length;
     totalDemandados > 0
@@ -478,8 +472,13 @@ document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('demandante-telefono').value   = data.persona.celular         || '';
             document.getElementById('demandante-correo').value     = data.persona.correo_contacto || '';
 
-            if (data.persona.nombres)   document.getElementById('demandante-nombres').value   = data.persona.nombres;
-            if (data.persona.apellidos) document.getElementById('demandante-apellidos').value  = data.persona.apellidos;
+           if (data.persona.nombres || data.persona.apellidos) {
+                const nombreCompleto = [data.persona.nombres, data.persona.apellidos].filter(Boolean).join(' ');
+                document.getElementById('demandante-nombres_apellidos').value = nombreCompleto;
+            }
+            if (data.persona.razon_social) {
+                document.getElementById('demandante-razon_social').value = data.persona.razon_social;
+            }
             if (data.persona.email)     document.getElementById('demandante-correo').value     = data.persona.email;
             if (data.persona.telefono)  document.getElementById('demandante-telefono').value   = data.persona.telefono;
         })
@@ -503,7 +502,6 @@ document.addEventListener('DOMContentLoaded', () => {
             area.style.borderColor = '#dc3545';
             return;
         }
-        // Verde si OK, normal si vacio
         area.style.borderColor = file ? '#198754' : '';
     });
 
@@ -543,14 +541,16 @@ function agregarDemandado() {
                        maxlength="8" data-id="${id}" oninput="soloNumeros(this, 8)">
                 <small class="text-danger campo-error" id="error-${id}" style="display:none;"></small>
             </div>
-            <div class="col-md-3">
-                <label class="form-label">Nombres <span class="text-danger">*</span></label>
-                <input type="text" class="form-control campo-nombres" placeholder="Nombres" data-id="${id}">
+
+            <div class="col-md-6">
+                <label class="form-label">Nombres y Apellidos <span class="text-danger">*</span></label>
+                <input type="text" class="form-control campo-nombres_apellidos" placeholder="Ej: María López Torres" data-id="${id}">
             </div>
-            <div class="col-md-3">
-                <label class="form-label">Apellidos <span class="text-danger">*</span></label>
-                <input type="text" class="form-control campo-apellidos" placeholder="Apellidos" data-id="${id}">
+            <div class="col-md-6">
+                <label class="form-label">Razón Social <span class="text-danger">*</span></label>
+                <input type="text" class="form-control campo-razon_social" placeholder="Ej: Corporación XYZ" data-id="${id}">
             </div>
+
             <div class="col-md-3">
                 <label class="form-label">RUC <span class="text-muted small">(opcional)</span></label>
                 <input type="text" class="form-control campo-ruc" placeholder="20123456789"
@@ -585,7 +585,7 @@ function eliminarDemandado(id) {
 document.getElementById('arbitrajeForm').addEventListener('submit', function (e) {
     e.preventDefault();
 
-    // ── Validacion manual de campos obligatorios (novalidate activo) ──────────
+    // ── Validacion manual de campos obligatorios ──────────────────────────────
     const materia = document.querySelector('[name="nombre_materia"]').value.trim();
     if (!materia) { showError('La materia del arbitraje es obligatoria.'); return; }
 
@@ -601,22 +601,26 @@ document.getElementById('arbitrajeForm').addEventListener('submit', function (e)
     // ── Demandante ────────────────────────────────────────────────────────────
     const personas = [];
 
-    const nombresD   = document.getElementById('demandante-nombres').value.trim();
-    const apellidosD = document.getElementById('demandante-apellidos').value.trim();
+    const nombresApellidosD = document.getElementById('demandante-nombres_apellidos').value.trim();
+    const razonSocialD      = document.getElementById('demandante-razon_social').value.trim();
     const correoD    = document.getElementById('demandante-correo').value.trim();
     const telefonoD  = document.getElementById('demandante-telefono').value.trim();
     const rucD       = document.getElementById('demandante-ruc').value.trim();
     const domicilioD = document.getElementById('demandante-direccion').value.trim();
 
-    if (!nombresD || !apellidosD) {
-        showError('Los nombres y apellidos del demandante son obligatorios.');
+    if (!nombresApellidosD) {
+        showError('Los Nombres y Apellidos del demandante son obligatorios.');
+        return;
+    }
+    if (!razonSocialD) {
+        showError('La Razón Social del demandante es obligatoria.');
         return;
     }
 
     personas.push({
         dni:       dniDemandante,
-        nombres:   nombresD,
-        apellidos: apellidosD,
+        nombres_apellidos: nombresApellidosD,
+        razon_social:      razonSocialD,
         correo:    correoD,
         telefono:  telefonoD,
         ruc:       rucD,
@@ -631,50 +635,75 @@ document.getElementById('arbitrajeForm').addEventListener('submit', function (e)
     document.querySelectorAll('.demandado-item').forEach(div => {
         const id             = div.getAttribute('data-id');
         const dniInput       = div.querySelector('.campo-dni');
-        const nombresInput   = div.querySelector('.campo-nombres');
-        const apellidosInput = div.querySelector('.campo-apellidos');
+        const nombresApellidosInput = div.querySelector('.campo-nombres_apellidos');
+        const razonSocialInput      = div.querySelector('.campo-razon_social');
         const correoInput    = div.querySelector('.campo-correo');
         const telefonoInput  = div.querySelector('.campo-telefono');
         const rucInput       = div.querySelector('.campo-ruc');
         const direccionInput = div.querySelector('.campo-direccion');
         const errorEl        = document.getElementById(`error-${id}`);
 
-        errorEl.style.display = 'none';
-        dniInput.classList.remove('is-invalid');
+        if (errorEl) errorEl.style.display = 'none';
+        if (dniInput) dniInput.classList.remove('is-invalid');
+
+        if (!dniInput || !nombresApellidosInput || !razonSocialInput) {
+            hayError = true;
+            errores.push('Error al cargar los campos del demandado.');
+            return;
+        }
 
         const dni       = dniInput.value.trim();
-        const nombres   = nombresInput.value.trim();
-        const apellidos = apellidosInput.value.trim();
+        const nombresApellidos = nombresApellidosInput.value.trim();
+        const razonSocial      = razonSocialInput.value.trim();
         const correo    = correoInput    ? correoInput.value.trim()    : '';
         const telefono  = telefonoInput  ? telefonoInput.value.trim()  : '';
         const ruc       = rucInput       ? rucInput.value.trim()       : '';
         const direccion = direccionInput ? direccionInput.value.trim() : '';
 
         if (dni.length !== 8) {
-            errorEl.textContent   = 'El DNI debe tener exactamente 8 digitos.';
-            errorEl.style.display = 'block';
-            dniInput.classList.add('is-invalid');
+            if (errorEl) {
+                errorEl.textContent   = 'El DNI debe tener exactamente 8 digitos.';
+                errorEl.style.display = 'block';
+            }
+            if (dniInput) dniInput.classList.add('is-invalid');
             hayError = true;
             errores.push('Hay DNI invalidos en los demandados.');
             return;
         }
 
         if (isDNIDuplicado(dni, personas)) {
-            errorEl.textContent   = 'Este DNI ya esta registrado en el arbitraje.';
-            errorEl.style.display = 'block';
-            dniInput.classList.add('is-invalid');
+            if (errorEl) {
+                errorEl.textContent   = 'Este DNI ya esta registrado en el arbitraje.';
+                errorEl.style.display = 'block';
+            }
+            if (dniInput) dniInput.classList.add('is-invalid');
             hayError = true;
             errores.push('Hay DNI duplicados.');
             return;
         }
 
-        if (!nombres || !apellidos) {
+        if (!nombresApellidos) {
             hayError = true;
             errores.push('Nombres y Apellidos son obligatorios en todos los demandados.');
             return;
         }
+        
+        if (!razonSocial) {
+            hayError = true;
+            errores.push('Razón Social es obligatoria en todos los demandados.');
+            return;
+        }
 
-        personas.push({ dni, nombres, apellidos, correo, telefono, ruc, tipo: 'Demandado', direccion });
+        personas.push({ 
+            dni, 
+            nombres_apellidos: nombresApellidos,
+            razon_social: razonSocial,
+            correo, 
+            telefono, 
+            ruc, 
+            tipo: 'Demandado', 
+            direccion 
+        });
     });
 
     if (hayError) {
@@ -687,7 +716,7 @@ document.getElementById('arbitrajeForm').addEventListener('submit', function (e)
         return;
     }
 
-    // ── Voucher obligatorio (sin required en el HTML, validado aqui) ──────────
+    // ── Voucher obligatorio ───────────────────────────────────────────────────
     const file = document.getElementById('voucher').files[0];
     if (!file) {
         document.getElementById('voucher-area').style.borderColor = '#dc3545';
@@ -709,7 +738,7 @@ document.getElementById('arbitrajeForm').addEventListener('submit', function (e)
         return;
     }
 
-    // ── Capturar resumen ANTES del fetch (DOM aun tiene los datos) ────────────
+    // ── Capturar resumen ANTES del fetch ──────────────────────────────────────
     const resumenPrevio = construirResumen();
 
     toggleSpinner(true);
@@ -726,8 +755,8 @@ document.getElementById('arbitrajeForm').addEventListener('submit', function (e)
 
     personas.forEach((p, i) => {
         formData.append(`personas[${i}][dni]`,       p.dni);
-        formData.append(`personas[${i}][nombres]`,   p.nombres);
-        formData.append(`personas[${i}][apellidos]`, p.apellidos);
+        formData.append(`personas[${i}][nombres_apellidos]`, p.nombres_apellidos);
+        formData.append(`personas[${i}][razon_social]`,      p.razon_social);
         formData.append(`personas[${i}][correo]`,    p.correo    || '');
         formData.append(`personas[${i}][telefono]`,  p.telefono  || '');
         formData.append(`personas[${i}][ruc]`,       p.ruc       || '');

@@ -142,8 +142,8 @@ body {
     <!-- MENÚ -->
     <a href="/dashboard-eventos">🏠 Registros</a>
     <a href="/validacion">✔️ Validación</a>
-
-    <!-- USER -->
+    <a href="/envio-tarjetas">📧 Envio de Tarjetas</a>
+    <a href="/asistencia">📋 Asistencia</a>
     <div class="sidebar-bottom">
         <div><strong>{{ session('usuario') }}</strong></div>
 

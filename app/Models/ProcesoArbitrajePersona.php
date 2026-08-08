@@ -12,8 +12,8 @@ class ProcesoArbitrajePersona extends Model
     protected $fillable = [
         'arbitraje_id',
         'dni',
-        'nombres',
-        'apellidos',
+        'nombres_apellidos',
+        'razon_social',
         'correo',
         'telefono',
         'ruc',

@@ -140,7 +140,14 @@
                                     <div class="d-flex justify-content-between align-items-center">
                                         <div>
                                             <span class="badge {{ $persona->tipo === 'Demandante' ? 'bg-success' : 'bg-warning text-dark' }} mb-2">{{ $persona->tipo }}</span>
-                                            <h6 class="mb-1">{{ $persona->nombres }} {{ $persona->apellidos }}</h6>
+                                            <h6 class="mb-1">
+                                                <i class="fas fa-user me-1"></i> {{ $persona->nombres_apellidos }}
+                                            </h6>
+                                            @if($persona->razon_social)
+                                                <small class="text-muted d-block mb-1">
+                                                    <i class="fas fa-building me-1"></i> <strong>Razón Social:</strong> {{ $persona->razon_social }}
+                                                </small>
+                                            @endif                                           
                                             <p class="mb-0 text-muted small"><i class="fas fa-id-card me-1"></i>DNI: {{ $persona->dni }}</p>
                                             <p class="mb-0 text-muted small"><i class="fas fa-phone-alt me-1"></i>Teléfono: {{ $persona->telefono }}</p>
                                             @if($persona->correo)<p class="mb-0 text-muted small"><i class="fas fa-envelope me-1"></i>{{ $persona->correo }}</p>@endif

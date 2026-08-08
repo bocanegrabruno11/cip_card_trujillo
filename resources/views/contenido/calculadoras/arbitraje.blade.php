@@ -62,7 +62,7 @@
 
 <div class="calc-card">
     <div class="header-section">
-        <img src="{{ asset('img/cdlima_encabezado.jpg') }}" alt="Logo CARD" class="header-logo">
+        <img src="{{ asset('img/banner-cipcdll1.jpeg') }}" alt="Logo CARD" class="header-logo">
         <h4 class="calc-title">Calculadora de Arbitraje</h4>
         <p class="text-muted small mt-2">Estimación de gastos y honorarios</p>
     </div>

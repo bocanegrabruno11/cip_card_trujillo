@@ -199,7 +199,7 @@
         </div>
 
         <div class="info-card">
-            <h3>Nómina de Árbitros</h3>
+            <h3>Nómina de Árbitros y Secretarios Arbitrales</h3>
             <p>Consulte la lista actualizada de profesionales certificados y sus especialidades dentro de nuestro centro de arbitraje.</p>
             <a href="{{ route('institucion-arbitral.nomina') }}" class="btn-card">Ver Profesionales</a>
         </div>

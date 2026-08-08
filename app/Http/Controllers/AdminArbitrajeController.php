@@ -101,8 +101,8 @@ class AdminArbitrajeController extends Controller
                     'personas'             => $arbitraje->personas->map(fn($p) => [
                         'id_proceso_arbitraje_persona' => $p->id_proceso_arbitraje_persona,
                         'dni'       => $p->dni,
-                        'nombres'   => $p->nombres,
-                        'apellidos' => $p->apellidos,
+                        'nombres_apellidos'=> $p->nombres_apellidos,  // ✅ Campo unificado
+                            'razon_social'     => $p->razon_social,       // ✅ Nuevo campo
                         'correo'    => $p->correo,
                         'telefono'  => $p->telefono,
                         'ruc'       => $p->ruc,

@@ -67,7 +67,7 @@
     </div>
 
     <div class="chart-wrapper">
-        <img src="{{ asset('img/organigrama_2025.png') }}" 
+        <img src="{{ asset('img/organigrama-2026.jpg') }}" 
              alt="Organigrama CARD CD La Libertad" 
              class="organigrama-img" 
              onclick="openLightbox(this.src)">

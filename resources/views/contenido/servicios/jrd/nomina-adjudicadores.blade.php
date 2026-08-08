@@ -145,7 +145,7 @@
         @endforelse
     </div>
 
-    <h2 class="section-title">Nómina de Árbitros</h2>
+    <h2 class="section-title">Miembros de la nómina</h2>
     <div class="arbitro-grid">
         @foreach($adjudicadoresNomina as $per)
             <div class="arbitro-card" onclick="verDetalle({{ json_encode($per) }})">
