@@ -330,6 +330,22 @@ body {
             
             </ul>
         </li>
+
+        <li>
+            <a href="{{ route('arbitros.index') }}" class="menu-link">
+                <i class="fas fa-gavel"></i> 
+                <span class="menu-text">Árbitros</span>
+            </a>
+        </li>
+
+        <li>
+            <a href="#" class="menu-link">
+                <i class="fas fa-user-tie"></i> Adjudicadores
+            </a>
+        </li>
+
+    </ul>
+</li>
     </ul>
 
     <div class="user-footer">

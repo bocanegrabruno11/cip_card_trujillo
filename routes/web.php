@@ -34,7 +34,7 @@ use App\Http\Controllers\CipcdllController;
 use App\Http\Controllers\AsistentasCipcdllFinalController;
 use App\Http\Controllers\EnviarTarjetaController;
 use App\Http\Controllers\AsistenciaQrController;
-
+use App\Http\Controllers\ArbitroController;
 
 // Vista login (FALTABA ESTO)
 Route::get('/login-eventos', function () {
@@ -432,6 +432,9 @@ Route::get('/procesos/arbitraje/{id_arbitraje}/completo', [ProcesoDeArbitrajeCon
     });
 
     Route::resource('admin-usuarios', UsuariosController::class);
+
+    Route::resource('arbitros', ArbitroController::class);
+
 
 });
 
