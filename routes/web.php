@@ -34,7 +34,7 @@ use App\Http\Controllers\CipcdllController;
 use App\Http\Controllers\AsistentasCipcdllFinalController;
 use App\Http\Controllers\EnviarTarjetaController;
 use App\Http\Controllers\AsistenciaQrController;
-
+use App\Http\Controllers\ArbitroController;
 
 // Vista login (FALTABA ESTO)
 Route::get('/login-eventos', function () {
@@ -441,6 +441,8 @@ Route::get('/procesos/arbitraje/{id_arbitraje}/completo', [ProcesoDeArbitrajeCon
     // Logs de Actividad de Usuarios
     Route::get('admin/logs', [App\Http\Controllers\LogUsuarioController::class, 'index'])->name('admin.logs.index');
     Route::get('admin/logs/exportar', [App\Http\Controllers\LogUsuarioController::class, 'exportarTxt'])->name('admin.logs.export');
+    Route::resource('arbitros', ArbitroController::class);
+
 
 });
 
