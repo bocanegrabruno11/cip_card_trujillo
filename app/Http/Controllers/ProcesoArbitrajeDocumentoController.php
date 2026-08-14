@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
+use App\Models\ActividadUsuario;
 
 class ProcesoArbitrajeDocumentoController extends Controller
 {
@@ -118,12 +119,14 @@ class ProcesoArbitrajeDocumentoController extends Controller
                     'documento_id' => $documento->id_proceso_arbitraje_documento
                 ]);
             }
-            $asuntoNoti = $esResubirVoucher ? 'Voucher Re-subido' : 'Nuevo Documento Adjuntado';
+            $asuntoNoti = $esResubirVoucher ? 'Voucher Re-subido - ' . $arbitraje->numero_expediente : 'Nuevo Documento Adjuntado - ' . $arbitraje->numero_expediente;
             $textoNoti = $esResubirVoucher 
-                ? "Se ha vuelto a subir el voucher de pago del expediente. El caso ha retornado al estado de Validación."
-                : "Se ha adjuntado un nuevo documento al expediente de arbitraje: {$request->nombre_documento}.";
+                ? "Se ha vuelto a subir el voucher de pago del expediente {$arbitraje->numero_expediente}. El caso ha retornado al estado de Validación."
+                : "Se ha adjuntado un nuevo documento ({$request->nombre_documento}) al expediente de arbitraje {$arbitraje->numero_expediente}.";
 
             NotificacionService::notificarInvolucrados($arbitraje, 'arbitraje', $asuntoNoti, $textoNoti);
+            
+            ActividadUsuario::log('Subió el documento "' . $request->nombre_documento . '" al expediente ' . $arbitraje->numero_expediente, 'Mesa de Partes / Admin - Documentos Arbitraje');
 
             DB::commit();
 
@@ -185,10 +188,12 @@ class ProcesoArbitrajeDocumentoController extends Controller
                 NotificacionService::notificarInvolucrados(
                     $arbitraje, 
                     'arbitraje', 
-                    'Nueva Observación en Documento', 
-                    "Se ha agregado un comentario u observación al documento: {$documento->nombre_original}. Por favor, revise los detalles en su casilla."
+                    'Nueva Observación en Documento - ' . $arbitraje->numero_expediente, 
+                    "Se ha agregado un comentario u observación al documento: {$documento->nombre_original} del expediente {$arbitraje->numero_expediente}. Por favor, revise los detalles en su casilla."
                 );
             }
+            
+            ActividadUsuario::log('Agregó un comentario en el documento "' . $documento->nombre_original . '" del expediente ' . $arbitraje->numero_expediente, 'Admin - Documentos Arbitraje');
 
             return response()->json([
                 'success' => true,

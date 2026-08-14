@@ -327,8 +327,17 @@ body {
                         <i class="fas fa-layer-group"></i> Lista de usuarios
                     </a>
                 </li>
-            
             </ul>
+        </li>
+        <li class="menu-item">
+            <a href="{{ route('admin.soporte_contactos.index') }}" class="menu-link">
+                <i class="fas fa-headset"></i> <span>Soporte Técnico</span>
+            </a>
+        </li>
+        <li class="menu-item">
+            <a href="{{ route('admin.logs.index') }}" class="menu-link">
+                <i class="fas fa-history"></i> <span>Logs de Usuarios</span>
+            </a>
         </li>
     </ul>
 
@@ -445,6 +454,8 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 </script>
+
+@include('components.soporte-flotante')
 
 </body>
 </html>

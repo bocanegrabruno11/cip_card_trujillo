@@ -8,11 +8,13 @@ use Illuminate\Support\Facades\DB;
 use App\Models\Arbitraje;
 use App\Services\NotificacionService;
 use Illuminate\Support\Facades\Log;
+use App\Models\ActividadUsuario;
 
 class ArbitrajeController extends Controller
 {
     public function registros()
     {
+        ActividadUsuario::log('Accedió al panel de control de arbitrajes', 'Mesa de Partes - Arbitrajes');
         return view('mesa-partes.arbitrajes.control');
     }
 
@@ -213,8 +215,8 @@ class ArbitrajeController extends Controller
             NotificacionService::notificarInvolucrados(
                 $arbitraje, 
                 'arbitraje', 
-                'Expediente Archivado', 
-                'El proceso de arbitraje ha sido archivado por la administración. No se realizarán más acciones sobre este expediente.'
+                'Expediente Archivado - ' . $arbitraje->numero_expediente, 
+                "El proceso de arbitraje del expediente {$arbitraje->numero_expediente} ha sido archivado por la administración. No se realizarán más acciones sobre este expediente."
             );
             return response()->json(['success' => true, 'message' => 'El arbitraje ha sido archivado correctamente']);
         } catch (\Exception $e) {

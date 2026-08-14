@@ -127,6 +127,16 @@
 
         .forgot-link:hover, .register-link:hover { color: #E31E24; }
 
+        .btn-manual {
+            display: flex; justify-content: center; align-items: center; gap: 8px;
+            width: 100%; background-color: #f8f9fa; color: #333;
+            padding: 12px; border-radius: 5px; border: 1px solid #ddd;
+            font-size: 14px; font-weight: bold; text-decoration: none;
+            transition: all 0.3s; margin-top: 15px; margin-bottom: 15px;
+        }
+        .btn-manual:hover { background-color: #e2e6ea; color: #E31E24; border-color: #ccc; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+        .btn-manual i { color: #E31E24; font-size: 18px; }
+
         .d-none { display: none; }
 
         /* Media Query para pantallas pequeñas (Móviles) */
@@ -201,8 +211,8 @@
                     <a href="{{ route('register') }}" class="register-link">
                         ¿No tienes una cuenta? Regístrate ahora
                     </a>
-                    <a href="{{ asset('docs/manuales/Manual_de_Usuario_2026_CARDCIPCDLL.pdf') }}" target="_blank" class="register-link">
-                        <i class="fas fa-file-pdf" style="margin-right: 5px;"></i> ¿Necesitas ayuda? Ver Manual del Usuario
+                    <a href="{{ asset('docs/manuales/Manual_de_Usuario_2026_CARDCIPCDLL.pdf') }}" target="_blank" class="btn-manual">
+                        <i class="fas fa-file-pdf"></i> ¿Necesitas ayuda? Ver Manual del Usuario
                     </a>
                 </form>
             </div>

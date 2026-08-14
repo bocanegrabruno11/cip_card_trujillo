@@ -13,11 +13,13 @@ use App\Models\ProcesoJrdDocumento;
 use App\Models\EtapaJrd;
 use App\Models\User;
 use App\Services\NotificacionService;
+use App\Models\ActividadUsuario;
 
 class AdminJrdController extends Controller
 {
     public function index()
     {
+        ActividadUsuario::log('Accedió al listado de JRD', 'Admin - JRD');
         return view('Admin.Jrd');
     }
 
@@ -169,6 +171,10 @@ class AdminJrdController extends Controller
             ])->findOrFail($id);
 
             $etapasActivas = EtapaJrd::activos()->get();
+            $procesosOrdenados = $jrd->procesos->sortByDesc('fecha_creacion');
+            $jrd->setRelation('procesos', $procesosOrdenados);
+
+            ActividadUsuario::log('Accedió al detalle del expediente JRD ' . $jrd->numero_expediente, 'Admin - Detalle JRD');
 
             return view('Admin.Jrd-detalle', compact('jrd', 'etapasActivas'));
 
@@ -189,6 +195,8 @@ class AdminJrdController extends Controller
             $request->validate([
                 'comentario' => 'nullable|string|max:500'
             ]);
+
+            DB::beginTransaction();
 
             $jrd = Jrd::findOrFail($id_jrd);
 
@@ -222,9 +230,11 @@ class AdminJrdController extends Controller
             NotificacionService::notificarTitular(
                 $jrd, 
                 'jrd', 
-                'Voucher Validado', 
-                'Su comprobante de pago ha sido aprobado exitosamente por la administración.'
+                'Voucher Validado - ' . $jrd->numero_expediente, 
+                "Su comprobante de pago para el expediente JRD {$jrd->numero_expediente} ha sido aprobado exitosamente por la administración."
             );
+            
+            ActividadUsuario::log('Aprobó la solicitud y voucher del expediente JRD ' . $jrd->numero_expediente, 'Admin - Detalle JRD');
             
             $siguienteEtapa = EtapaJrd::where('estado', 1)
                 ->where('id', '>', $procesoActual->id_etapa_jrd)
@@ -245,10 +255,13 @@ class AdminJrdController extends Controller
                 NotificacionService::notificarInvolucrados(
                     $jrd, 
                     'jrd', 
-                    'Avance de Etapa en JRD', 
-                    "El expediente JRD ha avanzado a la etapa: {$siguienteEtapa->nombre}."
+                    'Avance de Etapa en JRD - ' . $jrd->numero_expediente, 
+                    "El expediente JRD {$jrd->numero_expediente} ha avanzado a la etapa: {$siguienteEtapa->nombre}."
                 );
 
+                ActividadUsuario::log('Avanzó la etapa del expediente JRD ' . $jrd->numero_expediente . ' a ' . $siguienteEtapa->nombre, 'Admin - Detalle JRD');
+
+                DB::commit();
                 return response()->json([
                     'success' => true,
                     'message' => 'Voucher aprobado. Ahora en etapa: ' . $siguienteEtapa->nombre,
@@ -258,19 +271,23 @@ class AdminJrdController extends Controller
             $jrd->estado             = 'terminado';
             $jrd->fecha_finalizacion = now();
             $jrd->save();
-            NotificacionService::notificarInvolucrados(
+            NotificacionService::notificarTitular(
                 $jrd, 
                 'jrd', 
-                'Proceso JRD Finalizado', 
-                'El expediente correspondiente a esta Junta de Resolución de Disputas ha sido concluido formalmente.'
+                'Proceso JRD Finalizado - ' . $jrd->numero_expediente, 
+                "El expediente JRD {$jrd->numero_expediente} ha sido concluido formalmente."
             );
 
+            ActividadUsuario::log('Finalizó el arbitraje JRD del expediente ' . $jrd->numero_expediente, 'Admin - Detalle JRD');
+
+            DB::commit();
             return response()->json([
                 'success' => true,
                 'message' => 'Voucher aprobado y JRD finalizado (última etapa completada).',
             ]);
 
         } catch (\Exception $e) {
+            DB::rollBack();
             Log::error('Error al aceptar voucher:', ['error' => $e->getMessage()]);
             return response()->json([
                 'success' => false,
@@ -286,7 +303,10 @@ class AdminJrdController extends Controller
                 'motivo' => 'required|string|max:500'
             ]);
 
+            DB::beginTransaction();
+
             $jrd = Jrd::findOrFail($id_jrd);
+            $motivo = $request->motivo;
             $jrd->estado = 'observado';
             $jrd->save();
 
@@ -297,16 +317,20 @@ class AdminJrdController extends Controller
             NotificacionService::notificarTitular(
                 $jrd, 
                 'jrd', 
-                'Solicitud Observada - Voucher Rechazado', 
-                "El voucher subido ha sido observado por la administración. Motivo: {$request->motivo}."
+                'Solicitud Observada - Voucher Rechazado - ' . $jrd->numero_expediente, 
+                "El voucher subido para el expediente JRD {$jrd->numero_expediente} ha sido observado por la administración. Motivo: {$request->motivo}."
             );
             
+            ActividadUsuario::log('Observó/rechazó la solicitud del expediente JRD ' . $jrd->numero_expediente, 'Admin - Detalle JRD');
+
+            DB::commit();
             return response()->json([
                 'success' => true,
                 'message' => 'Voucher rechazado. JRD marcado como observado.',
             ]);
 
         } catch (\Exception $e) {
+            DB::rollBack();
             Log::error('Error al rechazar voucher:', ['error' => $e->getMessage()]);
             return response()->json([
                 'success' => false,
@@ -318,6 +342,7 @@ class AdminJrdController extends Controller
 public function archivar(Request $request, $id_jrd)
 {
     try {
+        DB::beginTransaction();
         $jrd = Jrd::findOrFail($id_jrd);
         
         // Verificar si ya está archivado o terminado
@@ -333,23 +358,23 @@ public function archivar(Request $request, $id_jrd)
         $jrd->fecha_finalizacion = now();
         $jrd->save();
         
-        // NOTA: Se eliminó la actualización de ProcesoJrd
-        // para que NO se finalicen los procesos automáticamente
-        
         // Opcional: Si quieres mantener las notificaciones
         NotificacionService::notificarInvolucrados(
             $jrd, 
             'jrd', 
-            'Expediente JRD Archivado', 
-            'El proceso correspondiente a esta Junta de Resolución de Disputas ha sido archivado por la administración.'
+            'Expediente JRD Archivado - ' . $jrd->numero_expediente, 
+            "El expediente JRD {$jrd->numero_expediente} ha sido archivado por la administración."
         );
-
+        ActividadUsuario::log('Archivó el expediente JRD ' . $jrd->numero_expediente, 'Admin - Detalle JRD');
+        
+        DB::commit();
         return response()->json([
             'success' => true,
             'message' => 'JRD archivado correctamente.',
         ]);
 
     } catch (\Exception $e) {
+        DB::rollBack();
         Log::error('Error al archivar JRD:', ['error' => $e->getMessage()]);
         return response()->json([
             'success' => false,

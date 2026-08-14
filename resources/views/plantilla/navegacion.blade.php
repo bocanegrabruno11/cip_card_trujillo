@@ -307,20 +307,21 @@
        6. BURBUJAS SOCIALES DERECHAS
        ========================================= */
     .social-bubbles {
-        position: fixed; bottom: 20px; right: 20px; z-index: 999;
-        display: flex; flex-direction: column; gap: 10px;
+        position: fixed; top: 50%; right: 0; transform: translateY(-50%); z-index: 999;
+        display: flex; flex-direction: column; gap: 10px; align-items: flex-end;
     }
     .social-bubble {
-        width: 45px; height: 45px; border-radius: 50%;
-        display: flex; align-items: center; justify-content: center;
+        width: 45px; height: 45px; border-radius: 25px 0 0 25px;
+        display: flex; align-items: center; justify-content: flex-start; padding-left: 8px;
         cursor: pointer; position: relative; overflow: hidden;
-        transition: width 0.3s ease; background: rgba(255,255,255,0.1);
-        border: 2px solid rgba(0,0,0,0.1); backdrop-filter: blur(2px);
+        transition: width 0.3s ease; background: rgba(255,255,255,0.9);
+        border: 1px solid rgba(0,0,0,0.15); border-right: none;
+        backdrop-filter: blur(4px); box-shadow: -2px 2px 8px rgba(0,0,0,0.1);
     }
-    .social-bubble:hover { width: 140px; border-radius: 25px; justify-content: flex-start; padding-left: 10px; background: white; }
-    .social-bubble img { width: 25px; height: 25px; }
+    .social-bubble:hover { width: 140px; background: white; }
+    .social-bubble img { width: 25px; height: 25px; flex-shrink: 0; }
     .social-text { 
-        position: absolute; left: 45px; white-space: nowrap; opacity: 0; 
+        position: absolute; left: 40px; white-space: nowrap; opacity: 0; 
         font-size: 14px; font-weight: bold; color: #333; transition: 0.3s;
     }
     .social-bubble:hover .social-text { opacity: 1; }
@@ -705,4 +706,5 @@
             }
         });
     </script>
+    @include('components.soporte-flotante')
     @yield('scripts')

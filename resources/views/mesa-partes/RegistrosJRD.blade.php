@@ -503,7 +503,7 @@ function renderJrd(data) {
                     <div class="row mb-4">
                         <div class="col-md-12">
                             <h6 class="text-danger border-bottom pb-2 mb-3">
-                                <i class="fas fa-info-circle me-2"></i>Información General
+                                <i class="fas fa-info-circle me-2"></i>Seguimiento del expediente
                             </h6>
                             ${jrd.numero_expediente ? `<p><strong>Número de Expediente:</strong> ${jrd.numero_expediente}</p>` : ''}
                             <p><strong>Materia:</strong> ${jrd.nombre_materia || 'No especificada'}</p>

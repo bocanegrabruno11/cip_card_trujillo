@@ -467,7 +467,7 @@ function generarCardHTML(arb) {
 
                 <div class="row mb-4">
                     <div class="col-md-12">
-                        <h6 class="text-danger border-bottom pb-2 mb-3"><i class="fas fa-info-circle me-2"></i>Información General</h6>
+                        <h6 class="text-danger border-bottom pb-2 mb-3"><i class="fas fa-info-circle me-2"></i>Seguimiento del expediente</h6>
                         ${arb.numero_expediente ? `<p><strong>Número de Expediente:</strong> <span class="badge bg-dark">${arb.numero_expediente}</span></p>` : ''}
                         <p><strong>Materia:</strong> ${arb.nombre_materia || 'No especificada'}</p>
                         <p><strong>Pretensiones:</strong> ${arb.pretenciones||'No especificadas'}</p>

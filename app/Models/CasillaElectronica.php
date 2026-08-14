@@ -11,7 +11,12 @@ class CasillaElectronica extends Model
     public $timestamps = false;
 
     protected $fillable = [
-        'user_id', 'emisor_id', 'arbitraje_id', 'jrd_id', 'asunto', 'comentario', 'estado', 'fecha_registro'
+        'user_id', 'emisor_id', 'arbitraje_id', 'jrd_id', 'asunto', 'comentario', 'estado', 'fecha_registro', 'fecha_lectura'
+    ];
+
+    protected $casts = [
+        'fecha_registro' => 'datetime',
+        'fecha_lectura' => 'datetime',
     ];
 
     public function emisor() {

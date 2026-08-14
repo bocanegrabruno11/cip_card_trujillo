@@ -13,6 +13,7 @@ use App\Models\ProcesoArbitrajePersona;
 use App\Models\ProcesoDeArbitraje;
 use App\Models\ProcesoArbitrajeDocumento;
 use App\Models\EtapaArbitral;
+use App\Models\ActividadUsuario;
 
 class ArbitrajeRegistroController extends Controller
 {
@@ -191,6 +192,7 @@ class ArbitrajeRegistroController extends Controller
                 ]);
             }
 
+            ActividadUsuario::log('Registró un nuevo arbitraje: ' . $numeroExpediente, 'Mesa de Partes - Nuevo Arbitraje');
             DB::commit();
 
             Log::info('Arbitraje registrado exitosamente', [

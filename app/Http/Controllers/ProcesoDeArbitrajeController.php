@@ -110,8 +110,8 @@ class ProcesoDeArbitrajeController extends Controller
                 NotificacionService::notificarInvolucrados(
                     $arbitraje, 
                     'arbitraje', 
-                    'Avance de Etapa', 
-                    "El expediente ha avanzado a la etapa: '{$siguienteEtapa->nombre}'."
+                    'Avance de Etapa - ' . $arbitraje->numero_expediente, 
+                    "El expediente {$arbitraje->numero_expediente} ha avanzado a la etapa: '{$siguienteEtapa->nombre}'."
                 );
                 DB::commit();
                 
@@ -133,8 +133,8 @@ class ProcesoDeArbitrajeController extends Controller
                 NotificacionService::notificarInvolucrados(
                     $arbitraje, 
                     'arbitraje', 
-                    'Arbitraje Concluido', 
-                    "Se han completado todas las etapas procesales. El arbitraje ha finalizado exitosamente."
+                    'Arbitraje Concluido - ' . $arbitraje->numero_expediente, 
+                    "Se han completado todas las etapas procesales. El arbitraje {$arbitraje->numero_expediente} ha finalizado exitosamente."
                 );
                 DB::commit();
                 
@@ -205,8 +205,8 @@ class ProcesoDeArbitrajeController extends Controller
             NotificacionService::notificarTitular(
                 $arbitraje, 
                 'arbitraje', 
-                'Inicio de Proceso Arbitral', 
-                "Se ha dado inicio formal a su proceso de arbitraje en la etapa: '{$primeraEtapa->nombre}'."
+                'Inicio de Proceso Arbitral - ' . $arbitraje->numero_expediente, 
+                "Se ha dado inicio formal a su proceso de arbitraje {$arbitraje->numero_expediente} en la etapa: '{$primeraEtapa->nombre}'."
             );
             
             return response()->json([

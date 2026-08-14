@@ -39,6 +39,13 @@
         </div>
     @endif
 
+    @if(isset($notificaciones_sin_leer) && $notificaciones_sin_leer > 0)
+        <div class="alert alert-dismissible fade show shadow-sm fw-bold border-0" role="alert" style="background-color: #ffc107; color: #000;">
+            <i class="fas fa-bell me-2"></i> Tienes {{ $notificaciones_sin_leer }} mensaje(s) sin leer.
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    @endif
+
     <div class="card shadow border-0">
         <div class="card-body p-0">
             <div class="table-responsive">
@@ -47,6 +54,7 @@
                         <tr>
                             <th class="ps-4">Estado</th>
                             <th>Fecha</th>
+                            <th>Fecha Lectura</th>
                             <th>Expediente</th>
                             <th>Remitente</th>
                             <th>Asunto</th>
@@ -83,6 +91,9 @@
                             
                             <td class="text-muted" style="font-size: 0.9rem;">
                                 {{ \Carbon\Carbon::parse($n->fecha_registro)->format('d/m/Y H:i') }}
+                            </td>
+                            <td class="text-muted" style="font-size: 0.9rem;">
+                                {{ $n->fecha_lectura ? \Carbon\Carbon::parse($n->fecha_lectura)->format('d/m/Y H:i') : '-' }}
                             </td>
 
                             <td>
@@ -123,7 +134,7 @@
                         </tr>
                         @empty
                         <tr>
-                            <td colspan="6" class="text-center py-5 text-muted">
+                            <td colspan="7" class="text-center py-5 text-muted">
                                 <i class="fas fa-folder-open fa-3x mb-3 d-block"></i>
                                 No se encontraron notificaciones con los filtros aplicados.
                              </td>

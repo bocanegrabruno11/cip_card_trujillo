@@ -5,11 +5,13 @@ namespace App\Http\Controllers;
 use App\Models\CasillaElectronica;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use App\Models\ActividadUsuario;
 
 class CasillaElectronicaController extends Controller
 {
     public function index(Request $request)
     {
+        ActividadUsuario::log('Accedió a su Casilla Electrónica', 'Mesa de Partes - Casilla Electrónica');
         // Iniciamos la consulta cargando todas las relaciones necesarias
         $query = CasillaElectronica::with(['emisor', 'arbitraje', 'jrd'])
             ->where('user_id', Auth::id());
@@ -41,13 +43,17 @@ class CasillaElectronicaController extends Controller
 
     public function show($id)
     {
+        ActividadUsuario::log('Visualizó el mensaje de la Casilla Electrónica con ID ' . $id, 'Mesa de Partes - Casilla Electrónica');
         // Cargamos las relaciones para poder vincular al expediente
         $notificacion = CasillaElectronica::with(['emisor', 'arbitraje', 'jrd'])
             ->where('user_id', Auth::id())
             ->findOrFail($id);
         
         if ($notificacion->estado == 'no leido') {
-            $notificacion->update(['estado' => 'leido']);
+            $notificacion->update([
+                'estado' => 'leido',
+                'fecha_lectura' => now()
+            ]);
         }
 
         return view('mesa-partes.casilla.show', compact('notificacion'));
@@ -57,6 +63,9 @@ class CasillaElectronicaController extends Controller
     {
         $notificacion = CasillaElectronica::where('user_id', Auth::id())->findOrFail($id);
         $notificacion->delete();
+        
+        ActividadUsuario::log('Eliminó un mensaje de la Casilla Electrónica con ID ' . $id, 'Mesa de Partes - Casilla Electrónica');
+        
         return redirect()->route('casilla.index')->with('success', 'Notificación eliminada.');
     }
 }

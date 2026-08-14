@@ -9,6 +9,7 @@ use App\Services\NotificacionService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
+use App\Models\ActividadUsuario;
 
 class JrdDocumentoController extends Controller
 {
@@ -91,6 +92,8 @@ class JrdDocumentoController extends Controller
                 'observaciones'   => $request->observaciones ?? null,
                 'user_id'         => Auth::id()
             ]);
+            
+            ActividadUsuario::log('Subió el documento "' . $request->nombre_documento . '" al expediente JRD ' . $jrd->numero_expediente, 'Mesa de Partes / Admin - Documentos JRD');
            if ($proceso->estado === 'observado') {
                 $proceso->estado = 'activo';
                 $proceso->save();
@@ -106,8 +109,8 @@ class JrdDocumentoController extends Controller
             NotificacionService::notificarInvolucrados(
                 $jrd, 
                 'jrd', 
-                'Nuevo Documento Adjuntado', 
-                "Se ha adjuntado un nuevo documento al expediente JRD: {$request->nombre_documento}. Ingrese al sistema para revisarlo."
+                'Nuevo Documento Adjuntado - ' . $jrd->numero_expediente, 
+                "Se ha adjuntado un nuevo documento al expediente JRD {$jrd->numero_expediente}: {$request->nombre_documento}. Ingrese al sistema para revisarlo."
             );
 
             return response()->json([
@@ -211,8 +214,8 @@ class JrdDocumentoController extends Controller
                 NotificacionService::notificarInvolucrados(
                     $jrd, 
                     'jrd', 
-                    'Nuevo Documento Adjuntado', 
-                    "Una de las partes involucradas ha adjuntado un nuevo documento al expediente JRD: {$request->nombre_documento}."
+                    'Nuevo Documento Adjuntado - ' . $jrd->numero_expediente, 
+                    "Una de las partes involucradas ha adjuntado un nuevo documento al expediente JRD {$jrd->numero_expediente}: {$request->nombre_documento}."
                 );
             return response()->json([
                 'success'   => true,

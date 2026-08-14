@@ -7,11 +7,13 @@ use App\Models\User;
 use App\Models\Persona;
 use Spatie\Permission\Models\Role;
 use Illuminate\Support\Facades\Hash;
+use App\Models\ActividadUsuario;
 
 class UsuariosController extends Controller
 {
     public function index(Request $request)
     {
+        ActividadUsuario::log('Accedió al listado de usuarios', 'Admin - Usuarios');
         $query = User::with(['persona', 'roles'])->where('activo', '=', 1);
 
         // Filtro por Rol
@@ -38,6 +40,7 @@ class UsuariosController extends Controller
 
     public function create()
     {
+        ActividadUsuario::log('Accedió al formulario de creación de usuario', 'Admin - Usuarios');
         $roles = Role::all();
         return view('Admin.usuarios.create', compact('roles'));
     }
@@ -69,12 +72,15 @@ class UsuariosController extends Controller
             'correo_contacto' => $request->email,
         ]);
 
+        ActividadUsuario::log('Creó al usuario con DNI ' . $request->dni, 'Admin - Usuarios');
+
         return redirect()->route('admin-usuarios.index')->with('success', 'Usuario creado exitosamente.');
     }
 
     public function edit($id)
     {
         $usuario = User::with('persona')->findOrFail($id);
+        ActividadUsuario::log('Accedió a editar al usuario con ID ' . $id, 'Admin - Usuarios');
         $roles = Role::all();
         return view('Admin.usuarios.edit', compact('usuario', 'roles'));
     }
@@ -101,6 +107,8 @@ class UsuariosController extends Controller
         // Actualizar rol
         $usuario->syncRoles([$request->rol]);
 
+        ActividadUsuario::log('Editó al usuario con ID ' . $id, 'Admin - Usuarios');
+
         return redirect()->route('admin-usuarios.index')->with('success', 'Usuario actualizado exitosamente.');
     }
 
@@ -108,6 +116,8 @@ class UsuariosController extends Controller
     {
         $usuario = User::findOrFail($id);
         $usuario->update(['activo' => 0]); 
+
+        ActividadUsuario::log('Desactivó/Eliminó al usuario con ID ' . $id, 'Admin - Usuarios');
 
         return redirect()->route('admin-usuarios.index')->with('success', 'Usuario desactivado correctamente.');
     }

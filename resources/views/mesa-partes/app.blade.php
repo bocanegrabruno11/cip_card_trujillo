@@ -246,6 +246,39 @@
             background-color: #f8f9fa;
             font-weight: 600;
         }
+        
+        @keyframes fadeOutUpCustom {
+            0% { opacity: 0; transform: translateY(10px); }
+            10% { opacity: 1; transform: translateY(0); }
+            80% { opacity: 1; transform: translateY(0); }
+            100% { opacity: 0; transform: translateY(-10px); visibility: hidden; }
+        }
+        .msg-popup {
+            position: absolute;
+            left: -5px;
+            top: -35px;
+            background: #ffc107;
+            color: #000;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: bold;
+            white-space: nowrap;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            animation: fadeOutUpCustom 5s forwards;
+            pointer-events: none;
+            z-index: 1000;
+        }
+        .msg-popup::after {
+            content: '';
+            position: absolute;
+            top: 100%;
+            left: 15px;
+            transform: translateY(0);
+            border-width: 5px 5px 0 5px;
+            border-style: solid;
+            border-color: #ffc107 transparent transparent transparent;
+        }
     </style>
     
     @stack('styles')
@@ -286,6 +319,7 @@
                                 style="font-size: 0.6rem; padding: 0.25em 0.5em; margin-left: -5px; border: 2px solid var(--cip-red);">
                                 {{ $notificaciones_sin_leer > 9 ? '9+' : $notificaciones_sin_leer }}
                             </span>
+                            <div class="msg-popup">¡Tienes {{ $notificaciones_sin_leer }} mensaje(s)!</div>
                         @endif
                     </span>
                     <span class="ms-2">Casilla electrónica</span>
@@ -474,5 +508,7 @@
     </script>
     
     @stack('scripts')
+
+    @include('components.soporte-flotante')
 </body>
 </html>

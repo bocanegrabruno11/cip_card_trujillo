@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Jrd;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
+use App\Models\ActividadUsuario;
 
 class JrdController extends Controller
 {
@@ -13,6 +14,7 @@ class JrdController extends Controller
      */
     public function misJrd()
     {
+        ActividadUsuario::log('Accedió al panel de control de JRD', 'Mesa de Partes - JRD');
         return view('mesa-partes.mis-jprd');
     }
 

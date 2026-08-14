@@ -433,6 +433,15 @@ Route::get('/procesos/arbitraje/{id_arbitraje}/completo', [ProcesoDeArbitrajeCon
 
     Route::resource('admin-usuarios', UsuariosController::class);
 
+    // CRUD Soporte Técnico Contactos
+    Route::resource('admin/soporte-contactos', App\Http\Controllers\SoporteTecnicoContactoController::class)
+        ->names('admin.soporte_contactos')
+        ->except(['create', 'show', 'edit']);
+
+    // Logs de Actividad de Usuarios
+    Route::get('admin/logs', [App\Http\Controllers\LogUsuarioController::class, 'index'])->name('admin.logs.index');
+    Route::get('admin/logs/exportar', [App\Http\Controllers\LogUsuarioController::class, 'exportarTxt'])->name('admin.logs.export');
+
 });
 
 Route::get('/sherlock-holmes', function () {

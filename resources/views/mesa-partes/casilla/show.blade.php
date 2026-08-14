@@ -3,12 +3,6 @@
 
 @section('content')
 <div class="container-fluid">
-    <div class="mb-4">
-        <a href="{{ route('casilla.index') }}" class="btn btn-sm btn-secondary shadow-sm">
-            <i class="fas fa-arrow-left me-1"></i> Volver a la bandeja
-        </a>
-    </div>
-
     @php
         // Obtener el número de expediente según el tipo
         $numeroExpediente = null;
@@ -30,87 +24,60 @@
             : ($tipoExpediente === 'arbitraje' ? "Arbitraje #{$notificacion->arbitraje_id}" : "JRD #{$notificacion->jrd_id}");
     @endphp
 
-    <div class="row justify-content-center">
-        <div class="col-lg-10">
-            <div class="card shadow border-0 overflow-hidden">
-                <div class="card-header bg-white py-4 px-4 border-bottom">
-                    <div class="d-flex justify-content-between align-items-start">
-                        <div>
-                            <h4 class="fw-bold text-dark mb-1">{{ $notificacion->asunto }}</h4>
-                            <p class="text-muted mb-0">
-                                <i class="far fa-calendar-alt me-1"></i> Recibido el: {{ \Carbon\Carbon::parse($notificacion->fecha_registro)->format('d/m/Y h:i A') }}
-                            </p>
-                        </div>
-                        <span class="badge {{ $notificacion->estado == 'leido' ? 'bg-success' : 'bg-primary' }} px-3 py-2">
-                            {{ ucfirst($notificacion->estado) }}
-                        </span>
-                    </div>
+    <div class="mb-3 d-flex justify-content-between align-items-center">
+        <a href="{{ route('casilla.index') }}" class="btn btn-sm btn-light border shadow-sm text-secondary hover-dark">
+            <i class="fas fa-arrow-left me-1"></i> Volver a la bandeja
+        </a>
+        <form action="{{ route('casilla.destroy', $notificacion->id_casilla) }}" method="POST" onsubmit="return confirm('¿Estás seguro de eliminar este mensaje?')">
+            @csrf @method('DELETE')
+            <button type="submit" class="btn btn-sm btn-outline-danger shadow-sm">
+                <i class="fas fa-trash-alt me-1"></i> Eliminar mensaje
+            </button>
+        </form>
+    </div>
+
+    <div class="card shadow-sm border-0 rounded-3">
+        <div class="card-body p-4 p-md-5">
+            <!-- Encabezado del Mensaje -->
+            <div class="border-bottom pb-4 mb-4">
+                <div class="d-flex align-items-center justify-content-between mb-3">
+                    <h3 class="fw-bold text-dark mb-0">{{ $notificacion->asunto }}</h3>
+                    
+                    @if($notificacion->arbitraje_id || $notificacion->jrd_id)
+                        <a href="{{ $notificacion->arbitraje_id ? route('RegistrosArbitraje') : route('registros.jrd') }}" 
+                           class="btn {{ $notificacion->arbitraje_id ? 'btn-primary' : 'btn-success' }} btn-sm rounded-pill px-3 shadow-sm btn-ir-expediente"
+                           data-tipo="{{ $tipoExpediente }}"
+                           data-id="{{ $expedienteId }}">
+                            <i class="fas {{ $notificacion->arbitraje_id ? 'fa-scale-balanced' : 'fa-gavel' }} me-1"></i> Ver {{ $tituloExpediente }}
+                        </a>
+                    @endif
                 </div>
 
-                <div class="card-body bg-light border-bottom px-4">
-                    <div class="d-flex align-items-center">
-                        <div class="flex-shrink-0">
-                            <div class="bg-danger text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 50px; height: 50px; font-size: 1.2rem;">
-                                <i class="fas fa-user-tie"></i>
-                            </div>
+                <div class="d-flex align-items-center text-muted">
+                    <div class="bg-light border rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 48px; height: 48px;">
+                        <i class="fas fa-building text-secondary fs-5"></i>
+                    </div>
+                    <div>
+                        <div class="fw-bold text-dark fs-6">{{ $notificacion->emisor->name ?? 'Administración CIP' }} <span class="badge bg-light text-secondary border ms-2 fw-normal">De: {{ $notificacion->emisor->email ?? 'admin@cip.org.pe' }}</span></div>
+                        <div class="small mt-1">
+                            <i class="far fa-calendar-alt me-1"></i> Recibido: <span class="fw-semibold text-dark">{{ \Carbon\Carbon::parse($notificacion->fecha_registro)->format('d/m/Y h:i A') }}</span>
+                            <span class="mx-2 text-light-gray">|</span>
+                            <i class="far fa-eye me-1"></i> Leído: <span class="fw-semibold text-dark">{{ $notificacion->fecha_lectura ? \Carbon\Carbon::parse($notificacion->fecha_lectura)->format('d/m/Y h:i A') : \Carbon\Carbon::now()->format('d/m/Y h:i A') }}</span>
                         </div>
-                        <div class="ms-3">
-                            <h6 class="mb-0 fw-bold">{{ $notificacion->emisor->name ?? 'Administración CIP' }}</h6>
-                            <small class="text-muted">{{ $notificacion->emisor->email ?? 'admin@cip.org.pe' }}</small>
-                        </div>
                     </div>
-                </div>
-
-                <div class="card-body p-4">
-                    <h6 class="text-uppercase text-muted fw-bold small mb-3">Mensaje:</h6>
-                    <div class="p-4 bg-white border rounded" style="min-height: 150px; line-height: 1.6; color: #333;">
-                        {!! nl2br(e($notificacion->comentario)) !!}
-                    </div>
-
-                    <hr class="my-4">
-
-                    <div class="d-flex flex-column align-items-center p-3 bg-light rounded border border-dashed">
-                        <p class="mb-2 fw-bold text-muted small"><i class="fas fa-link me-1"></i> EXPEDIENTE RELACIONADO</p>
-                        
-                        @if($notificacion->arbitraje_id)
-                            <h5 class="mb-3 text-dark">
-                                <i class="fas fa-scale-balanced me-2 text-primary"></i>
-                                {{ $tituloExpediente }}
-                            </h5>
-                            <a href="{{ route('RegistrosArbitraje') }}" 
-                               class="btn btn-primary px-4 shadow-sm btn-ir-expediente"
-                               data-tipo="arbitraje"
-                               data-id="{{ $expedienteId }}">
-                                <i class="fas fa-external-link-alt me-2"></i> Ir al Expediente de Arbitraje
-                            </a>
-
-                        @elseif($notificacion->jrd_id)
-                            <h5 class="mb-3 text-dark">
-                                <i class="fas fa-gavel me-2 text-success"></i>
-                                {{ $tituloExpediente }}
-                            </h5>
-                            <a href="{{ route('registros.jrd') }}" 
-                               class="btn btn-success px-4 shadow-sm btn-ir-expediente"
-                               data-tipo="jrd"
-                               data-id="{{ $expedienteId }}">
-                                <i class="fas fa-external-link-alt me-2"></i> Ir al Expediente JRD
-                            </a>
-
-                        @else
-                            <p class="text-muted italic mb-0">Esta notificación es de carácter general informativo.</p>
-                        @endif
-                    </div>
-                </div>
-
-                <div class="card-footer bg-white text-end py-3">
-                    <form action="{{ route('casilla.destroy', $notificacion->id_casilla) }}" method="POST" onsubmit="return confirm('¿Estás seguro de eliminar este mensaje?')">
-                        @csrf @method('DELETE')
-                        <button type="submit" class="btn btn-outline-danger btn-sm">
-                            <i class="fas fa-trash-alt me-1"></i> Eliminar de mi casilla
-                        </button>
-                    </form>
                 </div>
             </div>
+
+            <!-- Cuerpo del Mensaje -->
+            <div class="message-content" style="font-size: 1.05rem; line-height: 1.7; color: #333;">
+                {!! nl2br(e($notificacion->comentario)) !!}
+            </div>
+            
+            @if(!$notificacion->arbitraje_id && !$notificacion->jrd_id)
+                <div class="mt-4 pt-3 border-top">
+                    <p class="text-muted small mb-0"><i class="fas fa-info-circle me-1"></i> Esta notificación es de carácter general informativo.</p>
+                </div>
+            @endif
         </div>
     </div>
 </div>

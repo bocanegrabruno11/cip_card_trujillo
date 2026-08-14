@@ -10,6 +10,7 @@ use App\Models\EtapaArbitral;
 use App\Services\NotificacionService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use App\Models\ActividadUsuario;
 
 class VoucherController extends Controller
 {
@@ -71,10 +72,12 @@ class VoucherController extends Controller
                 NotificacionService::notificarTitular(
                     $arbitraje, 
                     'arbitraje', 
-                    'Voucher de Pago Aprobado', 
-                    'Su comprobante de pago ha sido validado correctamente por la administración. El proceso de arbitraje ha sido iniciado formalmente.'
+                    'Voucher de Pago Aprobado - ' . $arbitraje->numero_expediente, 
+                    "Su comprobante de pago para el expediente {$arbitraje->numero_expediente} ha sido validado correctamente por la administración. El proceso de arbitraje ha sido iniciado formalmente."
                 );
                 
+                ActividadUsuario::log('Aceptó el voucher del arbitraje ' . $arbitraje->numero_expediente, 'Admin - Voucher Arbitraje');
+
                 DB::commit();
                 
                 return response()->json([
@@ -98,9 +101,12 @@ class VoucherController extends Controller
                 NotificacionService::notificarTitular(
                     $arbitraje, 
                     'arbitraje', 
-                    'Pago Observado / Rechazado', 
-                    "Su comprobante de pago ha sido observado por la administración. Motivo: {$motivo}. Por favor, verifique su registro y vuelva a subir el voucher correcto."
+                    'Solicitud de Arbitraje Observada - ' . $arbitraje->numero_expediente, 
+                    "Su solicitud de arbitraje para el expediente {$arbitraje->numero_expediente} ha sido observada. Motivo detallado: {$motivo}. Por favor, revise y actualice su información."
                 );
+                
+                ActividadUsuario::log('Rechazó el voucher del arbitraje ' . $arbitraje->numero_expediente, 'Admin - Voucher Arbitraje');
+
                 DB::commit();
                 
                 return response()->json([

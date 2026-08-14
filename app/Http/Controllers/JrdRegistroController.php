@@ -11,6 +11,7 @@ use App\Models\ProcesoJrdPersona;
 use App\Models\ProcesoJrdDocumento;
 use App\Models\EtapaJrd;
 use Illuminate\Support\Facades\Log;
+use App\Models\ActividadUsuario;
 
 class JrdRegistroController extends Controller
 {
@@ -165,6 +166,7 @@ class JrdRegistroController extends Controller
                 Log::info('Documento Drive guardado:', ['id' => $docDrive->id_proceso_jrd_documento]);
             }
 
+            ActividadUsuario::log('Registró un nuevo expediente JRD: ' . $numeroExpediente, 'Mesa de Partes - Nuevo JRD');
             DB::commit();
 
             Log::info('=== JRD REGISTRADO EXITOSAMENTE ===', [

@@ -76,8 +76,8 @@ public function pasarSiguienteProceso(Request $request, $id_jrd)
             NotificacionService::notificarInvolucrados(
                     $jrd, 
                     'jrd', 
-                    'Avance de Etapa en JRD', 
-                    "El expediente JRD ha avanzado de la etapa '" . ($procesoActual->etapa->nombre ?? 'Anterior') . "' a la etapa: '{$siguienteEtapa->nombre}'."
+                    'Avance de Etapa en JRD - ' . $jrd->numero_expediente, 
+                    "El expediente JRD {$jrd->numero_expediente} ha avanzado de la etapa '" . ($procesoActual->etapa->nombre ?? 'Anterior') . "' a la etapa: '{$siguienteEtapa->nombre}'."
                 );
             return response()->json([
                 'success' => true,
