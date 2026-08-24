@@ -41,9 +41,9 @@ body {
     left: 0;
     display: flex;
     flex-direction: column;
-    z-index: 1050; /* Aumentado para estar sobre el overlay en móvil */
+    z-index: 1050;
     box-shadow: 2px 0 10px rgba(0,0,0,0.1);
-    transition: transform 0.3s ease; /* Transición suave para móvil */
+    transition: transform 0.3s ease;
 }
 
 .sidebar-header {
@@ -62,7 +62,7 @@ body {
     padding-left: 0;
     flex: 1;
     padding-top: 20px;
-    overflow-y: auto; /* Permite scroll si hay muchos items */
+    overflow-y: auto;
 }
 
 .menu-link {
@@ -162,7 +162,7 @@ body {
     background: none;
 }
 
-/* ===== CARDS Y UTILIDADES (Se mantienen igual) ===== */
+/* ===== CARDS Y UTILIDADES ===== */
 .card { border: none; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); transition: all 0.3s ease; }
 .card:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
 .card-header { background-color: transparent; border-bottom: 1px solid #e9ecef; padding: 18px 20px; font-weight: 600; }
@@ -179,9 +179,9 @@ body {
 .modal-header { border-bottom: 1px solid #e9ecef; background-color: #f8f9fa; border-radius: 12px 12px 0 0; }
 .modal-footer { border-top: 1px solid #e9ecef; }
 
-/* ===== ELEMENTOS MÓVILES (Nuevos) ===== */
+/* ===== ELEMENTOS MÓVILES ===== */
 .mobile-header {
-    display: none; /* Oculto en PC */
+    display: none;
     background: var(--cip-red);
     height: 60px;
     padding: 0 20px;
@@ -221,35 +221,35 @@ body {
     position: fixed;
     top: 0; left: 0; right: 0; bottom: 0;
     background: rgba(0,0,0,0.5);
-    z-index: 1040; /* Justo debajo del sidebar (1050) */
+    z-index: 1040;
     backdrop-filter: blur(2px);
 }
 
-/* ===== RESPONSIVE (Actualizado) ===== */
+/* ===== RESPONSIVE ===== */
 @media (max-width: 768px) {
     :root {
-        --sidebar-width: 260px; /* Mantiene un buen ancho al abrirse */
+        --sidebar-width: 260px;
     }
     
     .mobile-header {
-        display: flex; /* Muestra la cabecera en móvil */
+        display: flex;
     }
 
     .sidebar {
-        transform: translateX(-100%); /* Oculta la barra hacia la izquierda */
+        transform: translateX(-100%);
     }
 
     .sidebar.show {
-        transform: translateX(0); /* Muestra la barra al darle la clase .show */
+        transform: translateX(0);
     }
 
     .sidebar-overlay.show {
-        display: block; /* Muestra el fondo oscuro */
+        display: block;
     }
 
     .main-wrapper {
-        margin-left: 0; /* El contenido toma el 100% del ancho */
-        padding-top: 60px; /* Deja espacio para que la cabecera móvil no tape el contenido */
+        margin-left: 0;
+        padding-top: 60px;
     }
     
     .main-content {
@@ -278,26 +278,53 @@ body {
         <img src="{{ asset('img/logo.png') }}" alt="Logo CIP">
     </div>
 
+    @php
+        $user = auth()->user();
+        $esAdmin = $user && $user->hasRole('admin');
+        $esArbitro = $user && $user->esArbitro();
+    @endphp
+
     <ul class="sidebar-menu">
+        {{-- ============================================ --}}
+        {{-- ARBITRAJES (Visible para Admin y Árbitros)   --}}
+        {{-- ============================================ --}}
         <li class="menu-item">
             <a href="#" class="menu-link toggle-menu">
                 <i class="fas fa-gavel"></i> <span>Arbitrajes</span>
                 <i class="fas fa-chevron-down"></i>
             </a>
             <ul class="submenu">
+                {{-- Crear Etapas: SOLO ADMIN PURO --}}
+                @if($esAdmin && !$esArbitro)
                 <li>
                     <a href="{{ route('Admin.etapas.index') }}" class="menu-link">
                         <i class="fas fa-layer-group"></i> Crear Etapas Arbitrales
                     </a>
                 </li>
+                @endif
+                
+                {{-- Ver Arbitrajes: ADMIN y ÁRBITROS --}}
                 <li>
                     <a href="{{ route('Admin.Arbitraje') }}" class="menu-link">
                         <i class="fas fa-list-alt"></i> Ver Arbitrajes
                     </a>
                 </li>
+
+                {{-- Vincular Árbitros: SOLO ADMIN PURO (dentro de Arbitrajes) --}}
+                @if($esAdmin && !$esArbitro)
+                <li>
+                    <a href="{{ route('admin.arbitros.vincular') }}" class="menu-link">
+                        <i class="fas fa-link"></i> Vincular Árbitros
+                    </a>
+                </li>
+                @endif
             </ul>
         </li>
 
+        {{-- ============================================ --}}
+        {{-- JPRD (SOLO ADMIN PURO)                       --}}
+        {{-- ============================================ --}}
+        @if($esAdmin && !$esArbitro)
         <li class="menu-item">
             <a href="#" class="menu-link toggle-menu">
                 <i class="fas fa-users-cog"></i> <span>JPRD</span>
@@ -316,7 +343,13 @@ body {
                 </li>
             </ul>
         </li>
-         <li class="menu-item">
+        @endif
+
+        {{-- ============================================ --}}
+        {{-- USUARIOS (SOLO ADMIN PURO)                   --}}
+        {{-- ============================================ --}}
+        @if($esAdmin && !$esArbitro)
+        <li class="menu-item">
             <a href="#" class="menu-link toggle-menu">
                 <i class="fas fa-users-cog"></i> <span>Usuarios</span>
                 <i class="fas fa-chevron-down"></i>
@@ -329,37 +362,65 @@ body {
                 </li>
             </ul>
         </li>
+        @endif
+
+        {{-- ============================================ --}}
+        {{-- SOPORTE TÉCNICO (SOLO ADMIN PURO)            --}}
+        {{-- ============================================ --}}
+        @if($esAdmin && !$esArbitro)
         <li class="menu-item">
             <a href="{{ route('admin.soporte_contactos.index') }}" class="menu-link">
                 <i class="fas fa-headset"></i> <span>Soporte Técnico</span>
             </a>
         </li>
+        @endif
+
+        {{-- ============================================ --}}
+        {{-- LOGS DE USUARIOS (SOLO ADMIN PURO)           --}}
+        {{-- ============================================ --}}
+        @if($esAdmin && !$esArbitro)
         <li class="menu-item">
             <a href="{{ route('admin.logs.index') }}" class="menu-link">
                 <i class="fas fa-history"></i> <span>Logs de Usuarios</span>
             </a>
         </li>
+        @endif
 
+        {{-- ============================================ --}}
+        {{-- ÁRBITROS (SOLO ADMIN PURO)                   --}}
+        {{-- ============================================ --}}
+        @if($esAdmin && !$esArbitro)
         <li>
             <a href="{{ route('arbitros.index') }}" class="menu-link">
                 <i class="fas fa-gavel"></i> 
                 <span class="menu-text">Árbitros</span>
             </a>
         </li>
+        @endif
 
+        {{-- ============================================ --}}
+        {{-- ADJUDICADORES (SOLO ADMIN PURO)              --}}
+        {{-- ============================================ --}}
+        @if($esAdmin && !$esArbitro)
         <li>
             <a href="#" class="menu-link">
                 <i class="fas fa-user-tie"></i> Adjudicadores
             </a>
         </li>
+        @endif
 
-    </ul>
-</li>
     </ul>
 
     <div class="user-footer">
         <strong><i class="fas fa-user-circle me-1"></i> {{ Auth::user()->name ?? 'Administrador' }}</strong>
         <span>{{ Auth::user()->email ?? 'admin@cip.org.pe' }}</span>
+
+        {{-- Mostrar etiqueta de rol --}}
+        @if($esArbitro)
+            <span class="badge bg-info mt-1 d-block">🔵 Árbitro</span>
+        @elseif($esAdmin)
+            <span class="badge bg-danger mt-1 d-block">🔴 Administrador</span>
+        @endif
 
         <button type="button" class="btn-logout" data-bs-toggle="modal" data-bs-target="#logoutModal">
             <i class="fas fa-sign-out-alt"></i> Cerrar Sesión
@@ -415,13 +476,13 @@ if (mobileBtn && sidebar && overlay) {
     mobileBtn.addEventListener('click', () => {
         sidebar.classList.add('show');
         overlay.classList.add('show');
-        document.body.style.overflow = 'hidden'; // Evita que el fondo haga scroll
+        document.body.style.overflow = 'hidden';
     });
 
     overlay.addEventListener('click', () => {
         sidebar.classList.remove('show');
         overlay.classList.remove('show');
-        document.body.style.overflow = 'auto'; // Restaura el scroll
+        document.body.style.overflow = 'auto';
     });
 }
 
@@ -451,7 +512,7 @@ if(logoutForm) {
     });
 }
 
-// Abrir submenú activo si existe en localStorage
+// Abrir submenú activo
 document.addEventListener('DOMContentLoaded', function() {
     const currentPath = window.location.pathname;
     const menuItems = document.querySelectorAll('.menu-item');

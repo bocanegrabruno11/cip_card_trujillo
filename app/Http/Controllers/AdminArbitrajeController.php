@@ -13,6 +13,7 @@ use App\Models\EtapaArbitral;
 use App\Models\ProcesoArbitrajeDocumento;
 use App\Services\NotificacionService;
 use App\Models\ActividadUsuario;
+use Illuminate\Support\Facades\Auth;
 
 class AdminArbitrajeController extends Controller
 {
@@ -48,45 +49,135 @@ class AdminArbitrajeController extends Controller
     public function obtenerTodos(Request $request)
     {
         try {
-            $query = Arbitraje::with([
-                'personas',
-                'procesos' => function ($query) {
-                    $query->orderBy('fecha_creacion', 'desc');
-                },
-                'procesos.etapa',
-                'procesos.documentos' => function ($query) {
-                    $query->orderBy('fecha_subida', 'desc');
-                },
-                'procesos.documentos.user.persona',
-                'user.persona'
-            ]);
+            $user = Auth::user();
 
-            if ($request->has('dni') && $request->dni) {
-                $dni = $request->dni;
-                $query->where(function ($q) use ($dni) {
-                    $q->whereHas('user.persona', function ($sub) use ($dni) {
-                        $sub->where('dni', $dni);
-                    })->orWhereHas('personas', function ($sub) use ($dni) {
-                        $sub->where('dni', $dni);
-                    });
-                });
+            // ─── VERIFICAR SI EL USUARIO ES ÁRBITRO ──────────────────────────
+            $arbitroUser = DB::table('arbitro_user')
+                ->where('user_id', $user->id)
+                ->first();
+
+            $esArbitro = false;
+            $dniArbitro = null;
+
+            if ($arbitroUser) {
+                $arbitro = DB::table('arbitros')
+                    ->where('id', $arbitroUser->arbitro_id)
+                    ->first();
+
+                if ($arbitro && $arbitro->dni) {
+                    $esArbitro = true;
+                    $dniArbitro = $arbitro->dni;
+                }
             }
 
-            $arbitrajes = $query->orderBy('fecha_inicio', 'desc')->get();
+            // ──────────────────────────────────────────────────────────────
+            // PRIORIDAD 1: Si es ÁRBITRO → ver SOLO los casos donde está vinculado
+            // ──────────────────────────────────────────────────────────────
+            if ($esArbitro && $dniArbitro) {
+                $arbitrajesIds = ProcesoArbitrajePersona::where('dni', $dniArbitro)
+                    ->where('tipo', 'Arbitro')
+                    ->pluck('arbitraje_id')
+                    ->toArray();
 
+                if (empty($arbitrajesIds)) {
+                    return response()->json([
+                        'success' => true,
+                        'arbitrajes' => [],
+                        'info' => [
+                            'total' => 0,
+                            'mensaje' => 'No estás vinculado a ningún caso de arbitraje',
+                            'dni_arbitro' => $dniArbitro,
+                            'es_arbitro' => $esArbitro
+                        ]
+                    ]);
+                }
+
+                $query = Arbitraje::with([
+                    'personas',
+                    'procesos' => function ($query) {
+                        $query->orderBy('fecha_creacion', 'desc');
+                    },
+                    'procesos.etapa',
+                    'procesos.documentos' => function ($query) {
+                        $query->orderBy('fecha_subida', 'desc');
+                    },
+                    'procesos.documentos.user.persona',
+                    'user.persona'
+                ])
+                ->whereIn('id_arbitraje', $arbitrajesIds);
+
+                if ($request->has('dni') && $request->dni) {
+                    $dni = $request->dni;
+                    $query->where(function ($q) use ($dni) {
+                        $q->whereHas('user.persona', function ($sub) use ($dni) {
+                            $sub->where('dni', $dni);
+                        })->orWhereHas('personas', function ($sub) use ($dni) {
+                            $sub->where('dni', $dni);
+                        });
+                    });
+                }
+
+                $arbitrajes = $query->orderBy('fecha_inicio', 'desc')->get();
+
+            // ──────────────────────────────────────────────────────────────
+            // PRIORIDAD 2: Si es ADMIN (y NO es árbitro) → ver TODOS
+            // ──────────────────────────────────────────────────────────────
+            } elseif ($user && $user->hasRole('admin')) {
+                $query = Arbitraje::with([
+                    'personas',
+                    'procesos' => function ($query) {
+                        $query->orderBy('fecha_creacion', 'desc');
+                    },
+                    'procesos.etapa',
+                    'procesos.documentos' => function ($query) {
+                        $query->orderBy('fecha_subida', 'desc');
+                    },
+                    'procesos.documentos.user.persona',
+                    'user.persona'
+                ]);
+
+                if ($request->has('dni') && $request->dni) {
+                    $dni = $request->dni;
+                    $query->where(function ($q) use ($dni) {
+                        $q->whereHas('user.persona', function ($sub) use ($dni) {
+                            $sub->where('dni', $dni);
+                        })->orWhereHas('personas', function ($sub) use ($dni) {
+                            $sub->where('dni', $dni);
+                        });
+                    });
+                }
+
+                $arbitrajes = $query->orderBy('fecha_inicio', 'desc')->get();
+
+            // ──────────────────────────────────────────────────────────────
+            // PRIORIDAD 3: Otros casos
+            // ──────────────────────────────────────────────────────────────
+            } else {
+                return response()->json([
+                    'success' => true,
+                    'arbitrajes' => [],
+                    'info' => [
+                        'total' => 0,
+                        'mensaje' => 'No tienes permisos para ver arbitrajes'
+                    ]
+                ]);
+            }
+
+            // ──────────────────────────────────────────────────────────────
+            // FORMATEO DE RESULTADOS
+            // ──────────────────────────────────────────────────────────────
             $formattedArbitrajes = $arbitrajes->map(function ($arbitraje) {
                 $creador        = $arbitraje->user;
                 $personaCreador = $creador ? $creador->persona : null;
 
-                // ✅ Título formateado para usar en la vista
                 $tituloExpediente = $arbitraje->numero_expediente 
                     ? "Expediente N° {$arbitraje->numero_expediente}"
                     : ($arbitraje->nombre_materia ?? 'Sin expediente');
 
                 return [
                     'id_arbitraje'         => $arbitraje->id_arbitraje,
-                    'numero_expediente'    => $arbitraje->numero_expediente, // ✅ AGREGADO
-                    'titulo_expediente'    => $tituloExpediente, // ✅ TÍTULO FORMATEADO
+                    'numero_expediente'    => $arbitraje->numero_expediente,
+                    'titulo_expediente'    => $tituloExpediente,
                     'nombre_materia'       => $arbitraje->nombre_materia,
                     'pretenciones'         => $arbitraje->pretenciones,
                     'cuantia'              => $arbitraje->cuantia,
@@ -103,8 +194,8 @@ class AdminArbitrajeController extends Controller
                     'personas'             => $arbitraje->personas->map(fn($p) => [
                         'id_proceso_arbitraje_persona' => $p->id_proceso_arbitraje_persona,
                         'dni'       => $p->dni,
-                        'nombres_apellidos'=> $p->nombres_apellidos,  // ✅ Campo unificado
-                            'razon_social'     => $p->razon_social,       // ✅ Nuevo campo
+                        'nombres_apellidos'=> $p->nombres_apellidos,
+                        'razon_social'     => $p->razon_social,
                         'correo'    => $p->correo,
                         'telefono'  => $p->telefono,
                         'ruc'       => $p->ruc,
@@ -146,6 +237,11 @@ class AdminArbitrajeController extends Controller
             return response()->json([
                 'success'    => true,
                 'arbitrajes' => $formattedArbitrajes,
+                'info' => [
+                    'es_arbitro' => $esArbitro,
+                    'dni_arbitro' => $dniArbitro,
+                    'total' => $formattedArbitrajes->count()
+                ]
             ]);
 
         } catch (\Exception $e) {
@@ -160,6 +256,43 @@ class AdminArbitrajeController extends Controller
     public function detalle($id)
     {
         try {
+            $user = Auth::user();
+
+            // ─── VERIFICAR SI EL USUARIO ES ÁRBITRO ──────────────────────────
+            $arbitroUser = DB::table('arbitro_user')
+                ->where('user_id', $user->id)
+                ->first();
+
+            $esArbitro = false;
+            $dniArbitro = null;
+
+            if ($arbitroUser) {
+                $arbitro = DB::table('arbitros')
+                    ->where('id', $arbitroUser->arbitro_id)
+                    ->first();
+
+                if ($arbitro && $arbitro->dni) {
+                    $esArbitro = true;
+                    $dniArbitro = $arbitro->dni;
+                }
+            }
+
+            // ─── SI ES ÁRBITRO, VERIFICAR QUE ESTÉ VINCULADO AL CASO ──────────
+            if ($esArbitro && $dniArbitro) {
+                $estaVinculado = ProcesoArbitrajePersona::where('arbitraje_id', $id)
+                    ->where('dni', $dniArbitro)
+                    ->where('tipo', 'Arbitro')
+                    ->exists();
+
+                if (!$estaVinculado) {
+                    // Redirigir con mensaje de error a la lista de arbitrajes
+                    return redirect()->route('Admin.Arbitraje')
+                        ->with('error', 'No tienes permisos para ver este arbitraje porque no estás vinculado a él.');
+                }
+            }
+
+            // ─── SI ES ADMIN (y NO es árbitro) → puede ver todo ──────────────
+
             $arbitraje = Arbitraje::with([
                 'personas',
                 'procesos.etapa',
@@ -336,49 +469,46 @@ class AdminArbitrajeController extends Controller
         }
     }
 
-public function archivar(Request $request, $id)
-{
-    try {
-        DB::beginTransaction();
-        $arbitraje = Arbitraje::findOrFail($id);
-        
-        // Verificar si ya está archivado o terminado
-        if (in_array($arbitraje->estado, ['archivado', 'terminado', 'finalizado'])) {
+    public function archivar(Request $request, $id)
+    {
+        try {
+            DB::beginTransaction();
+            $arbitraje = Arbitraje::findOrFail($id);
+            
+            if (in_array($arbitraje->estado, ['archivado', 'terminado', 'finalizado'])) {
+                return response()->json([
+                    'success' => false, 
+                    'message' => 'El arbitraje ya está ' . $arbitraje->estado
+                ], 400);
+            }
+            
+            $arbitraje->update([
+                'estado' => 'archivado', 
+                'fecha_finalizacion' => now()
+            ]);
+            
+            NotificacionService::notificarInvolucrados(
+                $arbitraje, 
+                'arbitraje', 
+                'Expediente Archivado - ' . $arbitraje->numero_expediente, 
+                "El proceso de arbitraje del expediente {$arbitraje->numero_expediente} ha sido archivado por la administración. No se realizarán más acciones sobre este expediente."
+            );
+            ActividadUsuario::log('Archivó el expediente ' . $arbitraje->numero_expediente, 'Admin - Detalle Arbitraje');
+            
+            DB::commit();
+            
+            return response()->json([
+                'success' => true, 
+                'message' => 'El arbitraje ha sido archivado correctamente'
+            ]);
+            
+        } catch (\Exception $e) {
+            DB::rollBack();
+            \Log::error('Error en archivar:', ['message' => $e->getMessage()]);
             return response()->json([
                 'success' => false, 
-                'message' => 'El arbitraje ya está ' . $arbitraje->estado
-            ], 400);
+                'message' => 'Error interno: ' . $e->getMessage()
+            ], 500);
         }
-        
-        // Solo archivar, NO pasar al siguiente proceso
-        $arbitraje->update([
-            'estado' => 'archivado', 
-            'fecha_finalizacion' => now()
-        ]);
-        
-        // Notificar a los involucrados
-        NotificacionService::notificarInvolucrados(
-            $arbitraje, 
-            'arbitraje', 
-            'Expediente Archivado - ' . $arbitraje->numero_expediente, 
-            "El proceso de arbitraje del expediente {$arbitraje->numero_expediente} ha sido archivado por la administración. No se realizarán más acciones sobre este expediente."
-        );
-        ActividadUsuario::log('Archivó el expediente ' . $arbitraje->numero_expediente, 'Admin - Detalle Arbitraje');
-        
-        DB::commit();
-        
-        return response()->json([
-            'success' => true, 
-            'message' => 'El arbitraje ha sido archivado correctamente'
-        ]);
-        
-    } catch (\Exception $e) {
-        DB::rollBack();
-        \Log::error('Error en archivar:', ['message' => $e->getMessage()]);
-        return response()->json([
-            'success' => false, 
-            'message' => 'Error interno: ' . $e->getMessage()
-        ], 500);
     }
-}
 }

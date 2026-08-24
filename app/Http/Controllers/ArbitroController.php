@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\Arbitro;
 use App\Models\User;
 use App\Models\ArbitroUser;
+use App\Models\ProcesoArbitrajePersona;
+use App\Models\Arbitraje;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
@@ -18,7 +20,6 @@ class ArbitroController extends Controller
     public function index()
     {
         $arbitros = Arbitro::with('users')->paginate(10);
-        // Cambiar de 'arbitros.index' a 'Admin.arbitros.index'
         return view('Admin.arbitros.index', compact('arbitros'));
     }
 
@@ -27,7 +28,6 @@ class ArbitroController extends Controller
      */
     public function create()
     {
-        // Cambiar de 'arbitros.create' a 'Admin.arbitros.create'
         return view('Admin.arbitros.create');
     }
 
@@ -37,7 +37,6 @@ class ArbitroController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            // Datos del árbitro
             'nombre' => ['required', 'string', 'max:255'],
             'apellidos' => ['required', 'string', 'max:255'],
             'dni' => ['nullable', 'string', 'max:20'],
@@ -45,18 +44,13 @@ class ArbitroController extends Controller
             'telefono' => ['nullable', 'string', 'max:20'],
             'correo' => ['nullable', 'email', 'max:255'],
             'direccion' => ['nullable', 'string'],
-            
-            // Datos del usuario
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email'],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
         ], [
-            // Mensajes para árbitro
             'nombre.required' => 'El nombre del árbitro es obligatorio.',
             'apellidos.required' => 'Los apellidos del árbitro son obligatorios.',
             'correo.email' => 'El correo del árbitro debe ser un email válido.',
-            
-            // Mensajes para usuario
             'name.required' => 'El nombre de usuario es obligatorio.',
             'email.required' => 'El email de usuario es obligatorio.',
             'email.unique' => 'Este email ya está registrado.',
@@ -67,7 +61,6 @@ class ArbitroController extends Controller
         try {
             DB::beginTransaction();
 
-            // 1. Crear el usuario con rol 1
             $user = User::create([
                 'name' => $request->name,
                 'email' => $request->email,
@@ -75,10 +68,8 @@ class ArbitroController extends Controller
                 'activo' => 1
             ]);
 
-            // Asignar rol 1 (usando Spatie Permission)
-            $user->assignRole(1); // ID del rol
+            $user->assignRole(1);
 
-            // 2. Crear el árbitro
             $arbitro = Arbitro::create([
                 'nombre' => $request->nombre,
                 'apellidos' => $request->apellidos,
@@ -89,7 +80,6 @@ class ArbitroController extends Controller
                 'direccion' => $request->direccion,
             ]);
 
-            // 3. Relacionar árbitro con usuario en la tabla pivote
             ArbitroUser::create([
                 'arbitro_id' => $arbitro->id,
                 'user_id' => $user->id,
@@ -109,12 +99,24 @@ class ArbitroController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Arbitro $arbitro)
-    {
-        $arbitro->load('users');
-        // Cambiar de 'arbitros.show' a 'Admin.arbitros.show'
-        return view('Admin.arbitros.show', compact('arbitro'));
-    }
+/**
+ * Display the specified resource.
+ */
+public function show($id)
+{
+    $arbitro = Arbitro::with('users')->findOrFail($id);
+
+    // Obtener los casos donde este árbitro está vinculado
+    $casosVinculados = ProcesoArbitrajePersona::where('dni', $arbitro->dni)
+        ->where('tipo', 'Arbitro')
+        ->with(['arbitraje' => function($query) {
+            $query->with(['user.persona', 'personas']);
+        }])
+        ->orderBy('id_proceso_arbitraje_persona', 'desc')  // ✅ CAMBIADO
+        ->get();
+
+    return view('Admin.arbitros.show', compact('arbitro', 'casosVinculados'));
+}
 
     /**
      * Show the form for editing the specified resource.
@@ -123,7 +125,6 @@ class ArbitroController extends Controller
     {
         $arbitro->load('users');
         $usuario = $arbitro->users->first();
-        // Cambiar de 'arbitros.edit' a 'Admin.arbitros.edit'
         return view('Admin.arbitros.edit', compact('arbitro', 'usuario'));
     }
 
@@ -145,20 +146,17 @@ class ArbitroController extends Controller
         try {
             DB::beginTransaction();
 
-            // Actualizar árbitro
             $arbitro->update($request->only([
                 'nombre', 'apellidos', 'dni', 'ruc', 
                 'telefono', 'correo', 'direccion'
             ]));
 
-            // Actualizar usuario asociado
             $usuario = $arbitro->users->first();
             if ($usuario) {
                 $usuario->update([
                     'name' => $request->name ?? $usuario->name,
                 ]);
                 
-                // Si se proporciona nueva contraseña
                 if ($request->filled('password')) {
                     $request->validate([
                         'password' => ['required', 'confirmed', Rules\Password::defaults()],
@@ -188,16 +186,10 @@ class ArbitroController extends Controller
         try {
             DB::beginTransaction();
 
-            // Obtener el usuario asociado
             $usuario = $arbitro->users->first();
-            
-            // Eliminar relaciones en la tabla pivote
             $arbitro->users()->detach();
-            
-            // Eliminar el árbitro
             $arbitro->delete();
             
-            // Eliminar el usuario (opcional, dependiendo de tu lógica)
             if ($usuario) {
                 $usuario->delete();
             }

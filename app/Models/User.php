@@ -125,4 +125,12 @@ class User extends Authenticatable
     {
         return $query->where('activo', 0);
     }
+
+    /**
+ * Verifica si el usuario está registrado como árbitro
+ */
+    public function esArbitro()
+    {
+        return $this->arbitros()->exists();
+    }
 }

@@ -204,6 +204,7 @@ Route::get('/documentos/descargar/{filename}', [DocumentoController::class, 'des
 
 
 Route::middleware(['auth', 'checkrole:gestor_contenido'])->group(function () {
+    
     Route::get('/gestion-contenido', [PageController::class, 'gestionContenido'])->name('gestion-contenido');
     Route::resource('publicaciones', PublicacionController::class);
     Route::put('/gestor/publicaciones/{id}/estado', [PublicacionController::class, 'toggleEstado'])
@@ -442,6 +443,22 @@ Route::get('/procesos/arbitraje/{id_arbitraje}/completo', [ProcesoDeArbitrajeCon
     Route::get('admin/logs', [App\Http\Controllers\LogUsuarioController::class, 'index'])->name('admin.logs.index');
     Route::get('admin/logs/exportar', [App\Http\Controllers\LogUsuarioController::class, 'exportarTxt'])->name('admin.logs.export');
     Route::resource('arbitros', ArbitroController::class);
+
+    // ============================================
+    // VINCULACIÓN DE ÁRBITROS A CASOS
+    // ============================================
+    Route::get('/admin/arbitros/vincular', [App\Http\Controllers\AdminArbitroVinculacionController::class, 'index'])
+        ->name('admin.arbitros.vincular');
+    
+    Route::post('/admin/arbitros/vincular', [App\Http\Controllers\AdminArbitroVinculacionController::class, 'vincular'])
+        ->name('admin.arbitros.vincular.post');
+    
+    Route::post('/admin/arbitros/desvincular', [App\Http\Controllers\AdminArbitroVinculacionController::class, 'desvincular'])
+        ->name('admin.arbitros.desvincular');
+    
+    Route::get('/admin/arbitros/vinculados/{arbitrajeId}', [App\Http\Controllers\AdminArbitroVinculacionController::class, 'obtenerVinculados'])
+        ->name('admin.arbitros.vinculados');
+
 
 
 });
