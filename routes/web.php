@@ -459,7 +459,7 @@ Route::get('/procesos/arbitraje/{id_arbitraje}/completo', [ProcesoDeArbitrajeCon
     Route::get('/admin/arbitros/vinculados/{arbitrajeId}', [App\Http\Controllers\AdminArbitroVinculacionController::class, 'obtenerVinculados'])
         ->name('admin.arbitros.vinculados');
 
-
+ Route::resource('adjudicadores', App\Http\Controllers\AdjudicadorController::class);
 
 });
 

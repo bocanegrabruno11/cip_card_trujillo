@@ -26,4 +26,8 @@ class ProcesoJrdPersona extends Model
     {
         return $this->belongsTo(Jrd::class, 'jrd_id', 'id_jrd');
     }
+    public function adjudicador()
+    {
+        return $this->belongsTo(Adjudicador::class, 'dni', 'dni');
+    }
 }

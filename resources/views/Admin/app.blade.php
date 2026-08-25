@@ -280,14 +280,16 @@ body {
 
     @php
         $user = auth()->user();
-        $esAdmin = $user && $user->hasRole('admin');
+        $esAdminPuro = $user && $user->esAdminPuro();
         $esArbitro = $user && $user->esArbitro();
+        $esAdjudicador = $user && $user->esAdjudicador();
     @endphp
 
     <ul class="sidebar-menu">
         {{-- ============================================ --}}
-        {{-- ARBITRAJES (Visible para Admin y Árbitros)   --}}
+        {{-- ARBITRAJES (SOLO Admin Puro y Árbitros)      --}}
         {{-- ============================================ --}}
+        @if($esAdminPuro || $esArbitro)
         <li class="menu-item">
             <a href="#" class="menu-link toggle-menu">
                 <i class="fas fa-gavel"></i> <span>Arbitrajes</span>
@@ -295,7 +297,7 @@ body {
             </a>
             <ul class="submenu">
                 {{-- Crear Etapas: SOLO ADMIN PURO --}}
-                @if($esAdmin && !$esArbitro)
+                @if($esAdminPuro)
                 <li>
                     <a href="{{ route('Admin.etapas.index') }}" class="menu-link">
                         <i class="fas fa-layer-group"></i> Crear Etapas Arbitrales
@@ -303,15 +305,15 @@ body {
                 </li>
                 @endif
                 
-                {{-- Ver Arbitrajes: ADMIN y ÁRBITROS --}}
+                {{-- Ver Arbitrajes: ADMIN PURO y ÁRBITROS --}}
                 <li>
                     <a href="{{ route('Admin.Arbitraje') }}" class="menu-link">
                         <i class="fas fa-list-alt"></i> Ver Arbitrajes
                     </a>
                 </li>
 
-                {{-- Vincular Árbitros: SOLO ADMIN PURO (dentro de Arbitrajes) --}}
-                @if($esAdmin && !$esArbitro)
+                {{-- Vincular Árbitros: SOLO ADMIN PURO --}}
+                @if($esAdminPuro)
                 <li>
                     <a href="{{ route('admin.arbitros.vincular') }}" class="menu-link">
                         <i class="fas fa-link"></i> Vincular Árbitros
@@ -320,22 +322,28 @@ body {
                 @endif
             </ul>
         </li>
+        @endif
 
         {{-- ============================================ --}}
-        {{-- JPRD (SOLO ADMIN PURO)                       --}}
+        {{-- JPRD (Admin puro: menú completo | Adjudicador: solo "Ver JPRD") --}}
         {{-- ============================================ --}}
-        @if($esAdmin && !$esArbitro)
+        @if($esAdminPuro || $esAdjudicador)
         <li class="menu-item">
             <a href="#" class="menu-link toggle-menu">
                 <i class="fas fa-users-cog"></i> <span>JPRD</span>
                 <i class="fas fa-chevron-down"></i>
             </a>
             <ul class="submenu">
+                {{-- Crear Etapas JPRD: SOLO ADMIN PURO --}}
+                @if($esAdminPuro)
                 <li>
                     <a href="{{ route('Admin.jrd.etapas.index') }}" class="menu-link">
                         <i class="fas fa-layer-group"></i> Crear Etapas JPRD
                     </a>
                 </li>
+                @endif
+
+                {{-- Ver JPRD: ADMIN PURO y ADJUDICADOR --}}
                 <li>
                     <a href="{{ route('Admin.Jrd') }}" class="menu-link">
                         <i class="fas fa-list-alt"></i> Ver JPRD
@@ -348,7 +356,7 @@ body {
         {{-- ============================================ --}}
         {{-- USUARIOS (SOLO ADMIN PURO)                   --}}
         {{-- ============================================ --}}
-        @if($esAdmin && !$esArbitro)
+        @if($esAdminPuro)
         <li class="menu-item">
             <a href="#" class="menu-link toggle-menu">
                 <i class="fas fa-users-cog"></i> <span>Usuarios</span>
@@ -367,7 +375,7 @@ body {
         {{-- ============================================ --}}
         {{-- SOPORTE TÉCNICO (SOLO ADMIN PURO)            --}}
         {{-- ============================================ --}}
-        @if($esAdmin && !$esArbitro)
+        @if($esAdminPuro)
         <li class="menu-item">
             <a href="{{ route('admin.soporte_contactos.index') }}" class="menu-link">
                 <i class="fas fa-headset"></i> <span>Soporte Técnico</span>
@@ -378,7 +386,7 @@ body {
         {{-- ============================================ --}}
         {{-- LOGS DE USUARIOS (SOLO ADMIN PURO)           --}}
         {{-- ============================================ --}}
-        @if($esAdmin && !$esArbitro)
+        @if($esAdminPuro)
         <li class="menu-item">
             <a href="{{ route('admin.logs.index') }}" class="menu-link">
                 <i class="fas fa-history"></i> <span>Logs de Usuarios</span>
@@ -389,7 +397,7 @@ body {
         {{-- ============================================ --}}
         {{-- ÁRBITROS (SOLO ADMIN PURO)                   --}}
         {{-- ============================================ --}}
-        @if($esAdmin && !$esArbitro)
+        @if($esAdminPuro)
         <li>
             <a href="{{ route('arbitros.index') }}" class="menu-link">
                 <i class="fas fa-gavel"></i> 
@@ -401,10 +409,11 @@ body {
         {{-- ============================================ --}}
         {{-- ADJUDICADORES (SOLO ADMIN PURO)              --}}
         {{-- ============================================ --}}
-        @if($esAdmin && !$esArbitro)
+        @if($esAdminPuro)
         <li>
-            <a href="#" class="menu-link">
-                <i class="fas fa-user-tie"></i> Adjudicadores
+            <a href="{{ route('adjudicadores.index') }}" class="menu-link">
+                <i class="fas fa-user-tie"></i> 
+                <span class="menu-text">Adjudicadores</span>
             </a>
         </li>
         @endif
@@ -418,8 +427,12 @@ body {
         {{-- Mostrar etiqueta de rol --}}
         @if($esArbitro)
             <span class="badge bg-info mt-1 d-block">🔵 Árbitro</span>
-        @elseif($esAdmin)
+        @elseif($esAdjudicador)
+            <span class="badge bg-info mt-1 d-block">🔵 Adjudicador</span>
+        @elseif($esAdminPuro)
             <span class="badge bg-danger mt-1 d-block">🔴 Administrador</span>
+        @else
+            <span class="badge bg-secondary mt-1 d-block">⚪ Usuario</span>
         @endif
 
         <button type="button" class="btn-logout" data-bs-toggle="modal" data-bs-target="#logoutModal">
