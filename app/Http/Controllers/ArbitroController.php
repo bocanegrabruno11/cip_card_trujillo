@@ -10,6 +10,7 @@ use App\Models\Arbitraje;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules;
 
 class ArbitroController extends Controller
@@ -99,24 +100,20 @@ class ArbitroController extends Controller
     /**
      * Display the specified resource.
      */
-/**
- * Display the specified resource.
- */
-public function show($id)
-{
-    $arbitro = Arbitro::with('users')->findOrFail($id);
+    public function show($id)
+    {
+        $arbitro = Arbitro::with('users')->findOrFail($id);
 
-    // Obtener los casos donde este árbitro está vinculado
-    $casosVinculados = ProcesoArbitrajePersona::where('dni', $arbitro->dni)
-        ->where('tipo', 'Arbitro')
-        ->with(['arbitraje' => function($query) {
-            $query->with(['user.persona', 'personas']);
-        }])
-        ->orderBy('id_proceso_arbitraje_persona', 'desc')  // ✅ CAMBIADO
-        ->get();
+        $casosVinculados = ProcesoArbitrajePersona::where('dni', $arbitro->dni)
+            ->where('tipo', 'Arbitro')
+            ->with(['arbitraje' => function($query) {
+                $query->with(['user.persona', 'personas']);
+            }])
+            ->orderBy('id_proceso_arbitraje_persona', 'desc')
+            ->get();
 
-    return view('Admin.arbitros.show', compact('arbitro', 'casosVinculados'));
-}
+        return view('Admin.arbitros.show', compact('arbitro', 'casosVinculados'));
+    }
 
     /**
      * Show the form for editing the specified resource.
@@ -133,7 +130,10 @@ public function show($id)
      */
     public function update(Request $request, Arbitro $arbitro)
     {
-        $request->validate([
+        $usuario = $arbitro->users->first();
+
+        // Reglas base para el árbitro
+        $rules = [
             'nombre' => ['required', 'string', 'max:255'],
             'apellidos' => ['required', 'string', 'max:255'],
             'dni' => ['nullable', 'string', 'max:20'],
@@ -141,30 +141,55 @@ public function show($id)
             'telefono' => ['nullable', 'string', 'max:20'],
             'correo' => ['nullable', 'email', 'max:255'],
             'direccion' => ['nullable', 'string'],
-        ]);
+        ];
+
+        // Reglas adicionales si existe un usuario asociado
+        if ($usuario) {
+            $rules['name'] = ['nullable', 'string', 'max:255'];
+            $rules['email'] = [
+                'required',
+                'string',
+                'email',
+                'max:255',
+                Rule::unique('users', 'email')->ignore($usuario->id),
+            ];
+            $rules['password'] = ['nullable', 'confirmed', Rules\Password::defaults()];
+        }
+
+        $messages = [
+            'email.required' => 'El email de usuario es obligatorio.',
+            'email.email' => 'Debe ingresar un email válido.',
+            'email.unique' => 'Este email ya está registrado por otro usuario.',
+            'password.confirmed' => 'Las contraseñas no coinciden.',
+            'password.min' => 'La contraseña debe tener al menos 8 caracteres.',
+        ];
+
+        $request->validate($rules, $messages);
 
         try {
             DB::beginTransaction();
 
+            // 1. Actualizar datos del árbitro
             $arbitro->update($request->only([
-                'nombre', 'apellidos', 'dni', 'ruc', 
+                'nombre', 'apellidos', 'dni', 'ruc',
                 'telefono', 'correo', 'direccion'
             ]));
 
-            $usuario = $arbitro->users->first();
+            // 2. Actualizar datos del usuario asociado
             if ($usuario) {
-                $usuario->update([
-                    'name' => $request->name ?? $usuario->name,
-                ]);
-                
-                if ($request->filled('password')) {
-                    $request->validate([
-                        'password' => ['required', 'confirmed', Rules\Password::defaults()],
-                    ]);
-                    $usuario->update([
-                        'password' => Hash::make($request->password),
-                    ]);
+                $usuario->name = $request->filled('name') ? $request->name : $usuario->name;
+
+                // ✅ Permitir cambio de email
+                if ($request->filled('email')) {
+                    $usuario->email = $request->email;
                 }
+
+                // ✅ Cambiar contraseña solo si se ingresó una nueva
+                if ($request->filled('password')) {
+                    $usuario->password = Hash::make($request->password);
+                }
+
+                $usuario->save();
             }
 
             DB::commit();
@@ -174,7 +199,7 @@ public function show($id)
 
         } catch (\Exception $e) {
             DB::rollBack();
-            return back()->with('error', 'Error al actualizar el árbitro: ' . $e->getMessage());
+            return back()->with('error', 'Error al actualizar el árbitro: ' . $e->getMessage())->withInput();
         }
     }
 
@@ -189,7 +214,7 @@ public function show($id)
             $usuario = $arbitro->users->first();
             $arbitro->users()->detach();
             $arbitro->delete();
-            
+
             if ($usuario) {
                 $usuario->delete();
             }

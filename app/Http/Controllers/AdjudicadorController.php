@@ -9,6 +9,7 @@ use App\Models\ProcesoJrdPersona;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules;
 
 class AdjudicadorController extends Controller
@@ -37,6 +38,15 @@ class AdjudicadorController extends Controller
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email'],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
+        ], [
+            'nombre.required' => 'El nombre del adjudicador es obligatorio.',
+            'apellidos.required' => 'Los apellidos del adjudicador son obligatorios.',
+            'correo.email' => 'El correo del adjudicador debe ser un email válido.',
+            'name.required' => 'El nombre de usuario es obligatorio.',
+            'email.required' => 'El email de usuario es obligatorio.',
+            'email.unique' => 'Este email ya está registrado.',
+            'password.required' => 'La contraseña es obligatoria.',
+            'password.confirmed' => 'Las contraseñas no coinciden.',
         ]);
 
         try {
@@ -81,7 +91,6 @@ class AdjudicadorController extends Controller
     {
         $adjudicador = Adjudicador::with('users')->findOrFail($id);
 
-        // Obtener los casos JRD donde este adjudicador está vinculado
         $casosVinculados = ProcesoJrdPersona::where('dni', $adjudicador->dni)
             ->where('tipo', 'Adjudicador')
             ->with(['jrd' => function($query) {
@@ -102,7 +111,10 @@ class AdjudicadorController extends Controller
 
     public function update(Request $request, Adjudicador $adjudicador)
     {
-        $request->validate([
+        $usuario = $adjudicador->users->first();
+
+        // Reglas base para el adjudicador
+        $rules = [
             'nombre' => ['required', 'string', 'max:255'],
             'apellidos' => ['required', 'string', 'max:255'],
             'dni' => ['nullable', 'string', 'max:20'],
@@ -110,30 +122,55 @@ class AdjudicadorController extends Controller
             'telefono' => ['nullable', 'string', 'max:20'],
             'correo' => ['nullable', 'email', 'max:255'],
             'direccion' => ['nullable', 'string'],
-        ]);
+        ];
+
+        // Reglas adicionales si existe un usuario asociado
+        if ($usuario) {
+            $rules['name'] = ['nullable', 'string', 'max:255'];
+            $rules['email'] = [
+                'required',
+                'string',
+                'email',
+                'max:255',
+                Rule::unique('users', 'email')->ignore($usuario->id),
+            ];
+            $rules['password'] = ['nullable', 'confirmed', Rules\Password::defaults()];
+        }
+
+        $messages = [
+            'email.required' => 'El email de usuario es obligatorio.',
+            'email.email' => 'Debe ingresar un email válido.',
+            'email.unique' => 'Este email ya está registrado por otro usuario.',
+            'password.confirmed' => 'Las contraseñas no coinciden.',
+            'password.min' => 'La contraseña debe tener al menos 8 caracteres.',
+        ];
+
+        $request->validate($rules, $messages);
 
         try {
             DB::beginTransaction();
 
+            // 1. Actualizar datos del adjudicador
             $adjudicador->update($request->only([
-                'nombre', 'apellidos', 'dni', 'ruc', 
+                'nombre', 'apellidos', 'dni', 'ruc',
                 'telefono', 'correo', 'direccion'
             ]));
 
-            $usuario = $adjudicador->users->first();
+            // 2. Actualizar datos del usuario asociado
             if ($usuario) {
-                $usuario->update([
-                    'name' => $request->name ?? $usuario->name,
-                ]);
-                
-                if ($request->filled('password')) {
-                    $request->validate([
-                        'password' => ['required', 'confirmed', Rules\Password::defaults()],
-                    ]);
-                    $usuario->update([
-                        'password' => Hash::make($request->password),
-                    ]);
+                $usuario->name = $request->filled('name') ? $request->name : $usuario->name;
+
+                // ✅ Permitir cambio de email
+                if ($request->filled('email')) {
+                    $usuario->email = $request->email;
                 }
+
+                // ✅ Cambiar contraseña solo si se ingresó una nueva
+                if ($request->filled('password')) {
+                    $usuario->password = Hash::make($request->password);
+                }
+
+                $usuario->save();
             }
 
             DB::commit();
@@ -143,7 +180,7 @@ class AdjudicadorController extends Controller
 
         } catch (\Exception $e) {
             DB::rollBack();
-            return back()->with('error', 'Error al actualizar el adjudicador: ' . $e->getMessage());
+            return back()->with('error', 'Error al actualizar el adjudicador: ' . $e->getMessage())->withInput();
         }
     }
 
@@ -155,7 +192,7 @@ class AdjudicadorController extends Controller
             $usuario = $adjudicador->users->first();
             $adjudicador->users()->detach();
             $adjudicador->delete();
-            
+
             if ($usuario) {
                 $usuario->delete();
             }

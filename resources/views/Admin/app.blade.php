@@ -349,6 +349,15 @@ body {
                         <i class="fas fa-list-alt"></i> Ver JPRD
                     </a>
                 </li>
+
+                {{-- ✅ NUEVO: Vincular Adjudicadores - SOLO ADMIN PURO --}}
+                @if($esAdminPuro)
+                <li>
+                    <a href="{{ route('admin.adjudicadores.vincular') }}" class="menu-link">
+                        <i class="fas fa-link"></i> Vincular Adjudicadores
+                    </a>
+                </li>
+                @endif
             </ul>
         </li>
         @endif

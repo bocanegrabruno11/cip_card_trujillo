@@ -161,12 +161,6 @@
                                                    title="Editar">
                                                     <i class="fas fa-edit"></i>
                                                 </a>
-                                                <button type="button" 
-                                                        class="btn btn-danger" 
-                                                        title="Eliminar"
-                                                        onclick="confirmDelete({{ $adjudicador->id }})">
-                                                    <i class="fas fa-trash"></i>
-                                                </button>
                                                 <form id="delete-form-{{ $adjudicador->id }}" 
                                                       action="{{ route('adjudicadores.destroy', $adjudicador) }}" 
                                                       method="POST" 

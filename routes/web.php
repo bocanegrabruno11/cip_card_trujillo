@@ -458,9 +458,26 @@ Route::get('/procesos/arbitraje/{id_arbitraje}/completo', [ProcesoDeArbitrajeCon
     
     Route::get('/admin/arbitros/vinculados/{arbitrajeId}', [App\Http\Controllers\AdminArbitroVinculacionController::class, 'obtenerVinculados'])
         ->name('admin.arbitros.vinculados');
+    Route::resource('arbitros', ArbitroController::class);
 
- Route::resource('adjudicadores', App\Http\Controllers\AdjudicadorController::class);
+ Route::resource('adjudicadores', App\Http\Controllers\AdjudicadorController::class)
+    ->parameters(['adjudicadores' => 'adjudicador']);
 
+
+// ============================================
+// VINCULACIÓN DE ADJUDICADORES A CASOS JPRD
+// ============================================
+Route::get('/admin/adjudicadores/vincular', [App\Http\Controllers\AdminAdjudicadorVinculacionController::class, 'index'])
+    ->name('admin.adjudicadores.vincular');
+
+Route::post('/admin/adjudicadores/vincular', [App\Http\Controllers\AdminAdjudicadorVinculacionController::class, 'vincular'])
+    ->name('admin.adjudicadores.vincular.post');
+
+Route::post('/admin/adjudicadores/desvincular', [App\Http\Controllers\AdminAdjudicadorVinculacionController::class, 'desvincular'])
+    ->name('admin.adjudicadores.desvincular');
+
+Route::get('/admin/adjudicadores/vinculados/{jrdId}', [App\Http\Controllers\AdminAdjudicadorVinculacionController::class, 'obtenerVinculados'])
+    ->name('admin.adjudicadores.vinculados');
 });
 
 Route::get('/sherlock-holmes', function () {

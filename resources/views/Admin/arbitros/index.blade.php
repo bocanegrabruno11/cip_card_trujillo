@@ -198,12 +198,6 @@
                                                    title="Editar">
                                                     <i class="fas fa-edit"></i>
                                                 </a>
-                                                <button type="button" 
-                                                        class="btn btn-danger" 
-                                                        title="Eliminar"
-                                                        onclick="confirmDelete({{ $arbitro->id }})">
-                                                    <i class="fas fa-trash"></i>
-                                                </button>
                                                 <form id="delete-form-{{ $arbitro->id }}" 
                                                       action="{{ route('arbitros.destroy', $arbitro) }}" 
                                                       method="POST" 
