@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Persona;
 use Illuminate\Validation\Rule;
+use App\Services\NotificacionService;
 class PersonaController extends Controller
 {
     // Mostrar lista de personas
@@ -47,6 +48,8 @@ public function store(Request $request)
         'celular' => $request->celular,
         'user_id' => auth()->id(),
     ]);
+
+    NotificacionService::sincronizarCasillaRetroactiva(auth()->user(), $request->dni);
 
     return redirect()->back()->with('success', 'Información guardada correctamente.');
 }
@@ -101,6 +104,8 @@ public function update(Request $request)
     );
 
     $persona->update($validated);
+
+    NotificacionService::sincronizarCasillaRetroactiva(auth()->user(), $request->dni);
 
     return back()->with('success', 'Información actualizada correctamente');
 }

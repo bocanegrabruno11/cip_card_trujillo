@@ -64,4 +64,57 @@ class NotificacionService
             'fecha_registro' => now()
         ]);
     }
+
+    public static function sincronizarCasillaRetroactiva($user, $dni)
+    {
+        // 1. Sincronizar Arbitrajes
+        $arbitrajesPersonas = \App\Models\ProcesoArbitrajePersona::where('dni', $dni)->get();
+        foreach ($arbitrajesPersonas as $ap) {
+            $arbitraje = \App\Models\Arbitraje::find($ap->arbitraje_id);
+            if ($arbitraje) {
+                $existe = CasillaElectronica::where('user_id', $user->id)
+                    ->where('arbitraje_id', $arbitraje->id_arbitraje)
+                    ->where('asunto', 'like', 'Vinculación a Expediente%')
+                    ->exists();
+
+                if (!$existe) {
+                    CasillaElectronica::insert([
+                        'user_id'        => $user->id,
+                        'emisor_id'      => $arbitraje->user_id, // Usamos al creador del arbitraje como emisor
+                        'arbitraje_id'   => $arbitraje->id_arbitraje,
+                        'jrd_id'         => null,
+                        'asunto'         => 'Vinculación a Expediente - ' . $arbitraje->numero_expediente,
+                        'comentario'     => "Usted ha sido vinculado como {$ap->tipo} al expediente N° {$arbitraje->numero_expediente}. Ingrese a Mis Arbitrajes para ver los detalles y documentos.",
+                        'estado'         => 'no leido',
+                        'fecha_registro' => now()
+                    ]);
+                }
+            }
+        }
+
+        // 2. Sincronizar JRD
+        $jrdPersonas = \App\Models\ProcesoJrdPersona::where('dni', $dni)->get();
+        foreach ($jrdPersonas as $jp) {
+            $jrd = \App\Models\Jrd::find($jp->jrd_id);
+            if ($jrd) {
+                $existe = CasillaElectronica::where('user_id', $user->id)
+                    ->where('jrd_id', $jrd->id_jrd)
+                    ->where('asunto', 'like', 'Vinculación a Expediente JRD%')
+                    ->exists();
+
+                if (!$existe) {
+                    CasillaElectronica::insert([
+                        'user_id'        => $user->id,
+                        'emisor_id'      => $jrd->user_id, // Usamos al creador del jrd como emisor
+                        'arbitraje_id'   => null,
+                        'jrd_id'         => $jrd->id_jrd,
+                        'asunto'         => 'Vinculación a Expediente JRD - ' . $jrd->numero_expediente,
+                        'comentario'     => "Usted ha sido vinculado como {$jp->tipo} al expediente JRD N° {$jrd->numero_expediente}. Ingrese a Mis JRD para ver los detalles y documentos.",
+                        'estado'         => 'no leido',
+                        'fecha_registro' => now()
+                    ]);
+                }
+            }
+        }
+    }
 }
