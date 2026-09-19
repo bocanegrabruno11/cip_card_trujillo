@@ -502,21 +502,21 @@
                 {{-- 8. MESA DE PARTES VIRTUAL (Dinámico) --}}
                 <li>
                     @guest
-                        <a href="{{ route('login') }}" onclick="handleMenuClick(event, this)">CARD-CIPCDLL</a>
+                        <a href="{{ route('login') }}" onclick="handleMenuClick(event, this)">MESA DE PARTES</a>
                     @endguest
 
                     @auth
                         @if(Auth::user()->hasRole('admin'))
-                            <a href="{{ route('Admin.dashboard') }}" onclick="handleMenuClick(event, this)">CARD-CIPCDLLL</a>
+                            <a href="{{ route('Admin.dashboard') }}" onclick="handleMenuClick(event, this)">MESA DE PARTES</a>
                         
                         @elseif(Auth::user()->hasRole('gestor_contenido'))
-                            <a href="{{ route('gestion-contenido') }}" onclick="handleMenuClick(event, this)">CARD-CIPCDLL</a>
+                            <a href="{{ route('gestion-contenido') }}" onclick="handleMenuClick(event, this)">MESA DE PARTES</a>
                         
                         @elseif(Auth::user()->hasRole('mesa_partes'))
-                            <a href="{{ route('dashboard') }}" onclick="handleMenuClick(event, this)">CARD-CIPCDLLL</a>
+                            <a href="{{ route('dashboard') }}" onclick="handleMenuClick(event, this)">MESA DE PARTES</a>
                         
                         @else
-                            <a href="{{ url('/') }}" onclick="handleMenuClick(event, this)">CARD-CIPCDLL</a>
+                            <a href="{{ url('/') }}" onclick="handleMenuClick(event, this)">MESA DE PARTES</a>
                         @endif
                     @endauth
                 </li>
