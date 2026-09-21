@@ -157,7 +157,7 @@
         <i class="fas fa-scale-balanced logo-icon-gold"></i>
         <div class="logo-text-gold">CARD</div>
         <div class="logo-subtext">
-            CENTRO DE ARBITRAJE Y RESOLUCIÓN DE DISPUTAS<br>DEL CIP CDLIMA
+            CENTRO DE ARBITRAJE Y RESOLUCIÓN DE DISPUTAS<br>DEL CIP CDLL
         </div>
     </div>
 </header>
@@ -239,7 +239,7 @@
             <div class="footer-subtitle">
                 CENTRO DE ARBITRAJE<br>
                 Y RESOLUCIÓN DE DISPUTAS<br>
-                DEL CIP CDLIMA
+                DEL CIP CDLL
             </div>
         </div>
     </div>
