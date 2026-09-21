@@ -214,6 +214,9 @@
                     <a href="{{ asset('docs/manuales/Manual_de_Usuario_2026_CARDCIPCDLL.pdf') }}" target="_blank" class="btn-manual">
                         <i class="fas fa-file-pdf"></i> ¿Necesitas ayuda? Ver Manual del Usuario
                     </a>
+                    <a href="#" target="_blank" class="btn-manual" style="margin-top: 10px; background-color: #333; color: white;">
+                        <i class="fas fa-video"></i> Ver Video Tutorial
+                    </a>
                 </form>
             </div>
         </div>

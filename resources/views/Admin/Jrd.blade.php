@@ -1,6 +1,6 @@
 @extends('Admin.app')
 
-@section('title', 'Gestión de JRD')
+@section('title', 'Gestión de JPRD')
 @section('page-title', 'Administración de JRD')
 
 @section('content')
@@ -16,7 +16,7 @@
             <div class="card shadow-sm">
                 <div class="card-body py-2">
                     <div class="row g-2">
-                        <div class="col-md-8">
+                        <div class="col-md-6">
                             <div class="input-group input-group-sm">
                                 <span class="input-group-text bg-white">
                                     <i class="fas fa-id-card"></i>
@@ -24,9 +24,14 @@
                                 <input type="text" class="form-control" id="searchDni" placeholder="Buscar por DNI...">
                             </div>
                         </div>
-                        <div class="col-md-4">
+                        <div class="col-md-3">
                             <button class="btn btn-danger btn-sm w-100" id="btnBuscar">
                                 <i class="fas fa-search me-1"></i> Buscar
+                            </button>
+                        </div>
+                        <div class="col-md-3">
+                            <button class="btn btn-success btn-sm w-100" id="btnExportar">
+                                <i class="fas fa-file-excel me-1"></i> Exportar
                             </button>
                         </div>
                     </div>
