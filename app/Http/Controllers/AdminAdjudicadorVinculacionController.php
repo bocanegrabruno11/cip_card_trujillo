@@ -25,7 +25,7 @@ class AdminAdjudicadorVinculacionController extends Controller
 
         $adjudicadores = Adjudicador::with('users')->orderBy('apellidos')->get();
 
-        return view('Admin.Adjudicadores.vinculacion-adjudicadores', compact('jrds', 'adjudicadores'));
+        return view('Admin.adjudicadores.vinculacion-adjudicadores', compact('jrds', 'adjudicadores'));
     }
 
     /**
