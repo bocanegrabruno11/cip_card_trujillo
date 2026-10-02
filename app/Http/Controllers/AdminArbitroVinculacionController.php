@@ -25,7 +25,7 @@ class AdminArbitroVinculacionController extends Controller
             
         $arbitros = Arbitro::with('users')->orderBy('apellidos')->get();
         
-        return view('Admin.Arbitros.vinculacion-arbitros', compact('arbitrajes', 'arbitros'));
+        return view('Admin.arbitros.vinculacion-arbitros', compact('arbitrajes', 'arbitros'));
     }
 
     /**
